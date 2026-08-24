@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Configure the Refresh Cycle of Microsoft SCCM Collections using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Configure the Refresh Cycle of Microsoft SCCM Collections using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>It's not uncommon to encounter thousands of collections in a large deployment of Microsoft SCCM. If the refresh cycle of the collections is not carefully managed, you may start to experience significant performance degradation. As a rule of thumb, you should not enable <em>incremental updates</em> on more than 200 collections, or configure too many collections with an aggressive periodic refresh cycle.</p>
+      <p>The following PowerShell script includes a few functions that can help to manage the refresh cycle of collections.</p>
+      <p>The <em>get-incremental</em> function will list the collections with incremental updates enabled.</p>
+      <p>The <em>disable-incremental</em> function will disable incremental updates, and enable periodic updates, on an array of collections. The periodic update schedule is set to daily, with a randomised hourly offset.</p>
+      <p>The <em>enable-incremental</em> function will enable incremental updates <em>and</em> periodic updates on an array of collections. The periodic update schedule is set to weekly, with a randomised hourly offset.</p>
+      <pre><code># site code.
+$sitecode = 'lab'
+
+# name of server hosting the sms provider.
+$provider = 'sccm'
+
+# create a recuring interval token with a cycle of x days.
+# the start time will be randomised, but always on the hour.
+function new-token($days = 1) {
+  $class = gwmi -list -name root\sms\site_$sitecode -class sms_st_recurinterval -comp $provider
+  $interval = $class.createinstance()
+  $interval.dayspan = $days
+  $interval.starttime = get-date (get-date '1/1/2016').addhours((get-random -max 24)) -format yyyyMMddHHmmss.000000+***
+  return $interval
+}
+
+# get the names of all collections enabled for incremental updates.
+function get-incremental() {
+  $collections = @()
+  gwmi -name root\sms\site_$sitecode -class sms_collection -comp $provider | %{
+    $collection = [wmi]$_.__path
+    if ($collection.refreshtype -band 4 -and $collection.collectionid -notlike 'sms*') {
+      $collections += $collection.name
+    }
+  }
+  return $collections
+}
+
+# configure the refresh cycle for an array of collections.
+# set $type to 2 for periodic refresh only, and 6 for incremental and periodic.
+# set $days to the number days between each periodic refresh.
+function set-schedule([array]$collections, $type, $days) {
+  $collections | %{
+    if (! ($collection = gwmi -name root\sms\site_$sitecode -class sms_collection -comp $provider -filter &quot;name = '$_'&quot;)) { return }
+    $collection.refreshtype = $type
+    $collection.refreshschedule = new-token $days
+    #$collection.psbase()
+    $collection.put() | out-null
+  }
+}
+
+# disable incremental updates.
+# i.e. enable periodic updates only, with a refresh cycle of 1 day.
+function disable-incremental([array]$collections) {
+  set-schedule $collections 2 1
+}
+
+# enable incremental updates.
+# i.e. enable incremental and periodic updates, with a refresh cycle of 7 days.
+function enable-incremental([array]$collections) {
+  set-schedule $collections 6 7
+}</code></pre>
+      <p>To retrieve the name of all collections enabled for incremental updates:</p>
+      <pre><code>get-incremental</code></pre>
+      <p>To disable incremental updates on all collections listed in a file named <em>disable.txt</em>, and enable periodic updates with a daily cycle:</p>
+      <pre><code>disable-incremental (get-content disable.txt)</code></pre>
+      <p>To enable incremental and periodic updates on all collections listed in a file named <em>disable.txt</em>, with a weekly periodic refresh cycle:</p>
+      <pre><code>enable-incremental (get-content enable.txt)</code></pre>
+      <footer>
+        <p><span>Published: 2016-06-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

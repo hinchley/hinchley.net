@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Remove a User's Device Profile and Directory Number from Cisco Unified Communications Manager using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Remove a User's Device Profile and Directory Number from Cisco Unified Communications Manager using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>Here is some code I wrote this week to remove a user's device profile and directory number from Cisco Unified Communications Manager (UCM) via the AXL API using PowerShell. There are a few parts to the solution:</p>
+      <ol>
+        <li>A name-based wildcard search is initiated to retrieve all device profiles. I do this, because it isn't possible to directly retrieve a specific device profile via a user's login id. To keep the result set small, I only retrieve the name and associated login id for each device profile.</li>
+        <li>The result set is iterated over until a matching login id is found.</li>
+        <li>The complete device profile of the matched record is retrieved (using the matched profile name).</li>
+        <li>The directory number is obtained from the retrieved device profile.</li>
+        <li>The device profile is deleted.</li>
+        <li>The line associated with the directory number is deleted.</li>
+      </ol>
+      <p>To use the code, set the <em>login</em> variable to the login id of the user to be deleted, the <em>username</em> and <em>password</em> variables to those of an account with administrator privileges within Cisco UCM, and the <em>api</em> variable to the AXL API endpoint that is used within your environment.</p>
+      <p>I am sure this is a fairly niche task, but I hope someone may find the code useful.</p>
+      <pre><code># the login id of the user to delete.
+$login = 'jbloggs'
+
+# creds for connecting to the api.
+$username = 'admin'
+$password = 'password'
+
+# api endpoint.
+$api = 'https://10.1.1.1:8443/axl/'
+
+# build authorization header.
+$cred = [system.text.utf8encoding]::utf8.getbytes($username + ':' + $password)
+$auth = 'BASIC ' + [system.convert]::tobase64string($cred)
+
+add-type @&quot;
+  using System.Net;
+  using System.Security.Cryptography.X509Certificates;
+  public class TrustAllCertsPolicy : ICertificatePolicy {
+    public bool CheckValidationResult(
+      ServicePoint srvPoint,
+      X509Certificate certificate,
+      WebRequest request,
+      int certificateProblem
+    ) { return true; }
+  }
+&quot;@
+
+# used to bypass certificate validity check.
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
+# soap template.
+$template = @'
+&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:ns=&quot;http://www.cisco.com/AXL/API/11.5&quot;&gt;
+    &lt;soapenv:Header/&gt;
+    &lt;soapenv:Body&gt;
+      {0}
+    &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;
+'@
+
+# first, we will check if the user has a device profile.
+# we can't search by login id, so we will retrieve all users (using a name wildcard search).
+# to keep the result set small, we will only return the name and login id fields.
+# we will then iterate through the results looking for a matching login id.
+$snippet = '&lt;ns:listDeviceProfile&gt;&lt;searchCriteria&gt;&lt;name&gt;%&lt;/name&gt;&lt;/searchCriteria&gt;&lt;returnedTags&gt;&lt;name /&gt;&lt;loginUserId /&gt;&lt;/returnedTags&gt;&lt;/ns:listDeviceProfile&gt;'
+
+# build request body from template + snippet.
+$body = $template -f $snippet
+
+try {
+  $result = invoke-restmethod -contentType 'text/xml' -headers @{ Authorization = $auth; SOAPAction = 'CUCM:DB ver=11.5 listDeviceProfile' } -uri $api -method post -body $body
+  if ($result.Envelope.Body.listDeviceProfileResponse.return.length -eq 0) {
+    write-host 'The user does not have a device profile in Call Manager.'; exit
+  }
+} catch { write-warning 'Error searching for the device profile in Call Manager.'; exit }
+
+$name = $null
+$result.Envelope.Body.listDeviceProfileResponse.return.deviceProfile | %{
+  # break if we find a user with a matching login id.
+  if ($_.loginUserId.'#text' -eq $login) { $name = $_.name; break }
+}
+
+if ($name -eq $null) { write-host 'The user does not have a device profile in Call Manager.'; exit }
+
+# having found a user with a matching login id, we will retrieve the user's full device profile.
+$snippet = '&lt;ns:getDeviceProfile&gt;&lt;name&gt;{0}&lt;/name&gt;&lt;/ns:getDeviceProfile&gt;' -f $name
+$body = $template -f $snippet
+
+try {
+  $result = invoke-restmethod -contentType 'text/xml' -headers @{ Authorization = $auth; SOAPAction = 'CUCM:DB ver=11.5 getDeviceProfile' } -uri $api -method post -body $body
+} catch { write-warning &quot;Error retrieving the user's device profile in Call Manager.&quot;; exit }
+
+# we will now extract the user's directory number from the device profile.
+$pattern = $result.Envelope.Body.getDeviceProfileResponse.return.deviceProfile.lines.FirstChild.dirn.pattern
+if (! $pattern) { write-host 'The user does not have a directory number in Call Manager.'; exit }
+
+# now we can remove the user's device profile.
+$snippet = '&lt;ns:removeDeviceProfile&gt;&lt;name&gt;{0}&lt;/name&gt;&lt;/ns:removeDeviceProfile&gt;' -f $name
+$body = $template -f $snippet
+
+try {
+  $result = invoke-restmethod -contentType 'text/xml' -headers @{ Authorization = $auth; SOAPAction = 'CUCM:DB ver=11.5 removeDeviceProfile' } -uri $api -method post -body $body
+} catch { write-warning 'The device profile could not be removed from Call Manager.'; exit }
+
+# and finally, we can remove the user's directory number.
+# note: you may need to modify the route partition name for your environment.
+$snippet = '&lt;ns:removeLine&gt;&lt;pattern&gt;{0}&lt;/pattern&gt;&lt;routePartitionName&gt;-SYSTEM&lt;/routePartitionName&gt;&lt;/ns:removeLine&gt;' -f $pattern
+$body = $template -f $snippet
+
+try {
+  $result = invoke-restmethod -contentType 'text/xml' -headers @{ Authorization = $auth; SOAPAction = 'CUCM:DB ver=11.5 removeLine' } -uri $api -method post -body $body
+} catch { write-warning 'The directory number could not be removed from Call Manager.'; exit }</code></pre>
+      <footer>
+        <p><span>Published: 2018-05-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

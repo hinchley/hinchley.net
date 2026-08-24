@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Post-Installation Configuration of Microsoft SCCM 2012 R2 SP1</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Post-Installation Configuration of Microsoft SCCM 2012 R2 SP1</h1>
+    </header>
+    <main class="archive">
+      <p>This post is a continuation of a previous article that described <a href="install-microsoft-sccm-2012-r2-sp1.html">how to install Microsoft SCCM 2012 R2 SP1</a>. In this post I will briefly outline several important post-deployment configuration activities.</p>
+      <p>Before starting on the SCCM-related tasks, I will rename the default Active Directory site in my home lab from <em>Default-First-Site-Name</em> to <em>LAB</em> (to match the name of the boundary I will create later). This command, and any other Active Directory related commands in this post, will need to be executed from an elevated PowerShell prompt on a system with the Active Directory PowerShell module installed.</p>
+      <pre><code>Get-ADObject -SearchBase (Get-ADRootDSE).ConfigurationNamingContext -Filter &quot;Name -eq 'Default-First-Site-Name'&quot; | Rename-ADObject -NewName LAB</code></pre>
+      <p>And confirm the name change as follows:</p>
+      <pre><code>Get-ADObject -SearchBase (Get-ADRootDSE).ConfigurationNamingContext -Filter &quot;ObjectClass -eq 'Site'&quot;</code></pre>
+      <p>Ok, with that out of the way, let's initialise the environment by opening an elevated PowerShell prompt on the site system server, and running the following commands:</p>
+      <pre><code>Import-Module -Name &quot;$(split-path $Env:SMS_ADMIN_UI_PATH)\ConfigurationManager.psd1&quot;
+Set-Location LAB:
+
+$site = Get-CMSite
+$sitecode = $site.SiteCode</code></pre>
+      <p>Now let's create a new SCCM boundary and a new boundary group named <em>LAB</em>, and add the boundary to the group:</p>
+      <pre><code>New-CMBoundary -Type ADSite -DisplayName LAB -Value LAB
+New-CMBoundaryGroup -Name LAB -DefaultSiteCode LAB
+Add-CMBoundaryToGroup -BoundaryGroupName LAB -BoundaryName LAB</code></pre>
+      <p>To configure SCCM discovery methods, use the following script:</p>
+      <pre><code>$Domain       = 'DC=lab,DC=hinchley,DC=net'
+$Servers      = &quot;LDAP://OU=Servers,$Domain&quot;
+$Workstations = &quot;LDAP://OU=Workstations,$Domain&quot;
+$Groups       = &quot;LDAP://OU=Groups,$Domain&quot;
+$Users        = &quot;LDAP://OU=User Accounts,$Domain&quot;
+ 
+# Configure Forest Discovery
+Set-CMDiscoveryMethod -ActiveDirectoryForestDiscovery `
+  -EnableActiveDirectorySiteBoundaryCreation $true `
+  -EnableSubnetBoundaryCreation $false `
+  -Enabled $true
+
+# Configure System Discovery
+$SystemDiscoverySchedule = New-CMSchedule -Start '2015/01/01 00:00:00' -RecurInterval Days -RecurCount 1
+ 
+Set-CMDiscoveryMethod -ActiveDirectorySystemDiscovery `
+  -EnableDeltaDiscovery $true `
+  -DeltaDiscoveryIntervalMinutes 5 `
+  -EnableFilteringExpiredLogon $true `
+  -TimeSinceLastLogonDays 90 `
+  -EnableFilteringExpiredPassword $true `
+  -TimeSinceLastPasswordUpdateDays 90 `
+  -PollingSchedule $SystemDiscoverySchedule `
+  -Enabled $true
+
+$SystemDiscovery = Get-CimInstance `
+  -Namespace &quot;root/sms/site_$sitecode&quot; `
+  -ClassName SMS_SCI_Component `
+  -Filter 'ComponentName = &quot;SMS_AD_SYSTEM_DISCOVERY_AGENT&quot;'
+ 
+$SystemDiscoveryProps = $SystemDiscovery.PropLists |
+  Where-Object {$_.PropertyListName -eq 'AD Containers'}
+
+# 0 = recursive, 1 = do not include groups
+$SystemDiscoveryProps.Values  = $Servers, 0, 1
+$SystemDiscoveryProps.Values += $Workstations, 0, 1
+
+$SystemDiscovery | Set-CimInstance -Property @{PropLists = $SystemDiscovery.PropLists}
+
+# Configure Group Discovery
+$GroupDiscoverySchedule = New-CMSchedule -Start '2015/01/01 00:00:00' -RecurInterval Days -RecurCount 7
+ 
+Set-CMDiscoveryMethod -ActiveDirectoryGroupDiscovery `
+  -EnableDeltaDiscovery $true `
+  -DeltaDiscoveryIntervalMinutes 5 `
+  -EnableFilteringExpiredLogon $true `
+  -TimeSinceLastLogonDays 90 `
+  -EnableFilteringExpiredPassword $true `
+  -TimeSinceLastPasswordUpdateDays 90 `
+  -PollingSchedule $GroupDiscoverySchedule `
+  -Enabled $true
+ 
+$GroupDiscovery = Get-CimInstance `
+  -Namespace &quot;root/sms/site_$sitecode&quot; `
+  -ClassName SMS_SCI_Component `
+  -Filter 'ComponentName = &quot;SMS_AD_SECURITY_GROUP_DISCOVERY_AGENT&quot;'
+ 
+$GroupDiscoveryProps = $GroupDiscovery.PropLists |
+  Where-Object {$_.PropertyListName -eq 'AD Containers'}
+
+# 0 = location (not group), 0 = recursive, 1 = not used
+$GroupDiscoveryProps.Values = &quot;Groups&quot;, 0, 0, 1
+
+$NewGroupProp = New-CimInstance `
+  -ClientOnly `
+  -Namespace &quot;root/sms/site_$sitecode&quot; `
+  -ClassName SMS_EmbeddedPropertyList `
+  -Property @{PropertyListName='Search Bases:Groups';Values=[string[]]$Groups}
+
+$GroupDiscovery.PropLists += $NewGroupProp
+
+$GroupDiscovery | Set-CimInstance -Property @{PropLists = $GroupDiscovery.PropLists}
+
+# Configure User Discovery
+$UserDiscoverySchedule = New-CMSchedule -Start '2015/01/01 00:00:00' -RecurInterval Days -RecurCount 1
+ 
+Set-CMDiscoveryMethod -ActiveDirectoryUserDiscovery `
+  -EnableDeltaDiscovery $true `
+  -DeltaDiscoveryIntervalMinutes 5 `
+  -PollingSchedule $UserDiscoverySchedule `
+  -Enabled $true
+ 
+$UserDiscovery = Get-CimInstance `
+  -Namespace &quot;root/sms/site_$sitecode&quot; `
+  -ClassName SMS_SCI_Component `
+  -Filter 'ComponentName = &quot;SMS_AD_USER_DISCOVERY_AGENT&quot;'
+
+$UserDiscoveryProps = $UserDiscovery.PropLists |
+  Where-Object {$_.PropertyListName -eq 'AD Containers'}
+
+$UserDiscoveryProps.Values  = $Users, 0, 1
+
+$UserDiscovery | Set-CimInstance -Property @{PropLists = $UserDiscovery.PropLists}
+
+# Restart SMS_SITE_COMPONENT_MANAGER Service
+Get-Service -Name SMS_SITE_COMPONENT_MANAGER | Restart-Service</code></pre>
+      <p>The following command will configure the distribution point, add it to the <em>LAB</em> boundary group, enable PXE support (without password), include support for unknown computers, and enable content validation on the default schedule:</p>
+      <pre><code>Get-CMDistributionPoint | Set-CMDistributionPoint -EnablePXESupport $true -AllowRespondIncomingPxeRequest $true -EnableUnknownComputerSupport $true -EnableValidateContent $true -AddBoundaryGroupName LAB -ClientCommunicationType HTTP</code></pre>
+      <p>Let's create a <em>network access</em> service account for retrieving content from the distribution point:</p>
+      <pre><code>$account = &quot;sccm-nac&quot;
+
+New-ADUser -Name $account -SamAccountName $account -DisplayName $account -UserPrincipalName &quot;$account@lab.hinchley.net&quot; -Path &quot;ou=Service Accounts,dc=lab,dc=hinchley,dc=net&quot; -AccountPassword ($password = Read-Host &quot;Password&quot; -AsSecureString) -ChangePasswordAtLogon $false -PasswordNeverExpires $true -Enabled $true</code></pre>
+      <p>Now let's configure the network access account:</p>
+      <pre><code>$username = &quot;LAB\$account&quot;
+
+New-CMAccount -Name $username -Password $password -SiteCode $sitecode
+Set-CMSoftwareDistributionComponent -NetworkAccessAccount $username -SiteCode $sitecode</code></pre>
+      <p>In a similar manner, we will create and assign a <em>push installation</em> service account, and in the process, enable automatic site-wide deployment of the client to all device types, including to site system servers and domain controllers. Note: The latter requires the service account, at least in the short term, to be added to the Domain Admins group.</p>
+      <pre><code>$account = &quot;sccm-push&quot;
+$username = &quot;LAB\$account&quot;
+
+New-ADUser -Name $account -SamAccountName $account -DisplayName $account -UserPrincipalName &quot;$account@lab.hinchley.net&quot; -Path &quot;ou=Service Accounts,dc=lab,dc=hinchley,dc=net&quot; -AccountPassword ($password = Read-Host &quot;Password&quot; -AsSecureString) -ChangePasswordAtLogon $false -PasswordNeverExpires $true -Enabled $true -PassThru  | Add-ADPrincipalGroupMembership -MemberOf &quot;Domain Admins&quot;
+New-CMAccount -Name $username -Password $password -SiteCode $sitecode
+Set-CMClientPushInstallation -EnableAutomaticClientPushInstallation $true -EnableSystemTypeConfigurationManager $true -InstallClientToDomainController $true -ChosenAccount $username -SiteCode $sitecode</code></pre>
+      <p>To deploy the Application Catalog web service point with default values to the primary site server:</p>
+      <pre><code>Add-CMApplicationCatalogWebServicePoint -SiteCode $sitecode -SiteSystemServerName $site.ServerName</code></pre>
+      <p>And to deploy the Application Catalog website point, with a NetBIOS name of <em>SOFTWARE</em>, and branded as <em>Home Lab</em>, use the following command:</p>
+      <pre><code>Add-CMApplicationCatalogWebsitePoint -SiteCode $sitecode -SiteSystemServerName $site.ServerName -NetbiosName &quot;SOFTWARE&quot; -OrganizationName &quot;Home Lab&quot; -SiteSystemServerNameConfiguredForApplicationCatalogWebServicePoint $site.ServerName -ConfiguredAsHttpConnection</code></pre>
+      <p>Now let's create a CNAME record in DNS for <em>SOFTWARE</em> (referencing the site server). This command will need to be executed on a system with the <em>DnsServer</em> PowerShell module.</p>
+      <pre><code>$domain = Get-ADDomain
+$suffix = $domain.DNSRoot
+
+Add-DnsServerResourceRecordCName -Name &quot;SOFTWARE&quot; -HostNameAlias &quot;BORIS.$suffix&quot; -ZoneName $suffix -ComputerName $domain.PDCEmulator</code></pre>
+      <p>We will now update the <em>Computer Agent</em> settings of the <em>Default Client Settings</em> object to add the Application Catalog web site to the trusted sites zone and to set the name of the Software Centre:</p>
+      <pre><code>Set-CMClientSetting -Name &quot;Default Client Agent Settings&quot; -ComputerAgent -AddPortalToTrustedSiteList $true -BrandingTitle &quot;Home Lab&quot;</code></pre>
+      <p>Finally, we will create a new device collection for Windows Server 2012 R2 servers:</p>
+      <pre><code>$Name = &quot;All Windows Server 2012 R2&quot;
+New-CMDeviceCollection -Name $name -LimitingCollectionName &quot;All Systems&quot;  -RefreshType ConstantUpdate
+Add-CMDeviceCollectionQueryMembershipRule -CollectionName $name -QueryExpression &quot;select *  from  SMS_R_System where SMS_R_System.OperatingSystemNameandVersion = 'Microsoft Windows NT Server 6.3'&quot; -RuleName $name</code></pre>
+      <footer>
+        <p><span>Published: 2015-10-10</span> <span>Last Updated: 2017-04-02</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

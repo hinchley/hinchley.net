@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: New Printers Slow to Appear under the Devices and Printers View within Windows</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: New Printers Slow to Appear under the Devices and Printers View within Windows</h1>
+    </header>
+    <main class="archive">
+      <p>I recently noticed that it was taking a very long time for newly added printers to appear under the <em>Devices and Printers</em> view in Control Panel on a system running Windows Server 2012 R2. After I added a new printer, it would be immediately accessible via the Print dialog of any application, but it would take minutes to appear within the <em>Devices and Printers</em> view.</p>
+      <p>After checking Event Viewer, I discovered a series of events (ID 201) in the <em>DeviceSetupManager\Admin</em> log under <em>Applications and Services Logs\Microsoft\Windows</em> with the following text: <em>A connection to the Windows Metadata and Internet Services (WMIS) could not be established.</em></p>
+      <p>This wasn't surprising, as the server was located in an isolated network with no connectivity to the internet.</p>
+      <p>After a little more digging, I discovered the following registry key: <em>HKLM\Software\Microsoft\Windows\CurrentVersion\Device Metadata</em>. The key included a value named <em>DeviceMetadataServiceURL</em> (set to <em>http://go.microsoft.com/fwlink/?LinkID=252669&amp;clcid=0x409</em>) that presumably defined the online location the server was attempting to query. I also noticed that under the same key was a DWORD value named <em>PreventDeviceMetadataFromNetwork</em>. I changed this value from 0 to 1, and then attempted to connect to another printer. Sure enough, the new printer immediately appeared within the <em>Devices and Printers</em> view. Problem solved!</p>
+      <p>The same approach should also work on Windows 10.</p>
+      <footer>
+        <p><span>Published: 2017-02-23</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Using PowerShell to Automatically Change the Desktop Wallpaper Based on Screen Resolution</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Using PowerShell to Automatically Change the Desktop Wallpaper Based on Screen Resolution</h1>
+    </header>
+    <main class="archive">
+      <p>The default "Hero" wallpaper in Windows 10 is available under <code>C:\Windows\Web\4K\Wallpaper\Windows</code> in a variety of sizes matching common screen layouts. Wouldn't it be nice if you could automatically switch between these backgrounds when you change your screen resolution? Well, the script shown below will do exactly that.</p>
+      <p>The script, which is written using C# dressed up in the thinnest of PowerShell wrappers, listens for the <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.win32.systemevents.displaysettingschanged">DisplaySettingsChanged</a> event (indicating a change in screen resolution). When the event is fired, the script iterates through all attached monitors, calculating the resolution, and applying a desktop wallpaper with a matching size (falling back to a default background if no match is found).</p>
+      <p>Unlike many solutions that rely on the <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-systemparametersinfoa">SystemParametersInfo</a> function to assign a single desktop background to all monitors, this solution uses the <a href="https://docs.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-idesktopwallpaper">IDesktopWallpaper</a> interface to assign a unique wallpaper to each monitor based on its specific resolution.</p>
+      <p>If you run this script using a scheduled task with an event trigger of "user logon", you can implement an automated solution for selecting the most appropriate desktop wallpaper whenever the logged on user changes the resolution (or orientation) of a monitor.</p>
+      <p>Note: The script will not work if users are prevented from changing the desktop wallpaper (i.e. if <em>NoChangingWallPaper</em> under <code>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\ActiveDesktop</code> in either HKCU or HKLM is set to <em>1</em>).</p>
+      <p>The script is configured to switch between the default Hero images included with Windows 10 (defaulting to <code>C:\Windows\Web\Wallpaper\Windows\img0.jpg</code>), but you can easily modify the code to support other resolutions if you have replaced or supplemented the default wallpaper with alternate images.</p>
+      <p>The script is also configured to display the configured wallpaper in <em>Fill</em> mode, but you can easily change this behaviour by using a different value from the <em>DesktopWallpaperPosition</em> enumeration when calling the <em>SetPosition</em> function.</p>
+      <pre><code>Add-Type -TypeDefinition @&quot;
+using System;
+using System.IO;
+using System.Text;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using System.Linq;
+using Microsoft.Win32;
+
+namespace WinAPI {
+  class DesktopWallpaper
+  {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Rect
+    {
+      public int Left;
+      public int Top;
+      public int Right;
+      public int Bottom;
+    }
+
+    public enum DesktopSlideshowOptions
+    {
+      ShuffleImages = 0x01
+    }
+
+    public enum DesktopSlideshowState
+    {
+      Enabled = 0x01,
+      Slideshow = 0x02,
+      DisabledByRemoteSession = 0x04
+    }
+
+    public enum DesktopSlideshowDirection
+    {
+      Forward = 0,
+      Backward = 1
+    }
+
+    public enum DesktopWallpaperPosition
+    {
+      Center = 0,
+      Tile = 1,
+      Stretch = 2,
+      Fit = 3,
+      Fill = 4,
+      Span = 5
+    }
+
+    [ComImport, Guid(&quot;B92B56A9-8B55-4E14-9A89-0199BBB6F93B&quot;), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IDesktopWallpaper
+    {
+      void SetWallpaper([MarshalAs(UnmanagedType.LPWStr)] string monitorID, [MarshalAs(UnmanagedType.LPWStr)] string wallpaper);
+
+      [return: MarshalAs(UnmanagedType.LPWStr)]
+      string GetWallpaper([MarshalAs(UnmanagedType.LPWStr)] string monitorID);
+
+      [return: MarshalAs(UnmanagedType.LPWStr)]
+      string GetMonitorDevicePathAt(uint monitorIndex);
+
+      [return: MarshalAs(UnmanagedType.U4)]
+      uint GetMonitorDevicePathCount();
+
+      [return: MarshalAs(UnmanagedType.Struct)]
+      Rect GetMonitorRECT([MarshalAs(UnmanagedType.LPWStr)] string monitorID);
+
+      void SetBackgroundColor([MarshalAs(UnmanagedType.U4)] uint color);
+
+      [return: MarshalAs(UnmanagedType.U4)]
+      uint GetBackgroundColor();
+
+      void SetPosition([MarshalAs(UnmanagedType.I4)] DesktopWallpaperPosition position);
+
+      [return: MarshalAs(UnmanagedType.I4)]
+      DesktopWallpaperPosition GetPosition();
+
+      void SetSlideshow(IntPtr items);
+
+      IntPtr GetSlideshow();
+
+      void SetSlideshowOptions(DesktopSlideshowDirection options, uint slideshowTick);
+      [PreserveSig]
+
+      uint GetSlideshowOptions(out DesktopSlideshowDirection options, out uint slideshowTick);
+
+      void AdvanceSlideshow([MarshalAs(UnmanagedType.LPWStr)] string monitorID, [MarshalAs(UnmanagedType.I4)] DesktopSlideshowDirection direction);
+
+      DesktopSlideshowDirection GetStatus();
+
+      bool Enable();
+    }
+
+    public class WallpaperWrapper
+    {
+      static readonly Guid CLSID_DesktopWallpaper = new Guid(&quot;{C2CF3110-460E-4fc1-B9D0-8A1C0C9CC4BD}&quot;);
+
+      public static IDesktopWallpaper GetWallpaper()
+      {
+        Type typeDesktopWallpaper = Type.GetTypeFromCLSID(CLSID_DesktopWallpaper);
+        return (IDesktopWallpaper)Activator.CreateInstance(typeDesktopWallpaper);
+      }
+    }
+  }
+
+  public class Wallpaper
+  {
+    public static void Main()
+    {
+        SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
+        Application.Run();
+    }
+
+    static void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
+    {
+      string path = &quot;C:\\Windows\\Web\\4K\\Wallpaper\\Windows\\img0_{0}.jpg&quot;;
+
+      string[] resolutions = {
+        &quot;768x1024&quot;,
+        &quot;768x1366&quot;,
+        &quot;1024x768&quot;,
+        &quot;1200x1920&quot;,
+        &quot;1366x768&quot;,
+        &quot;1600x2560&quot;,
+        &quot;2160x3840&quot;,
+        &quot;2560x1600&quot;,
+        &quot;3840x2160&quot;
+      };
+
+      uint counter = 0;
+      string wallpaper = &quot;&quot;;
+
+      foreach (Screen screen in Screen.AllScreens) {
+        int width  = screen.Bounds.Width;
+        int height = screen.Bounds.Height;
+
+        string resolution = width + &quot;x&quot; + height;
+
+        if (! resolutions.Contains(resolution)) {
+          if (width &gt; height) {
+            resolution = &quot;3840x2160&quot;;
+          } else {
+            resolution = &quot;2160x3840&quot;;
+          }
+        }
+
+        wallpaper = path.Replace(&quot;{0}&quot;, resolution);
+
+        if (File.Exists(wallpaper)) {
+          SetWallpaper(counter++, wallpaper);
+        }
+      }
+    }
+
+    public static void SetWallpaper(uint id, string path)
+    {
+      DesktopWallpaper.IDesktopWallpaper wallpaper = DesktopWallpaper.WallpaperWrapper.GetWallpaper();
+
+      if (id &lt;= wallpaper.GetMonitorDevicePathCount()) {
+        string monitor = wallpaper.GetMonitorDevicePathAt(id);
+        wallpaper.SetWallpaper(monitor, path);
+        wallpaper.SetPosition(DesktopWallpaper.DesktopWallpaperPosition.Fill);
+      }
+
+      Marshal.ReleaseComObject(wallpaper);
+    }
+  }
+}
+&quot;@ -ReferencedAssemblies 'System.Drawing.dll', System.Windows.Forms
+
+[WinAPI.Wallpaper]::Main()</code></pre>
+      <footer>
+        <p><span>Published: 2016-07-19</span> <span>Last Updated: 2016-07-20</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

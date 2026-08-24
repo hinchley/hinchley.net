@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Install and Configure Microsoft Deployment Toolkit 2013 using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Install and Configure Microsoft Deployment Toolkit 2013 using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>In this article I will show how you can install and configure Microsoft Deployment Toolkit 2013 using PowerShell.</p>
+      <p>You will need the following:</p>
+      <ul>
+        <li>Ideally, you will install MDT onto an existing SCCM 2012 R2 SP1 server (follow this <a href="/articles/install-microsoft-sccm-2012-r2-sp1/">guide</a>). If not, you will need a system preinstalled with Microsoft .NET Framework 3.5 and Microsoft ADK 10.</li>
+        <li>Access to the MDT 2013 Update 1 media (unfortunately, the media has been removed by Microsoft as it has been superseded).</li>
+        <li>Access to the Windows 10 media.</li>
+      </ul>
+      <p>To install MDT 2013 Update 1, open an elevated PowerShell prompt and run:</p>
+      <pre><code>&amp; msiexec /i MicrosoftDeploymentToolkit2013_x64.msi /qb</code></pre>
+      <p>Next, run the following code to create a new deployment share, import the operating system source files, and create a client task sequence for deploying the operating system. Note: The code assumes the Windows 10 media is mounted as <code>D:\</code>.</p>
+      <pre><code>$Folder = &quot;C:\DeploymentShare&quot;
+$Share  = &quot;DeploymentShare$&quot;
+
+Import-Module &quot;C:\Program Files\Microsoft Deployment Toolkit\bin\MicrosoftDeploymentToolkit.psd1&quot;
+
+New-Item -Path $Folder -Type Directory
+New-SmbShare –Name $Share –Path $Folder –FullAccess EVERYONE
+
+New-PSDrive -Name &quot;DS001&quot; -PSProvider &quot;MDTProvider&quot; -Root $Folder -NetworkPath &quot;\\$ENV:COMPUTERNAME\$Share&quot; -Description &quot;Deployment Share&quot; | Add-MDTPersistentDrive
+
+$os = Import-MDTOperatingSystem -Path &quot;DS001:\Operating Systems&quot; -SourcePath &quot;D:\&quot; -DestinationFolder &quot;Windows 10&quot;
+
+Import-MDTTaskSequence -Path &quot;DS001:\Task Sequences&quot; -Name &quot;Windows 10&quot; -Template &quot;Client.xml&quot; -Comments &quot;Build and Capture Windows 10&quot; -ID &quot;WIN10&quot; -Version &quot;1.0&quot; -OperatingSystemPath &quot;DS001:\Operating Systems\$($os.Name)&quot; -FullName &quot;LAB&quot; -OrgName &quot;LAB&quot; -AdminPassword (Read-Host &quot;Password&quot;)
+
+Update-MDTDeploymentShare -Path &quot;DS001:&quot;</code></pre>
+      <p>To enable the option to capture the operating system we need to remove <em>SkipCapture=Y</em> from <em>CustomSettings.ini</em>:</p>
+      <pre><code>$File = &quot;C:\DeploymentShare\Control\CustomSettings.ini&quot;
+(Get-Content $file | Select-String -Pattern 'SkipCapture' -NotMatch) | Set-Content $file</code></pre>
+      <p>You can now boot a virtual machine off the <code>C:\DeploymentShare\Boot\LiteTouchPE_x64.iso</code> media to initiate the build and capture of Windows 10.</p>
+      <p>Assuming you have installed MDT on your primary SCCM site server, as a bonus, let's integrate MDT with the Configuration Manager Console. You can do this by running the following command, and progressing through the wizard:</p>
+      <pre><code>&quot;C:\Program Files\Microsoft Deployment Toolkit\Bin\Mi
+crosoft.BDD.WizLauncher.exe&quot; ConfigureSCCM</code></pre>
+      <p>Alternatively, you can open an elevated PowerShell prompt and run the following code (adjusting the variables as appropriate for your environment):</p>
+      <pre><code>$SiteCode   = &quot;LAB&quot;
+$SiteServer = &quot;BORIS.LAB.HINCHLEY.NET&quot;
+
+$MDT  = &quot;C:\Program Files\Microsoft Deployment Toolkit&quot;
+$SCCM = &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole&quot;
+$MOF  = &quot;$SCCM\Bin\Microsoft.BDD.CM12Actions.mof&quot;
+
+Copy-Item &quot;$MDT\Bin\Microsoft.BDD.CM12Actions.dll&quot; &quot;$SCCM\Bin\Microsoft.BDD.CM12Actions.dll&quot;
+Copy-Item &quot;$MDT\Bin\Microsoft.BDD.Workbench.dll&quot; &quot;$SCCM\Bin\Microsoft.BDD.Workbench.dll&quot;
+Copy-Item &quot;$MDT\Bin\Microsoft.BDD.ConfigManager.dll&quot; &quot;$SCCM\Bin\Microsoft.BDD.ConfigManager.dll&quot;
+Copy-Item &quot;$MDT\Bin\Microsoft.BDD.CM12Wizards.dll&quot; &quot;$SCCM\Bin\Microsoft.BDD.CM12Wizards.dll&quot;
+Copy-Item &quot;$MDT\Bin\Microsoft.BDD.PSSnapIn.dll&quot; &quot;$SCCM\Bin\Microsoft.BDD.PSSnapIn.dll&quot;
+Copy-Item &quot;$MDT\Bin\Microsoft.BDD.Core.dll&quot; &quot;$SCCM\Bin\Microsoft.BDD.Core.dll&quot;
+Copy-Item &quot;$MDT\SCCM\Microsoft.BDD.CM12Actions.mof&quot; $MOF
+Copy-Item &quot;$MDT\Templates\CM12Extensions\*&quot; &quot;$SCCM\XmlStorage\Extensions\&quot; -Force -Recurse
+(Get-Content $MOF).Replace('%SMSSERVER%', $SiteServer).Replace('%SMSSITECODE%', $SiteCode) | Set-Content $MOF
+&amp; &quot;C:\Windows\System32\wbem\mofcomp.exe&quot; &quot;$SCCM\Bin\Microsoft.BDD.CM12Actions.mof&quot;</code></pre>
+      <p>What about modifying the MDT task sequence to include an application? Let's assume you have a PowerShell script named <code>C:\Media\Branding\Configure.ps1</code> that writes the current date into the registry:</p>
+      <pre><code>New-ItemProperty -Path HKLM:Software -Name CaptureTime -Value $(Get-Date -UFormat &quot;%Y/%m/%d&quot;)</code></pre>
+      <p>We can use the following command to wrap the script in an MDT application:</p>
+      <pre><code>$app = Import-MDTApplication `
+  -Enable $true `
+  -Path &quot;DS001:\Applications&quot; `
+  -Name &quot;Branding&quot; `
+  -ShortName &quot;Branding&quot; `
+  -DisplayName &quot;Branding&quot; `
+  -CommandLine &quot;powershell.exe -ExecutionPolicy Bypass -File Configure.ps1&quot; `
+  -WorkingDirectory &quot;.\Applications\Branding&quot; `
+  -ApplicationSourcePath &quot;C:\Media\Branding&quot; `
+  -DestinationFolder &quot;Branding&quot;</code></pre>
+      <p>And now the tricky bit, to add the new application into the task sequence under the existing <em>Custom Tasks</em> folder:</p>
+      <pre><code>$step = [xml]@&quot;
+&lt;step type=&quot;BDD_InstallApplication&quot; name=&quot;Branding&quot; description=&quot;&quot; disable=&quot;false&quot; continueOnError=&quot;false&quot; runIn=&quot;WinPEandFullOS&quot; successCodeList=&quot;0 3010&quot;&gt;
+&lt;defaultVarList&gt;
+  &lt;variable name=&quot;ApplicationGUID&quot; property=&quot;ApplicationGUID&quot;&gt;$($x.GUID)&lt;/variable&gt;
+  &lt;variable name=&quot;ApplicationSuccessCodes&quot; property=&quot;ApplicationSuccessCodes&quot;&gt;0 3010&lt;/variable&gt;
+&lt;/defaultVarList&gt;
+&lt;action&gt;cscript.exe &quot;%SCRIPTROOT%\ZTIApplications.wsf&quot;&lt;/action&gt;
+&lt;/step&gt;
+&quot;@
+
+$ts    = &quot;C:\DeploymentShare\Control\WIN10\ts.xml&quot;
+$xml   = [xml](Get-Content $ts)
+$node  = $xml.ImportNode($step.get_DocumentElement(), $true)
+$tasks = $xml.Sequence.Group.Group | ? Name -eq &quot;Custom Tasks&quot;
+$tasks.AppendChild($node)
+$xml.Save($ts)</code></pre>
+      <p>Note: The MDT cmdlets typical require access to the MDT &quot;drive&quot; (in my case: <em>DS001</em>). The provider can be restored into a new PowerShell session as follows:</p>
+      <pre><code>Import-Module &quot;C:\Program Files\Microsoft Deployment Toolkit\bin\MicrosoftDeploymentToolkit.psd1&quot;
+Restore-MDTPersistentDrive</code></pre>
+      <p>The application that we just added to the task sequence will run after Windows is installed, but if we wanted to run a PowerShell-based script prior to the installation of the operating system, we would need to add support for PowerShell to WinPE. We can do this via the following commands:</p>
+      <pre><code>$settings = &quot;C:\DeploymentShare\Control\Settings.xml&quot;
+$xml = [xml](Get-Content $settings)
+$xml.Settings.Item(&quot;Boot.x86.FeaturePacks&quot;).&quot;#text&quot; = &quot;winpe-mdac,winpe-netfx,winpe-powershell&quot;
+$xml.Settings.Item(&quot;Boot.x64.FeaturePacks&quot;).&quot;#text&quot; = &quot;winpe-mdac,winpe-netfx,winpe-powershell&quot;
+$xml.Save($settings)
+
+Update-MDTDeploymentShare -Path &quot;DS001:&quot; -Force</code></pre>
+      <p>The approach outlined above mimics the process of selecting the required WinPE features through the MDT Deployment Workbench, and relies on an update of the Deployment Share for the features to be injected into the WIM. You can manually achieve the same outcome by using <em>Dism</em> to explicitly inject the features as shown:</p>
+      <pre><code># This example only updates the x64 boot WIM.
+mkdir C:\Mount
+
+$adk = &quot;C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit&quot;
+
+dism /Mount-Wim /WimFile:C:\DeploymentShare\Boot\LiteTouchPE_x64.wim /MountDir:C:\Mount /Index:1
+
+&amp; &quot;$adk\Deployment Tools\amd64\DISM\dism.exe&quot; /Add-Package /Image:C:\Mount /PackagePath:&quot;$adk\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-NetFx.cab&quot;
+&amp; &quot;$adk\Deployment Tools\amd64\DISM\dism.exe&quot; /Add-Package /Image:C:\Mount /PackagePath:&quot;$adk\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-NetFx_en-us.cab&quot;
+
+&amp; &quot;$adk\Deployment Tools\amd64\DISM\dism.exe&quot; /Add-Package /Image:C:\Mount /PackagePath:&quot;$adk\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-PowerShell.cab&quot;
+&amp; &quot;$adk\Deployment Tools\amd64\DISM\dism.exe&quot; /Add-Package /Image:C:\Mount /PackagePath:&quot;$adk\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-PowerShell_en-us.cab&quot;
+
+dism /UnMount-Wim /MountDir:C:\Mount /Commit
+rmdir C:\Mount</code></pre>
+      <p>The above process does not inform MDT the x64 boot WIM has been updated, and hence, if the Deployment Share is refreshed, the changes made to the WIM will be lost. Therefore I recommend updating <em>settings.xml</em> directly, as previously shown.</p>
+      <p>Note: The name of the features &quot;known&quot; to WinPE (i.e. listed within the Properties pane of the Deployment Workbench) are defined within <code>C:\Program Files\Microsoft Deployment Toolkit\Bin\FeatureNames.xml</code>.</p>
+      <footer>
+        <p><span>Published: 2015-10-17</span> <span>Last Updated: 2015-10-25</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

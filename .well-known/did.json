@@ -1,0 +1,25 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:hinchley.net",
+  "verificationMethod": [
+    {
+      "id": "did:web:hinchley.net#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:hinchley.net",
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "cd0YtaI5UgSPnOA4RGh1WAeNLhFIiIFbnE1Taj8GA5A"
+      }
+    }
+  ],
+  "authentication": [
+    "did:web:hinchley.net#key-1"
+  ],
+  "assertionMethod": [
+    "did:web:hinchley.net#key-1"
+  ]
+}

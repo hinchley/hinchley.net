@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Install and Configure Hyper-V on Windows Server 2012 R2 using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Install and Configure Hyper-V on Windows Server 2012 R2 using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>This post will demonstrate the steps required to install and configure a simple Hyper-V deployment on Windows Server 2012 R2 (Server Core).</p>
+      <p>The following assumptions apply:</p>
+      <ul>
+        <li>The target server is installed and running Windows Server 2012 R2 (Server Core).</li>
+        <li>The server has a data volume (referenced as D:) that will be used for storing virtual machines.</li>
+        <li>The Windows Server 2012 R2 ISO is located at <em>D:\Media\en_windows_server_2012_r2_with_update_x64.iso</em>.</li>
+      </ul>
+      <p>To use the Hyper-V management console on Windows Server 2012 R2 (Server Core), it is necessary to reconfigure the server in &quot;minimal-UI&quot; mode. This can be done by running the following commands from an elevated PowerShell prompt:</p>
+      <pre><code>$mount = Mount-DiskImage -ImagePath D:\Media\en_windows_server_2012_r2_with_update_x64.iso -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + ':'
+
+mkdir D:\Mount
+dism /Mount-Wim /WimFile:$drive\sources\install.wim /MountDir:D:\Mount /Index:2 /ReadOnly
+Add-WindowsFeature -Name Server-GUI-MGMT-Infra -Source D:\Mount\windows\winsxs
+dism /UnMount-Wim /MountDir:D:\Mount /Discard
+rmdir D:\Mount
+
+DisMount-DiskImage -ImagePath D:\Media\en_windows_server_2012_r2_with_update_x64.iso</code></pre>
+      <p>Before rebooting the server, let's prevent Server Manager from auto-starting at logon:</p>
+      <pre><code>New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -value &quot;0x1&quot; –Force</code></pre>
+      <p>And now restart:</p>
+      <pre><code>Restart-Computer</code></pre>
+      <p>To install the Hyper-V feature:</p>
+      <pre><code>Add-WindowsFeature -Name Hyper-V -IncludeManagementTools
+Restart-Computer</code></pre>
+      <p>After the server reboots, you could launch the Hyper-V management console from a command prompt with the following command (but why bother when you can do everything via PowerShell):</p>
+      <pre><code>virtmgmt.msc</code></pre>
+      <p>Use the following command to create a Hyper-V virtual switch (note: your network connection to the server will drop briefly):</p>
+      <pre><code>New-VMSwitch -Name LAB -NetAdapterName &quot;Ethernet&quot; -AllowManagementOS $true -Notes &quot;Hyper-V Management, Virtual Machines&quot;</code></pre>
+      <p>To create a "generation 2" virtual machine named EDWARD with a 140 GB hard drive, 2 processors, and dynamic memory (8 GB startup, 4 GB minimum and 16 GB maximum):</p>
+      <pre><code>$name = &quot;EDWARD&quot;
+$path = &quot;D:\VMs&quot;
+
+if (-Not (Test-Path $path)) { New-Item -Type Directory $path }
+
+$vm = New-VM -Name $name -Path $path -Generation 2 -MemoryStartupBytes 8GB -NewVHDPath &quot;$path\$name\Virtual Hard Disks\$name.vhdx&quot; -NewVHDSizeBytes 140GB -SwitchName LAB
+$vm | Set-VM -DynamicMemory -MemoryMinimumBytes 4GB -MemoryMaximumBytes 16GB -ProcessorCount 2</code></pre>
+      <p>The commands will create the following files/folder structure:</p>
+      <pre><code>D:\VMs\EDWARD\Virtual Hard Disks\EDWARD.vhdx
+D:\VMs\EDWARD\Virtual Machines\&lt;GUID&gt;.xml
+D:\VMs\EDWARD\Virtual Machines\&lt;GUID&gt;\</code></pre>
+      <p>To disable the "time synchronization" integration service:</p>
+      <pre><code>$vm | Disable-VMIntegrationService -Name &quot;Time Synchronization&quot;</code></pre>
+      <p>To add a DVD-ROM and bind it to an ISO:</p>
+      <pre><code>$vm | Add-VMDvdDrive -PassThru | Set-VMDvdDrive -Path &quot;D:\Media\en_windows_server_2012_r2_with_update_x64_dvd_6052708.iso&quot;</code></pre>
+      <p>The resultant boot order will be Network Adapter, Hard Drive, DVD Drive. This is good.</p>
+      <p>To connect to the virtual machine:</p>
+      <pre><code>vmconnect.exe localhost $VM.Name</code></pre>
+      <p>Finally, to start the virtual machine:</p>
+      <pre><code>Start-VM $vm</code></pre>
+      <p>The virtual machine will boot. Press any key to boot from the DVD. You are now underway...</p>
+      <p>As an added bonus, let's assume the physical host on which you've installed Hyper-V has two network adapters, each connected to a separate network or VLAN. You decide you want to route traffic between the networks using <a href="http://smallwall.org">SmallWall</a>, a FreeBSD router and firewall. The first step is to create a new virtual switch, which we will name PUBLIC. The <em>AllowManagementOS</em> property is set to <em>False</em> to prevent direct access to the switch from the Hyper-V host.</p>
+      <pre><code>New-VMSwitch -Name PUBLIC -NetAdapterName &quot;Ethernet 2&quot; -AllowManagementOS $false -Notes &quot;Edge Router&quot;</code></pre>
+      <p>The next step is to create a "generation 1" virtual machine for hosting SmallWall (which I will call CHARLES). A generation 1 virtual machine is necessary as SmallWall only supports legacy network adapters. The virtual machine is allocated a maximum of 512 MB of memory, assigned a 32 MB hard drive (SmallWall needs as little as 16 MB), and configured with two network adapters (the first bound to the LAB switch, and the second to the PUBLIC switch). The SmallWall ISO is mounted, and the system startup order modified. Finally, a console connection is established, and the server is started.</p>
+      <pre><code>$name = &quot;CHARLES&quot;
+$path = &quot;d:\VMs&quot;
+
+$vm = New-VM -Name $name -Path $path -Generation 1 -MemoryStartupBytes 256MB -NewVHDPath &quot;$path\$name\Virtual Hard Disks\$name.vhdx&quot; -NewVHDSizeBytes 32MB -SwitchName LAB -BootDevice LegacyNetworkAdapter
+
+$vm | Set-VM -DynamicMemory -MemoryMinimumBytes 128MB -MemoryMaximumBytes 512MB -ProcessorCount 1
+$vm | Add-VMNetworkAdapter -IsLegacy $true -SwitchName PUBLIC
+$vm | Disable-VMIntegrationService -Name &quot;Time Synchronization&quot;
+$vm | Get-VMDvdDrive | Set-VMDvdDrive -Path &quot;D:\Media\smallwall-generic-pc-1.8.3.iso&quot;
+$vm | Set-VMBios -StartupOrder @(&quot;IDE&quot;,&quot;CD&quot;,&quot;LegacyNetworkAdapter&quot;,&quot;Floppy&quot;)
+
+vmconnect.exe localhost $VM.Name
+Start-VM $vm</code></pre>
+      <p>You can now proceed with the installation of SmallWall.</p>
+      <footer>
+        <p><span>Published: 2015-09-28</span> <span>Last Updated: 2016-01-02</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

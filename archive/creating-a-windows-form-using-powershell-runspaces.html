@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Creating a Windows Form using PowerShell Runspaces</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Creating a Windows Form using PowerShell Runspaces</h1>
+    </header>
+    <main class="archive">
+      <p>I recently wrote a PowerShell script that used the Windows Forms .NET assembly to create a graphical user interface. The form included a button that initiated a long-running task. While the task was executing, I wanted to ensure the form remained responsive to user input, and I also wanted to update a status field on the form with the progress of the executing task.</p>
+      <p>Now, by default, any graphical interface created via PowerShell will run in a single-threaded apartment; which basically means that the application will "block", or become unresponsive, while it is waiting for a task to complete. The best way of overcoming this restriction is to leverage .NET runspaces (each runspace provides a separate execution context for a PowerShell pipeline).</p>
+      <p>The following code provides a simplified example of how I used runspaces to manage the execution of a long running task. The script creates a form with a button and a text label. The button initiates a script block that counts to 20 over a period of 20 seconds (the button is intentionally disabled during this period). The window remains responsive throughout, and the label is incrementally refreshed to show the value of the counter.</p>
+      <pre><code>[Reflection.Assembly]::LoadWithPartialName(&quot;System.Windows.Forms&quot;) | Out-Null
+Add-Type -AssemblyName System.Windows.Forms
+
+# for talking across runspaces.
+$sync = [Hashtable]::Synchronized(@{})
+
+# long running task.
+$counter = {
+  $count = [PowerShell]::Create().AddScript({
+    $sync.button.Enabled = $false
+
+    for ($i = 0; $i -le 20; $i++) {
+      $sync.label.Text = $i
+      start-sleep -seconds 1
+    }
+
+    $sync.button.Enabled = $true
+  })
+
+  $runspace = [RunspaceFactory]::CreateRunspace()
+  $runspace.ApartmentState = &quot;STA&quot;
+  $runspace.ThreadOptions = &quot;ReuseThread&quot;
+  $runspace.Open()
+  $runspace.SessionStateProxy.SetVariable(&quot;sync&quot;, $sync)
+
+  $count.Runspace = $runspace
+  $count.BeginInvoke()
+}
+
+# create the form.
+$form = New-Object Windows.Forms.Form
+$form.ClientSize = New-Object Drawing.Size(200, 60)
+$form.Text = &quot;Counter&quot;
+$form.StartPosition = &quot;CenterScreen&quot;
+$form.FormBorderStyle = &quot;FixedSingle&quot;
+$form.MaximizeBox = $false
+
+# create the button.
+$button = New-Object Windows.Forms.Button
+$button.Location = New-Object Drawing.Point(10, 10)
+$button.Width = 180
+$button.Text = &quot;Start Counting&quot;
+$button.Add_Click($counter)
+
+# create the label.
+$label = New-Object Windows.Forms.Label
+$label.Location = New-Object Drawing.Point(10, 38)
+$label.Width = 100
+$label.Text = 0
+
+# add controls to the form.
+$sync.button = $button
+$sync.label = $label
+$form.Controls.AddRange(@($sync.button, $sync.label))
+
+# show the form.
+[Windows.Forms.Application]::Run($form)</code></pre>
+      <footer>
+        <p><span>Published: 2016-03-28</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

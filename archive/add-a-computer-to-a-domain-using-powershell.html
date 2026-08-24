@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Add a Computer to a Domain using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Add a Computer to a Domain using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>The following PowerShell command will add a computer to the "Servers" organisational unit within the domain "lab.hinchley.net", and initiate an automatic reboot:</p>
+      <pre><code>Add-Computer -DomainName &quot;lab.hinchley.net&quot; -OUPath &quot;ou=Servers,dc=lab,dc=hinchley,dc=net&quot; -Credential (Get-Credential lab\administrator) -Restart -Force</code></pre>
+      <p>Note: The command will fail if a matching computer account already exists in the domain under a different organisational unit. This issue can be avoided by checking for the existence of the computer account prior to calling the <em>Add-Computer</em> cmdlet, and if the computer exists, moving the existing object to the correct location.</p>
+      <p>The task is made slightly more complicated by two factors: firstly, we can't rely on the <em>Get-AdComputer</em> cmdlet to search for the account, as it is unlikely the computer will have the Active Directory PowerShell module installed; and secondly, because the computer isn't on the domain, we will need to explicitly connect to Active Directory using domain credentials.</p>
+      <p>Here is some sample code:</p>
+      <pre><code>$Domain = &quot;lab.hinchley.net&quot;
+$Server = &quot;MOLLY&quot;
+$OU = &quot;ou=Servers,dc=lab,dc=hinchley,dc=net&quot;
+
+$Credential = Get-Credential
+$NetCredential = $Credential.GetNetworkCredential()
+
+$Username = &quot;{0}\{1}&quot; -f $NetCredential.Domain, $NetCredential.Username
+$Password = $NetCredential.Password
+
+$DomainInfo = New-Object DirectoryServices.DirectoryEntry(&quot;LDAP://$Domain&quot;, $Username, $Password)
+
+$Search = New-Object DirectoryServices.DirectorySearcher($DomainInfo)
+$Search.Filter = &quot;(samAccountName=$($Server)$)&quot;
+
+if ($Comp = $Search.FindOne()) {
+  $TargetOU = New-Object DirectoryServices.DirectoryEntry(&quot;LDAP://$Domain/$OU&quot;)
+  $Comp.GetDirectoryEntry().MoveTo($TargetOU)
+  Start-Sleep -Seconds 5
+}
+
+Add-Computer -DomainName $Domain -OUPath $OU -Credential $Credential -Restart -Force</code></pre>
+      <footer>
+        <p><span>Published: 2015-09-28</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

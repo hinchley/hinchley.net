@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: An Approach for Managing Microsoft AppLocker Policies</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: An Approach for Managing Microsoft AppLocker Policies</h1>
+    </header>
+    <main class="archive">
+      <p>AppLocker is a software whitelisting product from Microsoft that ships with Windows. It can be used to restrict the software that will execute on a computer.</p>
+      <h2 id="overview-of-policies">Overview of Policies</h2>
+      <p>AppLocker policies are typically created and deployed using Group Policy. If multiple policies are deployed to a single computer, these policies are merged into a single "effective" policy (more on this later).</p>
+      <p>AppLocker policies are composed of <em>rules</em> that are organised into <em>rule collections</em>. Each collection contains rules targeting a specific type of executable code. There are five collections:</p>
+      <ul>
+        <li>Executables (.exe and .com)</li>
+        <li>Dynamic Link Libraries (.dll and .ocx)</li>
+        <li>Scripts (.bat, .cmd, .ps1, .js and .vbs)</li>
+        <li>Windows Installer (.msi and .msp)</li>
+        <li>Universal Applications (.appx)</li>
+      </ul>
+      <p>Each collection can be separately configured in one of three modes: <em>disabled</em> (ignore all rules within the collection), <em>audit</em> (do not prevent code from executing, but log rule violations), or <em>enforced</em> (prevent code from executing and log violations).</p>
+      <p>Each AppLocker rule includes a unique GUID identifier, a name, and a description. A rule also identifies the SID of the user or group that is to be targeted, and an action of either <em>allow</em> or <em>deny</em> (where <em>allow</em> is used to allow code to execute, and <em>deny</em> is used to prevent execution). Finally, a rule also includes a condition to identify the affected executable code (i.e. the scope). There are three types of conditions:</p>
+      <ul>
+        <li><strong>Publisher</strong>. Code is identified using properties of a publisher certificate.</li>
+        <li><strong>Path</strong>. Code is identified using a file path (either fully qualified to a specific file, or using wildcards to reference multiple files/folders).</li>
+        <li><strong>File Hash</strong>. Code is identified using a unique authenticode hash.</li>
+      </ul>
+      <p>The path and hash conditions are straight forward, and each consist of a single value (i.e. the hash or path), but a total of four values are required to build a publisher rule. The values, listed with decreasing specificity, are: <em>file version</em>, <em>file name</em>, <em>product name</em> and <em>publisher</em>. Each of these values can be specifically defined, or generalised by using an asterisk wildcard. For example, by using a wildcard for product name, file name and version, you could "trust" all software published by a single vendor.</p>
+      <h2 id="whitelisting-approach">Whitelisting Approach</h2>
+      <p>There are many approaches to application whitelisting. As to what is "best" for you will depend upon the risks you are seeking to mitigate, and the effort you are willing to expend on creating and maintaining an effective policy. However, here are a few high-level approaches to whitelisting:</p>
+      <ol>
+        <li>Limit users and administrators to running explicitly approved software.</li>
+        <li>Limit users and administrators to running any software in approved locations (e.g. <code>c:\windows</code> and <code>c:\program files</code>).</li>
+        <li>Limit users to running explicitly approved software, but allow local administrators to run any software.</li>
+        <li>Limit users to running any software in locations that cannot be modified without administrator privileges (similar to option 2).</li>
+        <li>Allow users to run any software except programs that are specifically blocked (blacklisting).</li>
+      </ol>
+      <p>Having selected a suitable approach, you next need to decide how the rules will be enforced. For example, you could restrict execution by:</p>
+      <ol>
+        <li>Hash.</li>
+        <li>Explicit path.</li>
+        <li>Top level folder.</li>
+        <li>Publisher certificate (with various levels of granularity).</li>
+      </ol>
+      <p>Hash and publisher certificate (with all fields qualified) are the two most secure options (as both are independent of modifiable properties of a file). However, these two options also incur the greatest level of administrative effort (as any change to a file will require a corresponding change to the matching AppLocker rule).</p>
+      <p>Although whitelisting a top level folder (and everything therein) requires minimum effort, it won't prevent users from executing "inappropriate" software that is "incorrectly" installed into an approved location (e.g. an application manually installed by an administrator onto a shared computer becomes accessible to any user of the system).</p>
+      <p>Similarly, although using a publisher certificate that is scoped only to the publisher name may alleviate the need to modify AppLocker rules to support new product versions, it also opens the possibility that a user will be able to execute any software from the vendor, including software that may not be deemed suitable for your corporate environment.</p>
+      <p>As I said, there is no "right or wrong" approach. The key is to understand the risks to be mitigated, the support overheads you can sustain, and the agility required of your organisation. However, in this article, I will describe the steps required to implement a whitelisting policy based on the following principles:</p>
+      <ul>
+        <li><strong>Allow administrators to run any software</strong>. <em>Rationale</em>: If you are an administrator, you "own the box", and can disable AppLocker. Therefore, the security benefit of a policy that attempts to limit the actions of administrators is limited, and yet the support overhead is high, for a single misconfigured rule targeting local administrators could render a system inoperable.</li>
+        <li><strong>Allow non-privileged users to run any software under c:\windows</strong>. <em>Rationale</em>: Typically, only system software is installed into this folder. Authorising this location using a top-level folder rule considerably reduces the size of an AppLocker policy, and limits the effort required to maintain the policy following the deployment of system updates.</li>
+        <li><strong>Limit non-privileged users to running approved software outside of c:\windows</strong>. Authorise the execution of approved software by publisher certificate (based on vendor and product), falling back to hash when a certificate rule cannot be generated. <em>Rationale</em>: Avoids users from running unapproved software that may get installed via a local administrator. Also avoids the use of rules that can be circumvented by modifying the properties of file (e.g. renaming). And favouring publisher certificates over hashes will result in a smaller policy with less administrative overhead.</li>
+        <li><strong>Consider options for consolidating publisher rules</strong>. Use a small number of publisher rules based solely on publisher name (i.e. all other rule properties are wildcards) where doing so significantly reduces the number of rules to be maintained without notably increasing the likelihood that users will be able to run unapproved software from the vendor. For example, you may use a suite of products from a single vendor that collectively result in a large number of publisher rules when the product name is incorporated. <em>Rationale</em>: By decreasing the specificity of a publisher rule, and trusting all software from a single vendor, you will collapse many rules into a single rule. If it is unlikely that users will seek to install other software from the vendor, the impact of this consolidation is minimal.</li>
+        <li><strong>Amend any path based rule to explicitly exclude sub-folders that are user-writable</strong>. <em>Rational</em>: A "trusted" location such as <code>c:\windows</code> includes several well-known sub-folders that can be modified by non-privileged users. These folders could be used as a backdoor for executing arbitrary code.</li>
+      </ul>
+      <h2 id="automating-policy-creation">Automating Policy Creation</h2>
+      <p>Before describing the procedure for creating a new AppLocker policy, I will lay out a few assumptions:</p>
+      <ul>
+        <li>We are implementing an AppLocker policy for Windows 10 (although the approach is equally applicable to other versions of Windows).</li>
+        <li>The policy will be applied via Group Policy to computers that are deployed with a corporate standard operating environment (SOE).</li>
+        <li>The SOE includes the operating system, drivers, and a selection of "core" applications that are required by all users.</li>
+        <li>A catalog of approved optional software is made available to users (e.g. via the Microsoft Configuration Manager Application Catalog).</li>
+        <li>A single AppLocker policy will be created to allow users to execute the software within the SOE, and any approved software installed after the SOE is deployed.</li>
+      </ul>
+      <p>These are the steps we will use to create a new AppLocker policy based on the approach outlined above:</p>
+      <ol>
+        <li>Create a default policy that implements a basic ruleset allowing administrators to run any software, and standard users to run software under <code>c:\windows</code>.</li>
+        <li>Amend the default rules to prevent non-privileged users from executing software in "user-writable" locations.</li>
+        <li>Create another policy to include the rules required to enable all software included within the SOE (i.e. a baseline that includes core applications like Microsoft Office).</li>
+        <li>Create a new policy for each application that is authorised for optional installation (i.e. approved software that isn't baked into the SOE). Where possible, I recommend performing this step on a virtual machine. This will allow you to revert to a clean snapshot before processing each application.</li>
+        <li>Create new "ad hoc" policies to address files that weren't successfully processed during any of the previous steps.</li>
+        <li>Merge (and optimise) all of the policies created in the previous steps into a single policy that can be imported into Group Policy.</li>
+      </ol>
+      <p>So let's work through this one step at a time. Firstly, to create the default policy:</p>
+      <ol>
+        <li>From any Windows 10 computer that does not already include an AppLocker policy, run <em>gpedit.msc</em> as an administrator.</li>
+        <li>Expand <em>Local Computer Policy</em>, <em>Computer Configuration</em>, <em>Windows Settings</em>, <em>Security Settings</em>, <em>Application Control Policies</em>, <em>AppLocker</em>.</li>
+        <li>Right click the <em>AppLocker</em> node and select <em>Properties</em>.</li>
+        <li>Select the <em>Advanced</em> tab, select the option <em>Enable the DLL rule collection</em>, and click <em>OK</em>.</li>
+        <li>Right click <em>Executable Rules</em>, and select <em>Create Default Rules</em>.</li>
+        <li>Delete the rule named <em>(Default Rule) All files located in the Program Files folder</em>.</li>
+        <li>Repeat steps 5 and 6 for <em>Windows Installer Rules</em>, <em>Script Rules</em>, <em>DLL Rules</em>, and <em>Packaged App Rules</em>. Note: Step 6 isn't necessary for <em>Windows Installer Rules</em> and <em>Packaged App Rules</em>.</li>
+        <li>Right click the <em>AppLocker</em> node and select <em>Export Policy</em>.</li>
+        <li>Save the policy to a network share which we will henceforth refer to as the AppLocker "repository". e.g. <code>\\server\applocker\default.xml</code>.</li>
+      </ol>
+      <p>The next step is to modify this policy to exclude all user-writable locations. To help, we will use a script to scan the file system for folders with permissions that grant write access to standard users.</p>
+      <p>Create a script in your repository named <em>UserWriteableLocations.ps1</em> with the following content:</p>
+      <pre><code># Paths that we've already excluded via AppLocker.
+$exclusions = @()
+
+# Paths to process.
+$paths = @(
+  &quot;C:\Windows&quot;
+)
+
+# Setup log.
+$log = &quot;$PSScriptRoot\UserWritableLocations.log&quot;
+
+$FSR = [System.Security.AccessControl.FileSystemRights]
+
+# Unfortunately the FileSystemRights enum doesn't contain all the values from the Win32 API. Urgh.
+$GenericRights = @{
+  GENERIC_READ    = [int]0x80000000;
+  GENERIC_WRITE   = [int]0x40000000;
+  GENERIC_EXECUTE = [int]0x20000000;
+  GENERIC_ALL     = [int]0x10000000;
+  FILTER_GENERIC  = [int]0x0FFFFFFF;
+}
+
+# ... so we need to map them ourselves.
+$MappedGenericRights = @{
+  FILE_GENERIC_READ    = $FSR::ReadAttributes -bor $FSR::ReadData -bor $FSR::ReadExtendedAttributes -bor $FSR::ReadPermissions -bor $FSR::Synchronize
+  FILE_GENERIC_WRITE   = $FSR::AppendData -bor $FSR::WriteAttributes -bor $FSR::WriteData -bor $FSR::WriteExtendedAttributes -bor $FSR::ReadPermissions -bor $FSR::Synchronize
+  FILE_GENERIC_EXECUTE = $FSR::ExecuteFile -bor $FSR::ReadPermissions -bor $FSR::ReadAttributes -bor $FSR::Synchronize
+  FILE_GENERIC_ALL     = $FSR::FullControl
+}
+
+Function Map-GenericRightsToFileSystemRights([System.Security.AccessControl.FileSystemRights]$Rights) {
+  $MappedRights = New-Object -TypeName $FSR
+
+  if ($Rights -band $GenericRights.GENERIC_EXECUTE) {
+    $MappedRights = $MappedRights -bor $MappedGenericRights.FILE_GENERIC_EXECUTE
+  }
+
+  if ($Rights -band $GenericRights.GENERIC_READ) {
+   $MappedRights = $MappedRights -bor $MappedGenericRights.FILE_GENERIC_READ
+  }
+
+  if ($Rights -band $GenericRights.GENERIC_WRITE) {
+    $MappedRights = $MappedRights -bor $MappedGenericRights.FILE_GENERIC_WRITE
+  }
+
+  if ($Rights -band $GenericRights.GENERIC_ALL) {
+    $MappedRights = $MappedRights -bor $MappedGenericRights.FILE_GENERIC_ALL
+  }
+
+  return (($Rights -band $GenericRights.FILTER_GENERIC) -bor $MappedRights) -as $FSR
+}
+
+# These are the rights from the FileSystemRights enum we care about.
+$WriteRights = @('WriteData', 'CreateFiles', 'CreateDirectories', 'WriteExtendedAttributes', 'WriteAttributes', 'Write', 'Modify', 'FullControl')
+
+# Helper function to match against a list of patterns.
+function notlike($string, $patterns) {
+  foreach ($pattern in $patterns) { if ($string -like $pattern) { return $false } }
+  return $true
+}
+
+# The hard work...
+function scan($path, $log) {
+  $cache = @()
+  gci $path -recurse -exclude $exclusions -force -ea silentlycontinue |
+  ? {($_.psiscontainer) -and (notlike $_.fullname $exclusions)} | %{
+    trap { continue }
+    $directory = $_.fullname
+    (get-acl $directory -ea silentlycontinue).access |
+    ? {$_.isinherited -eq $false} |
+    ? {$_.identityreference -match &quot;.*USERS|EVERYONE&quot;} | %{
+      (map-genericrightstofilesystemrights $_.filesystemrights).tostring().split(&quot;,&quot;) | %{
+        if ($writerights -contains $_.trim()) {
+          if ($cache -notcontains $directory) { $cache += $directory }
+        }
+      }
+    }
+  }
+  return $cache
+}
+
+# Start scanning.
+$paths | %{ scan $_ $log } | out-file $log </code></pre>
+      <p>Now run the script as an administrator:</p>
+      <pre><code>powershell.exe -file \\server\applocker\userwritablelocation.ps1</code></pre>
+      <p>The results will be written to the repository as <code>\\server\applocker\UserWritableLocations.log</code>.</p>
+      <p>Note: The above script recursively searches for user-writable locations under <code>c:\windows</code>, however, it can easily be extended to scan other locations by adding the appropriate folders to the <em>$paths</em> variable (e.g. <code>c:\program files (x86)</code> and <code>c:\program files</code>).</p>
+      <p>Out of interest, these are the user-writable sub-folders under <code>c:\windows</code> on a default installation of Windows 10 Long Term Service Branch:</p>
+      <pre><code>C:\Windows\Tasks
+C:\Windows\Temp
+C:\Windows\tracing
+C:\Windows\PLA\Reports
+C:\Windows\PLA\Rules
+C:\Windows\PLA\Templates
+C:\Windows\PLA\Reports\en-US
+C:\Windows\PLA\Rules\en-US
+C:\Windows\Registration\CRMLog
+C:\Windows\System32\FxsTmp
+C:\Windows\System32\Tasks
+C:\Windows\System32\Com\dmp
+C:\Windows\System32\LogFiles\WMI
+C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
+C:\Windows\System32\spool\PRINTERS
+C:\Windows\System32\spool\SERVERS
+C:\Windows\System32\spool\drivers\color
+C:\Windows\System32\Tasks\Microsoft\Windows\PLA
+C:\Windows\System32\Tasks\Microsoft\Windows\RemoteApp and Desktop Connections Update
+C:\Windows\System32\Tasks\Microsoft\Windows\PLA\System
+C:\Windows\SysWOW64\FxsTmp
+C:\Windows\SysWOW64\Tasks
+C:\Windows\SysWOW64\Com\dmp
+C:\Windows\SysWOW64\Tasks\Microsoft\Windows\PLA
+C:\Windows\SysWOW64\Tasks\Microsoft\Windows\RemoteApp and Desktop Connections Update
+C:\Windows\SysWOW64\Tasks\Microsoft\Windows\PLA\System</code></pre>
+      <p>We will now create another script in the repository named <em>InsertUserWritableLocations.ps1</em> to update the default policy with the output of the previous script.</p>
+      <pre><code># The input file, created from UserWritableLocations.ps1.
+$input = &quot;$PSScriptRoot\UserWritableLocations.log&quot;
+
+# The default locations trusted by AppLocker.
+$trusted = @{
+  &quot;C:\Windows&quot; = @(
+    &quot;(Default Rule) All files located in the Windows folder&quot;,
+    &quot;(Default Rule) All scripts located in the Windows folder&quot;,
+    &quot;(Default Rule) Microsoft Windows DLLs&quot;
+  );
+  &quot;C:\Program Files&quot; = @(
+    &quot;(Default Rule) All files located in the Program Files folder&quot;,
+    &quot;(Default Rule) All scripts located in the Program Files folder&quot;,
+    &quot;(Default Rule) All DLLs located in the Program Files folder&quot;
+  )
+}
+
+# First run UserWritableLocations.ps1 to create an input file.
+if (-not (test-path $input)) { write-host &quot;File not found: $input&quot;; exit }
+
+# Categorise user-writable locations.
+$content = get-content $input
+$untrusted = @{
+  'C:\Program Files' = @($content | ? { $_ -like 'C:\Program Files\*' });
+  'C:\Windows'       = @($content | ? { $_ -like 'C:\Windows\*' });
+}
+
+# Load the default AppLocker policy.
+[xml]$policy = get-content &quot;$PSScriptRoot\Default.xml&quot;
+
+# Add path exceptions to the AppLocker policy.
+$trusted.keys | %{
+  $folder = $_
+  $trusted.item($folder) | %{
+    $rule = $policy.selectsinglenode(&quot;//FilePathRule[@Name='$_']&quot;)
+    if (! $rule) { return }
+    $exceptions = $policy.createelement(&quot;Exceptions&quot;)
+    [void]$rule.appendchild($exceptions)
+    $untrusted.item($folder) | %{
+      $exception = $policy.createelement(&quot;FilePathCondition&quot;)
+      $exception.setattribute(&quot;Path&quot;, &quot;$_\*&quot;)
+      [void]$exceptions.appendchild($exception)
+    }
+  }
+}
+
+# Save the modified AppLocker policy.
+$policy.save(&quot;$PSScriptRoot\default.xml&quot;)</code></pre>
+      <p>And now, to insert the user-writable locations into the default policy:</p>
+      <pre><code>powershell.exe -file \\server\applocker\insertuserwritablelocation.ps1</code></pre>
+      <p>Note: I have intentionally configured this script to process exceptions for <code>c:\windows</code> and <code>c:\program files</code>. We only need support for <code>c:\windows</code>, but if you decided to keep the default rules for <code>c:\program files</code>, and you also scanned this folder for user-writable locations, the above script has you covered.</p>
+      <p>The remaining steps in our process will be managed via a single script named <em>AppLocker.ps1</em>. Add this script to the repository with the following content:</p>
+      <pre><code>&lt;# examples:
+# generate a baseline policy.
+powershell.exe -file applocker.ps1 -baseline -output c:\policies\baseline.xml
+
+# generate an application-specific policy.
+powershell.exe -file applocker.ps1 -application -in c:\policies\baseline.xml -out c:\policies\application.xml
+
+# generate an adhoc policy.
+powershell.exe -file applocker.ps1 -adhoc -in c:\path -filter *.* -out c:\policies\adhoc.xml
+
+# merge policies.
+powershell.exe -file applocker.ps1 -merge -in c:\policies -out c:\policies\merged.xml
+#&gt;
+
+&lt;#  expected usage:
+1. run the script to generate a baseline. e.g.
+   powershell.exe -file applocker.ps1 -baseline -out c:\policies\baseline.xml
+2. install an application.
+3. rerun the script to generate an application-specific policy. e.g.
+   powershell.exe -file applocker.ps1 -application -in c:\policies\baseline.xml -out c:\policies\someapp.xml
+4. rerun the script to merge applocker policies under c:\policies. e.g.
+   powershell.exe -file applocker.ps1 -merge -in c:\policies -out c:\policies\soe.xml
+#&gt;
+
+param(
+  [switch]$baseline,
+  [switch]$application,
+  [switch]$adhoc,
+  [switch]$merge,
+  [string]$in,
+  [string]$filter,
+  [string]$out
+)
+
+function log($message)   { write-host -foregroundcolor green $message }
+function error($message) { write-host -foregroundcolor magenta $message; exit }
+
+# check baseline switches.
+if ($baseline) {
+  if ($out -eq $null) { error 'Usage: powershell.exe -file applocker.ps1 -baseline -out c:\policies\baseline.xml' }
+  if (! (test-path (split-path $out -parent))) { error 'The output folder does not exist.' }
+}
+
+# check application switches.
+if ($application) {
+  if ($in -eq $null -or $out -eq $null) { error 'powershell.exe -file applocker.ps1 -application -in c:\policies\baseline.xml -out c:\policies\application.xml' }
+  if (! (test-path $in)) { error 'The baseline policy does not exist.' }
+  if (! (test-path (split-path $out -parent))) { error 'The output folder does not exist.' }
+}
+
+# check adhoc switches.
+if ($adhoc) {
+  if ($in -eq $null -or $filter -eq $null -or $out -eq $null) { error 'powershell.exe -file applocker.ps1 -adhoc -in c:\path -filter *.* -out c:\policies\adhoc.xml' }
+  if (! (test-path $in)) { error 'The input folder does not exist.' }
+  if (! (test-path (split-path $out -parent))) { error 'The output folder does not exist.' }
+}
+
+# check merge switches.
+if ($merge) {
+  if ($in -eq $null -or $out -eq $null) { error 'powershell.exe -file applocker.ps1 -merge -in c:\policies -out c:\policies\merged.xml' }
+  if (! (test-path $in)) { error 'The input folder does not exist.' }
+  if (! (test-path (split-path $out -parent))) { error 'The output folder does not exist.' }
+}
+
+# we will trust all products published by the following vendors.
+$vendors = &quot;O=MICROSOFT CORPORATION, L=REDMOND, S=WASHINGTON, C=US&quot;, &quot;O=CITRIX SYSTEMS, INC., L=SANTA CLARA, S=CALIFORNIA, C=US&quot;
+
+# directories to scan.
+$paths = @('C:\Program Files', 'C:\Program Files (x86)')
+
+# rule collection types.
+$types = 'Appx', 'Dll', 'Exe', 'Msi', 'Script'
+
+# empty applocker policy.
+$xml = [xml]@'
+&lt;AppLockerPolicy Version=&quot;1&quot;&gt;
+&lt;RuleCollection Type=&quot;Appx&quot; EnforcementMode=&quot;Enabled&quot; /&gt;
+&lt;RuleCollection Type=&quot;Dll&quot; EnforcementMode=&quot;Enabled&quot; /&gt;
+&lt;RuleCollection Type=&quot;Exe&quot; EnforcementMode=&quot;Enabled&quot; /&gt;
+&lt;RuleCollection Type=&quot;Msi&quot; EnforcementMode=&quot;Enabled&quot; /&gt;
+&lt;RuleCollection Type=&quot;Script&quot; EnforcementMode=&quot;Enabled&quot; /&gt;
+&lt;/AppLockerPolicy&gt;
+'@
+
+# empty publisher rule.
+$publisher = [xml]@'
+&lt;FilePublisherRule Id=&quot;&quot; Name=&quot;&quot; Description=&quot;&quot; UserOrGroupSid=&quot;S-1-1-0&quot; Action=&quot;Allow&quot;&gt;
+  &lt;Conditions&gt;
+    &lt;FilePublisherCondition PublisherName=&quot;&quot; ProductName=&quot;*&quot; BinaryName=&quot;*&quot;&gt;
+      &lt;BinaryVersionRange LowSection=&quot;*&quot; HighSection=&quot;*&quot; /&gt;
+    &lt;/FilePublisherCondition&gt;
+  &lt;/Conditions&gt;
+&lt;/FilePublisherRule&gt;
+'@
+
+# empty file hash rule.
+$hash = [xml]@'
+&lt;FileHashRule Id=&quot;&quot; Name=&quot;Windows 10 Hash Rules&quot; Description=&quot;&quot; UserOrGroupSid=&quot;S-1-1-0&quot; Action=&quot;Allow&quot;&gt;
+  &lt;Conditions&gt;
+    &lt;FileHashCondition /&gt;
+  &lt;/Conditions&gt;
+&lt;/FileHashRule&gt;
+'@
+
+# return the &quot;real&quot; extension of a file.
+function get-filetype($path) {
+  $extension = [io.path]::getextension($path)
+  $extensions = @('.dll', '.exe', '.js', '.msi', '.ps1', '.vbs')
+
+  # extensions of file types that are actually dlls.
+  $imposterdlls = @('.api', '.8bx')
+
+  if ($extensions -contains $extension) { return $extension }
+
+  # a hack for files which are dll's without a pe header.
+  if ($imposterdlls -contains $extension) { return '.dll' }
+
+  $bytes = get-content $path -readcount 0 -encoding byte
+  $offset = $bytes[0x3c]
+  $signature = [char[]] $bytes[$offset..($offset + 3)]
+
+  if ([string]::join('', $signature) -eq &quot;PE`0`0&quot;) {
+    $header = $offset + 4
+    $data = [bitconverter]::toint32($bytes, $header + 18)
+    if ($data -band 0x2000) { return '.dll' } else { return '.exe' }
+  }
+
+  return $extension
+}
+
+# insert a rule based on $template, with a rule type of $class, under $parent, into $policy.
+function insert-rule($policy, $parent, $template, $class) {
+  $rule = $template.clone()
+  $rule.$class.id = [string]([guid]::newguid().guid)
+  return $parent.appendchild($policy.importnode($rule.$class, $true))
+}
+
+# insert $hashes into $policy under $parent.
+function insert-hashes($policy, $hashes, $parent) {
+  $hashes | %{ [void]$parent.conditions.firstchild.appendchild($policy.importnode($_, $true)) }
+}
+
+# insert $publishers into $policy under $parent.
+function insert-publishers($policy, $publishers, $parent) {
+  $publishers | %{
+    $_.conditions.filepublishercondition.binaryname = '*'
+    $_.conditions.filepublishercondition.binaryversionrange.lowsection = '*'
+    $_.conditions.filepublishercondition.binaryversionrange.highsection = '*'
+    [void]$parent.appendchild($policy.importnode($_, $true))
+  }
+}
+
+# insert $paths into $policy under $parent.
+function insert-paths($policy, $paths, $parent) {
+  $paths | %{ [void]$parent.appendchild($policy.importnode($_, $true)) }
+}
+
+# insert conditions ($hashes and $publishers) into $policy under $parent.
+function insert-conditions($policy, $parent, $hashes, $publishers) {
+  if ($hashes.count) {
+    $node = insert-rule $policy $parent $hash 'filehashrule'
+    insert-hashes $policy $hashes $node
+  }
+
+  if ($publishers.count) { insert-publishers $policy $publishers $parent }
+}
+
+# merge policy $one with $two and return union.
+function merge-policies($one, $two) {
+  $target = $xml.clone()
+
+  foreach ($type in $types) {
+    $hashes = @($one.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']//FileHash&quot;) +
+                $two.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']//FileHash&quot;) | sort-object -property data -unique)
+
+    $publishers = @($one.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule&quot;) +
+                    $two.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule&quot;) | sort-object -property name -unique)
+
+    # this script will never generate path rules, but we need to cater for merging with a policy that does.
+    $paths = @($one.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePathRule&quot;) +
+               $two.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePathRule&quot;) | sort-object -property name -unique)
+
+    $parent = $target.applockerpolicy.selectsinglenode(&quot;//RuleCollection[@Type='$type']&quot;)
+    insert-conditions $target $parent $hashes $publishers
+    insert-paths $target $paths $parent
+  }
+
+  return $target
+}
+
+# remove duplicate conditions between $one and $two and return result.
+function remove-duplicates($one, $two) {
+  $target = $xml.clone()
+
+  foreach ($type in $types) {
+    $h1 = @($one.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']//FileHash&quot;) | sort-object -property data)
+    $h2 = @($two.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']//FileHash&quot;) | sort-object -property data)
+    $hashes = @(); compare-object -referenceobject $h1 -differenceobject $h2 -property data -passthru | ? { $_.sideindicator -eq '&lt;=' } | %{ $hashes += $_ }
+
+    $p1 = @($one.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule&quot;) | sort-object -property name)
+    $p2 = @($two.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule&quot;) | sort-object -property name)
+    $publishers = @(); compare-object -referenceobject $p1 -differenceobject $p2 -property name -passthru | ? { $_.sideindicator -eq '&lt;=' } | %{ $publishers += $_ }
+
+    $parent = $target.applockerpolicy.selectsinglenode(&quot;//RuleCollection[@Type='$type']&quot;)
+    insert-conditions $target $parent $hashes $publishers
+  }
+
+  return $target
+}
+
+# applocker cannot handle more than 1,500 or so hashes in a single rule. let's break into blocks of 1000.
+function split-hashes($applocker) {
+  foreach ($type in $types) {
+    $collection = $applocker.applockerpolicy.selectsinglenode(&quot;//RuleCollection[@Type='$type']&quot;)
+    $hashes = @($applocker.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']//FileHash&quot;) | sort-object -property data)
+
+    if ([math]::floor($hashes.count) -gt 0) {
+      [void]$collection.removechild($collection.filehashrule)
+    }
+
+    $min = 0; while ($min -lt $hashes.count) {
+      $max = $min + 999
+      insert-conditions $applocker $collection $hashes[$min..$max] $null
+      $min = $max + 1
+    }
+  }
+}
+
+# initialise policy.
+$applocker = $xml.clone()
+
+# initialise rules array.
+$rules = @()
+
+# if merging policies.
+if ($merge) {
+  $applocker = $xml.clone()
+
+  get-childitem $in\*.xml -exclude (split-path $out -leaf) | %{
+    log &quot;Merging AppLocker policy $($_.name).&quot;
+    $applocker = merge-policies $applocker ([xml](get-content $_.fullname -encoding utf8))
+  }
+
+  log &quot;Chunking hashes into blocks of 1,000.&quot;
+  split-hashes $applocker
+
+  log &quot;Saving the merged policy.&quot;
+  $applocker.save($out)
+  return
+}
+
+# if generating an adhoc policy.
+if ($adhoc) {
+  log &quot;Creating adhoc AppLocker rules for $filter in folder $in.&quot;
+
+  $rules +=  get-childitem -path $in -filter $filter -recurse | select -expandproperty fullname | get-applockerfileinformation -ea silentlycontinue
+  $rules | %{
+    $_.path = $_.path -replace '%OSDRIVE%', 'C:'
+    $extension = [io.path]::getextension($_.path)
+    $_.path = $_.path -replace $extension, (get-filetype $_.path)
+  }
+
+  $policy = [xml]($rules | new-applockerpolicy -ruletype publisher, hash -user everyone -xml -ignoremissingfileinformation)
+} else {
+  log &quot;Creating AppLocker rules for the requested paths.&quot;
+  $paths | %{ $rules += get-applockerfileinformation -directory $_ -recurse -ea silentlycontinue }
+  $policy = [xml]($rules | new-applockerpolicy -ruletype publisher, hash -user everyone -xml -ignoremissingfileinformation)
+}
+
+log &quot;Optimising rules.&quot;
+foreach ($type in $types) {
+  $parent = $applocker.applockerpolicy.selectsinglenode(&quot;//RuleCollection[@Type='$type']&quot;)
+
+  $hashes = @($policy.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']//FileHash&quot;) | sort-object -property data -unique)
+  $publishers = @($policy.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule&quot;) | %{
+    $_.name = &quot;{0} - {1}&quot; -f $_.conditions.filepublishercondition.publishername, $_.conditions.filepublishercondition.productname; $_
+  } | sort-object -property name -unique)
+
+  insert-conditions $applocker $parent $hashes $publishers
+}
+
+log &quot;Consolidating file publisher conditions for trusted vendors.&quot;
+foreach ($vendor in $vendors) {
+  $node = $publisher.clone()
+  $node.filepublisherrule.name = [string]&quot;$vendor - *&quot;
+  $node.filepublisherrule.conditions.filepublishercondition.publishername = [string]$vendor
+
+  foreach ($type in $types) {
+    $parent = $false
+
+    $applocker.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule[contains(@Name, '$vendor')]&quot;) | %{
+      $parent = $_.parentnode
+      [void]($parent.removechild($_))
+    }
+
+    if ($parent -ne $false) {
+      $node.filepublisherrule.id = [string]([guid]::newguid().guid)
+      [void]$parent.appendchild($applocker.importnode($node.filepublisherrule, $true))
+    }
+  }
+}
+
+if ($application) {
+  log &quot;Comparing the new policy with the baseline and removing duplicate conditions.&quot;
+  $applocker = remove-duplicates $applocker ([xml](get-content $in -encoding utf8))
+}
+
+log &quot;Removing publisher rule wildcards.&quot;
+foreach ($type in $types) {
+  $applocker.applockerpolicy.selectnodes(&quot;//RuleCollection[@Type='$type']/FilePublisherRule/Conditions/FilePublisherCondition/BinaryVersionRange&quot;) | %{
+    $_.LowSection  = &quot;*&quot;
+    $_.HighSection = &quot;*&quot;
+  }
+}
+
+log &quot;Saving the policy.&quot;
+$applocker.save($out)</code></pre>
+      <p>In this step, we will use the above script to scan <code>c:\program files</code> and <code>c:\program files (x86)</code> and generate a "baseline" policy based first on publisher certificate (qualified to product), falling back to hash when a certificate cannot be used.</p>
+      <p>As a reminder, this step should be performed on a system immediately after the deployment of the SOE (i.e. before any "optional" software is deployed).</p>
+      <p>To generate the baseline, we will use the <em>baseline</em> switch, specifying the output file path of <code>\\server\applocker\baseline.xml</code> using the <em>out</em> switch:</p>
+      <pre><code>powershell.exe -file \\server\applocker\applocker.ps1 -baseline -out \\server\applocker\baseline.xml</code></pre>
+      <p>Having generated a baseline policy for the SOE, it is now time to create a separate policy for each corporate application. If you are using a virtual machine, at this point you would take a snapshot, and then install an approved application that is not already in the SOE (e.g. Microsoft Visio). To generate a policy specific to the application, use the command shown below. This will effectively generate a delta policy that includes rules for all files installed by the application (it does this by generating a new baseline, comparing this with the previous baseline, and exporting the differences). In this instance we use the <em>application</em> switch to indicate we are generating an application-specific policy, the <em>in</em> switch to identify the path to the previously created baseline, and the <em>out</em> switch to specify the name of the resultant application policy.</p>
+      <pre><code>powershell.exe -file \\server\applocker\applocker.ps1 -application -in \\server\applocker\baseline.xml -out c:\temp\viso.xml</code></pre>
+      <p>At this point, you would restore the virtual machine snapshot, and then repeat the process for another application.</p>
+      <p>In some cases you might need to create AppLocker rules for files that aren't deployed via an installer. As an example, there may be a small collection of files dynamically created within a temporary directory when a program is executed (and which aren't present in the Program Files directory when the application is installed). In this scenario, you should collect the relevant files, copy them into a temporary location, and then use the AppLocker script to generate an "adhoc" policy. For example, assuming you have copied a collection of DLL files into a folder named <code>c:\adhoc</code>, you can call the script with the <em>adhoc</em> switch, with the <em>in</em> parameter set to the directory containing the files, the <em>out</em> parameter set to the path of the resultant policy, and <em>filter</em> set to a mask that identifies the files to be scanned (this could be *.* if multiple files types are to be included):</p>
+      <pre><code>powershell.exe -file \\server\applocker\applocker.ps1 -adhoc -in c:\adhoc -filter *.dll -out \\server\applocker\adhoc.xml</code></pre>
+      <p>The "adhoc" switch is also useful when generating an AppLocker policy for an application that installs executable files with non-standard file extensions. Adobe Acrobat, for example, uses DLLs with an extension of <em>.8bx</em>. These file types will not be processed by the native AppLocker PowerShell cmdlets which are used when the script is called with the <em>application</em> switch, and hence won't be picked up in an application-specific policy. We can circumvent this limitation by using he <em>adhoc</em> switch to generate a policy that specifically targets this file type.</p>
+      <p>If you review the source code of the AppLocker script, you will notice the function <em>get-filetype</em> is used to determine the "real" file type of a file with a non-standard extension. The function attempts to do this by inspecting the file's PE header, but if the file doesn't actually conform to the <a href="https://en.wikipedia.org/wiki/Portable_Executable">portable executable</a> file format, you may have to resort to explicitly forcing a specific return type. This is exactly what I have done for files with an extension of <em>.api</em> and <em>.8bx</em>.</p>
+      <p>The final step in the process is to merge the various policies together into a single consolidated policy. Assuming you have collated all the policies into a common repository accessed via <code>\\server\applocker</code>, you can call the script with the <em>merge</em> switch, specifying the source folder using the <em>in</em> parameter, and the name of the final policy using the <em>out</em> parameter:</p>
+      <pre><code>powershell.exe -file \\server\applocker\applocker.ps1 -merge -in \\server\applocker -out \\server\applocker\soe.xml</code></pre>
+      <p>The script will optimise the merged polices to produce the smallest possible output. Note: The merge process assumes that all of the source policies were generated with the AppLocker script. <em>Do not attempt to merge an AppLocker policy generated via another method</em>.</p>
+      <p>You can now import the consolidated AppLocker policy (<em>soe.xml</em>) into group policy, and link it to the appropriate organisational unit.</p>
+      <p>A couple of additional notes on this process:</p>
+      <ul>
+        <li>The native AppLocker PowerShell cmdlets will seek to optimise an AppLocker policy by consolidating the conditions for files within the same folder into a single rule. This practice is helpful, but it still yields an unnecessarily verbose policy, and it doesn't guarantee the removal of redundant conditions (e.g. the same hash can be included more than once in the same policy). The script presented in this article takes optimisation to the extreme; removing all duplicate conditions, and consolidating as many conditions into a single rule as technically possible. In practice, I've encountered errors when importing an AppLocker policy into Group Policy when a single rule contains more than around 1,300 conditions (I haven't attempted to determine the exact limit). For this reason, the script chunks hashes into rules with a maximum of 1,000 conditions.</li>
+        <li>If you adopt the process outlined in this article, make sure you generate a separate baseline policy for each hardware model supported by the SOE (to cater for the presence of drivers and support software specific to each platform). Even though the baseline policies of different systems will be predominantly identical, the merge process will ensure that all redundant conditions are removed.</li>
+        <li>The approach I've described allows you to easily retire an application from your environment. If you no longer need to support a previously approved application, just delete the application-specific policy from your "repository", and re-run the merge procedure.</li>
+        <li>After generating an updated baseline or application-specific policy, do not immediately remove the superseded policy from your repository, as the resultant merged policy may no longer include rules required by existing computers in the field. You will need to devise an acceptable "overlap" period, during which both new and old rules are retained. Only after you are confident that any software targeted by the older rules has been fully removed from your environment, should you remove the old policy from the repository (so it won't be processed during the next merge operation).</li>
+        <li>The AppLocker script (in its current form) will attempt to consolidate publisher rules for all products from Microsoft and Citrix. You can choose to add or remove additional publisher names based on what is appropriate for your environment. To add a new vendor, add the qualified publisher name to the <em>$vendors</em> array on line 66 of the script.</li>
+      </ul>
+      <footer>
+        <p><span>Published: 2016-06-13</span> <span>Last Updated: 2016-06-26</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

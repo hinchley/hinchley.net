@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create a Web Server using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create a Web Server using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>In this article I will demonstrate how to create a simple web server in PowerShell.</p>
+      <p>There are a few parts to the solution:</p>
+      <ol>
+        <li>The code that listens for inbound requests on a specific host header and port (based on the <a href="https://msdn.microsoft.com/en-us/library/system.net.httplistener(v=vs.110).aspx">HttpListener</a> class). The domain and port can be set via <em>$url</em>.</li>
+        <li>A function, named <em>extract</em>, to access the variables within a POST request (required when processing a form submission). The extracted variables are returned as a hash.</li>
+        <li>A function, named <em>render</em>, to merge a hash with a block of HTML (where variables in the markup are wrapped within curly braces). For example, to generate <code>&lt;p&gt;Fred&lt;/p&gt;</code>, you could call <em>render</em> with a template of <code>&lt;p&gt;{name}&lt;/p&gt;</code> and a hash of <code>@{name = 'Fred'}</code>. Note: The function will attempt to replace a variable named <em>page</em> if called with a string instead of a hash.</li>
+        <li>A collection of routes (stored as a hash), where each route is identified by the combination of a HTTP method and URI. For example, a route of <code>'GET /foo' = { return do-foo }</code> will yield the output of a function named <em>do-foo</em> in response to a GET request for <em>/foo</em>.</li>
+      </ol>
+      <p>The example provided below will start a web server listening at <code>http://localhost:8080</code>, which when accessed via a browser, will display a HTML form with a single text input box and submit button. After entering a person's name, and clicking Submit, the web server will respond with a greeting (and a link back to the home page). Give it a shot.</p>
+      <pre><code># listening url.
+$url = 'http://localhost:8080/'
+
+$template = @'
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Example Web App&lt;/title&gt;
+&lt;style type=&quot;text/css&quot;&gt;
+html, body, #container {height:95%}
+body {font-family:verdana;line-height:1.5}
+form, #container, p {align-items:center;display:flex;flex-direction:column;justify-content:center}
+input {border:1px solid #999;border-radius:4px;margin-bottom:10px;padding:4px}
+input[type=submit] {padding:6px 10px}
+label, p {font-size:10px;padding-bottom:2px;text-transform:uppercase}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;container&quot;&gt;
+&lt;div id=&quot;content&quot;&gt;
+{page}
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+'@
+
+$form = @'
+&lt;form method=&quot;post&quot;&gt;
+&lt;label for=&quot;person&quot;&gt;Name&lt;/label&gt;
+&lt;input type=&quot;text&quot; name=&quot;person&quot; value=&quot;&quot; required /&gt;
+&lt;input type=&quot;submit&quot; name=&quot;submit&quot; value=&quot;Submit&quot; /&gt;
+&lt;/form&gt;
+'@
+
+$hello = @'
+&lt;p&gt;Hello {name}.&lt;br/&gt;&lt;a href=&quot;/&quot;&gt;Say hello again?&lt;/a&gt;&lt;/p&gt;
+'@
+
+# request actions.
+$routes = @{
+  'GET /'  = { return (render $template $form) }
+  'POST /' = {
+    # get post data.
+    $data = extract $request
+
+    # get the submitted name.
+    $name = $data.item('person')
+
+    # render the 'hello' snippet, passing the name.
+    $page = render $hello @{name = $name}
+
+    # embed the snippet into the template.
+    return (render $template $page)
+  }
+}
+
+# embed content into the default template.
+function render($template, $content) {
+  # shorthand for rendering the template.
+  if ($content -is [string]) { $content = @{page = $content} }
+
+  foreach ($key in $content.keys) {
+    $template = $template -replace &quot;{$key}&quot;, $content[$key]
+  }
+
+  return $template
+}
+
+# get post data from the input stream.
+function extract($request) {
+  $length = $request.contentlength64
+  $buffer = new-object &quot;byte[]&quot; $length
+
+  [void]$request.inputstream.read($buffer, 0, $length)
+  $body = [system.text.encoding]::ascii.getstring($buffer)
+
+  $data = @{}
+  $body.split('&amp;') | %{
+    $part = $_.split('=')
+    $data.add($part[0], $part[1])
+  }
+
+  return $data
+}
+
+$listener = new-object system.net.httplistener
+$listener.prefixes.add($url)
+$listener.start()
+
+while ($listener.islistening) {
+  $context = $listener.getcontext()
+  $request = $context.request
+  $response = $context.response
+
+  $pattern = &quot;{0} {1}&quot; -f $request.httpmethod, $request.url.localpath
+  $route = $routes.get_item($pattern)
+
+  if ($route -eq $null) {
+    $response.statuscode = 404
+  } else {
+    $content = &amp; $route
+    $buffer = [system.text.encoding]::utf8.getbytes($content)
+    $response.contentlength64 = $buffer.length
+    $response.outputstream.write($buffer, 0, $buffer.length)
+  }
+
+  $response.close()
+}</code></pre>
+      <footer>
+        <p><span>Published: 2016-06-04</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

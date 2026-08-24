@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Install Microsoft SCCM 2012 R2 SP1</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Install Microsoft SCCM 2012 R2 SP1</h1>
+    </header>
+    <main class="archive">
+      <p>In this article I will outline the steps required to perform a single-server installation of Microsoft SCCM 2012 R2 SP1 via the command line.</p>
+      <h2 id="version-clarification">Version Clarification</h2>
+      <p>Let's start by clearing up a common point of confusion: Microsoft SCCM 2012 R2 SP1 is identical (at the binary level) to Microsoft SCCM 2012 SP2. i.e. R2 SP1 = SP2. The &quot;R2&quot; simply means <a href="https://technet.microsoft.com/en-us/library/mt131422.aspx#BKMK_R2Updates">additional product capabilities</a> have been unlocked.</p>
+      <h2 id="requirements">Requirements</h2>
+      <p>This article assumes the following:</p>
+      <ul>
+        <li>Access to a server running Windows Server 2012 R2 (Full GUI).</li>
+        <li>Access to another server running Windows Server 2012 R2 with a configured instance of SQL Server 2012. Refer to the <em>Prerequisites</em>, <em>Installation</em>, and <em>Ports and Firewall</em> sections of this <a href="install-microsoft-sql-server-2012-and-configure-an-alwayson-availability-group.html">blog post</a> for instructions on how to install SQL Server.</li>
+        <li>A copy of the SCCM 2012 SP2 media.</li>
+        <li>A copy of the SCCM 2012 R2 SP1 media.</li>
+        <li>A copy of Microsoft Application Development Toolkit (ADK) 10.</li>
+        <li>The account used to perform the installation is a domain administrator (with administrator privileges on both the SCCM and SQL servers).</li>
+      </ul>
+      <p>Assuming you have access to the Volume License Service Center, you can obtain the media required for installing SCCM by searching for <em>System Center 2012 R2 Config Mgr Client Mgmt License with Service Pack 1</em> and then downloading <em>System Center 2012 Configuration Manager and Endpoint Protection With Service Pack 2 Multilanguage</em> (1158 MB), and <em>System Center 2012 R2 Configuration Manager Client Management License With Service Pack 1 Multilanguage</em> (5 MB).</p>
+      <h2 id="microsoft.net-framework-3.5">Microsoft .NET Framework 3.5</h2>
+      <p>A prerequisite for the installation of SCCM 2012 is Microsoft .NET Framework 3.5. I explained how to install this feature in a previous <a href="install-microsoft-sql-server-2012-and-configure-an-alwayson-availability-group.html">post</a>.</p>
+      <h2 id="microsoft-adk-10">Microsoft ADK 10</h2>
+      <p>The following components of the ADK are required by SCCM 2012: <em>Deployment Tools</em>, <em>Windows PE</em>, and the <em>User State Migration Tool</em>. We will also install the <em>Imaging and Configuration Designer</em>. However, before we can install these components, we need to download the required ADK setup files. From an elevated PowerShell prompt, run:</p>
+      <pre><code>cd C:\Media\Microsoft ADK 10
+.\adksetup.exe /quiet /layout .</code></pre>
+      <p>We can now install the necessary components using the following command:</p>
+      <pre><code>.\adksetup.exe /quiet /installpath &quot;C:\Program Files (x86)\Windows Kits\10&quot; /features OptionId.DeploymentTools OptionId.WindowsPreinstallationEnvironment OptionId.UserStateMigrationTool OptionId.ImagingAndConfigurationDesigner /ceip off</code></pre>
+      <h2 id="microsoft-iis">Microsoft IIS</h2>
+      <p>Another requirement for the installation of SCCM 2012 is Microsoft IIS. The following PowerShell command can be used to enable the required features:</p>
+      <pre><code>Add-WindowsFeature Web-Windows-Auth,Web-ISAPI-Ext,Web-Metabase,Web-WMI,BITS,RDC,NET-Framework-Features,Web-Asp-Net,Web-Asp-Net45,NET-HTTP-Activation,NET-Non-HTTP-Activ,Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,Web-Http-Redirect,Web-App-Dev,Web-Net-Ext,Web-Net-Ext45,Web-ISAPI-Filter,Web-Health,Web-Http-Logging,Web-Log-Libraries,Web-Request-Monitor,Web-HTTP-Tracing,Web-Security,Web-Filtering,Web-Performance,Web-Stat-Compression,Web-Mgmt-Console,Web-Scripting-Tools,Web-Mgmt-Compat</code></pre>
+      <p>Use the following commands to register IIS with .NET Framework 4:</p>
+      <pre><code>cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319
+.\aspnet_regiis.exe -r</code></pre>
+      <p>Although not necessary, we will use a dedicated IIS web site for SCCM called <em>SMSWEB</em> (listening on HTTP port 7080). Use the following command to create the web site:</p>
+      <pre><code>New-Website -Name &quot;SMSWEB&quot; -ApplicationPool &quot;DefaultAppPool&quot; -PhysicalPath &quot;C:\inetpub\wwwroot&quot; -Port &quot;7080&quot; -Force</code></pre>
+      <h2 id="firewall-rules">Firewall Rules</h2>
+      <p>The following PowerShell commands will enable inbound WMI and SMB connections to the site server; both are necessary for the operation of SCCM.</p>
+      <pre><code>Enable-NetFirewallRule -DisplayGroup &quot;Windows Management Instrumentation (WMI)&quot; -confirm:$false
+Enable-NetFirewallRule -DisplayName &quot;File and Printer Sharing (NB-Name-In)&quot; -confirm:$false
+Enable-NetFirewallRule -DisplayName &quot;File and Printer Sharing (NB-Session-In)&quot; -confirm:$false
+Enable-NetFirewallRule -DisplayName &quot;File and Printer Sharing (SMB-In)&quot; -confirm:$false</code></pre>
+      <p>The following command will allow inbound connections to the <em>SMSWEB</em> web site over HTTP (7080) and HTTPS (7443), and enable use of the Client Notification Service (10123):</p>
+      <pre><code>netsh advfirewall firewall add rule name=&quot;SCCM Management Point&quot; dir=in action=allow profile=domain localport=&quot;7080,7443,10123&quot; protocol=TCP</code></pre>
+      <h2 id="microsoft-sql-server-2012">Microsoft SQL Server 2012</h2>
+      <p>I provided instructions on how to install Microsoft SQL Server 2012 in a <a href="install-microsoft-sql-server-2012-and-configure-an-alwayson-availability-group.html">previous article</a>. In the article I describe how to configure an AlwaysOn availability group, but as this configuration isn't supported by SCCM 2012, you should just follow the steps required to install and configure a standalone instance of SQL Server (i.e. refer to the <em>Prerequisites</em>, <em>Installation</em>, and <em>Ports and Firewall</em> sections).</p>
+      <p>In addition to the steps outlined in the referenced article, you will also need to open TCP port 4022 on the SQL Server (required by the SQL Broker):</p>
+      <pre><code>netsh advfirewall firewall add rule name=&quot;SQL Broker&quot; dir=in action=allow profile=domain localport=&quot;4022&quot; protocol=TCP</code></pre>
+      <p>In addition to the broker port, we also require a number of additional ports on the SQL Server during the installation of SCCM. These ports can be removed once the installation is complete. To add the rules, open a PowerShell prompt on the SQL Server and run the following:</p>
+      <pre><code>New-NetFirewallRule -Group SCCM -DisplayName &quot;SCCM - File Share - TCP - 445&quot; -Direction Inbound -Protocol TCP -LocalPort 445 -Action Allow -Profile Domain | Out-Null
+New-NetFirewallRule -Group SCCM -DisplayName &quot;SCCM - File Share - UDP - 137-138&quot; -Direction Inbound -Protocol UDP -LocalPort &quot;137-138&quot; -Action Allow -Profile Domain | Out-Null
+New-NetFirewallRule -Group SCCM -DisplayName &quot;SCCM - RPC - TCP - 135&quot; -Direction Inbound -Protocol TCP -LocalPort 135 -Action Allow -Profile Domain | Out-Null
+New-NetFirewallRule -Group SCCM -DisplayName &quot;SCCM - NetBIOS - TCP - 139&quot; -Direction Inbound -Protocol TCP -LocalPort 139 -Action Allow -Profile Domain | Out-Null
+New-NetFirewallRule -Group SCCM -DisplayName &quot;SCCM - Dynamic Ports - TCP - 49154-49157&quot; -Direction Inbound -Protocol TCP -LocalPort &quot;49154-49157&quot; -Action Allow -Profile Domain | Out-Null
+New-NetFirewallRule -Group SCCM -DisplayName &quot;SCCM - UDP - 5355&quot; -Direction Inbound -Protocol UDP -LocalPort &quot;5355&quot; -Action Allow -Profile Domain | Out-Null</code></pre>
+      <p>To disable the rules after the installation is complete (i.e. at the end of this article) use the following commands:</p>
+      <pre><code>Get-NetFirewallRule -Group SCCM | Disable-NetFirewallRule</code></pre>
+      <p>One further step is required on the SQL Server - we must enable the <em>Remote Registry</em> service:</p>
+      <pre><code>Get-Service RemoteRegistry | Set-Service -StartupType Automatic -PassThru | Start-Service</code></pre>
+      <h2 id="active-directory-security-group">Active Directory Security Group</h2>
+      <p>From a computer with the <em>Active Directory PowerShell Module</em> installed, use the following command to create an Active Directory security group named <em>sccm-servers</em>, adding the SCCM server as a member (in my lab the server is named <em>BORIS</em>).</p>
+      <pre><code>New-ADGroup -Name &quot;sccm-servers&quot; -GroupScope Global -Path &quot;OU=Groups, DC=lab, DC=hinchley, DC=net&quot; -PassThru | Add-ADGroupMember -Members &quot;BORIS$&quot;  </code></pre>
+      <h2 id="local-administrators-group">Local Administrators Group</h2>
+      <p>To install SCCM 2012, the site server computer must have administrator privileges on both the SQL Server and the server hosting the management point (in this case, the local SCCM server). To add the <em>sccm-servers</em> global security group we just created into the local administrators group on both servers:</p>
+      <pre><code>([ADSI]&quot;WinNT://./Administrators,group&quot;).psbase.Invoke(&quot;Add&quot;,([ADSI]&quot;WinNT://LAB/sccm-servers&quot;).path)
+([ADSI]&quot;WinNT://EDWARD/Administrators,group&quot;).psbase.Invoke(&quot;Add&quot;,([ADSI]&quot;WinNT://LAB/sccm-servers&quot;).path)</code></pre>
+      <p>At this point, reboot the SCCM server to ensure the group membership changes take effect.</p>
+      <h2 id="system-container">System Container</h2>
+      <p>To enable the registration of the SCCM management point in Active Directory, it is necessary to create a <em>System Management</em> container. From a computer with the <em>Active Directory PowerShell Module</em> installed, use the following command to create the container, and assign the <em>sccm-servers</em> security group the <em>Full Control</em> permission:</p>
+      <pre><code>$container = New-ADObject -Name &quot;System Management&quot; -Type &quot;container&quot; -Path &quot;CN=System,DC=lab,DC=hinchley,DC=net&quot; -PassThru
+$container = [ADSI]&quot;LDAP://$($container.DistinguishedName)&quot;
+$group = Get-ADGroup sccm-servers
+$sid = [System.Security.Principal.SecurityIdentifier] $group.SID
+$identity = [System.Security.Principal.IdentityReference] $sid
+$rights = [System.DirectoryServices.ActiveDirectoryRights] &quot;GenericAll&quot;
+$type = [System.Security.AccessControl.AccessControlType] &quot;Allow&quot;
+$inheritance = [System.DirectoryServices.ActiveDirectorySecurityInheritance] &quot;All&quot;
+$ace = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $identity, $rights, $type, $inheritance
+$container.psbase.ObjectSecurity.AddAccessRule($ace)
+$container.psbase.CommitChanges()</code></pre>
+      <h2 id="extend-the-active-directory-schema">Extend the Active Directory Schema</h2>
+      <p>To enable the creation of SCCM-related objects in Active Directory, it is necessary to extend the schema to support the required classes and attributes. To perform this task, open an elevated PowerShell prompt as a user who is a member of the <em>Schema Admins</em> group, mount the SCCM media, and run the schema extension utility:</p>
+      <pre><code>$mount = Mount-DiskImage -ImagePath &quot;C:\Media\Microsoft SCCM 2012\SW_DVD5_Sys_Ctr_ConfigMgr_and_Endpnt_Prtctn_2012w_SP2_MultiLang_MLF_X20-21849.iso&quot; -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + ':'
+
+Set-Location $drive\SMSSETUP\BIN\I386
+.\extadsch.exe</code></pre>
+      <p>A message should be displayed stating: <em>Successfully extended the Active Directory schema</em>.</p>
+      <p>Note: We leave the SCCM media mounted, as we will use it again later.</p>
+      <h2 id="sccm-2012-prerequisites">SCCM 2012 Prerequisites</h2>
+      <p>Before we begin the installation of SCCM 2012, it is necessary to download the required prerequisites. From our existing PowerShell prompt, use the following commands to download the installation dependencies to <code>C:\Media\Microsoft SCCM 2012\Prereqs</code>:</p>
+      <pre><code>cd $drive\SMSSETUP\BIN\X64
+.\setupdl.exe &quot;C:\Media\Microsoft SCCM 2012\Prereqs&quot;</code></pre>
+      <h2 id="install-sccm-2012-sp2">Install SCCM 2012 SP2</h2>
+      <p>We will now create a configuration script for performing the silent installation of SCCM 2012. The following script will deploy a new primary site named <em>LAB</em> on the server named <em>BORIS</em>. The site database will be stored on a SQL Server named <em>EDWARD</em>.</p>
+      <p>Please note the following:</p>
+      <ul>
+        <li>You will need to set <em>ProductID</em> to a valid license key.</li>
+        <li>The SCCM database (named <em>CM_LAB</em>) will be created on the <em>SQL01</em> instance on the SQL Server.</li>
+      </ul>
+      <pre><code>[Identification]
+Action=InstallPrimarySite
+
+[Options]
+AdminConsole=1
+ClientsUsePKICertificate=0
+DistributionPoint=BORIS.LAB.HINCHLEY.NET
+DistributionPointProtocol=HTTP
+DistributionPointInstallIIS=0
+JoinCEIP=0
+ManagementPoint=BORIS.LAB.HINCHLEY.NET
+ManagementPointProtocol=HTTP
+MobileDeviceLanguage=0
+PrerequisiteComp=1
+PrerequisitePath=C:\Media\Microsoft SCCM 2012 R2 SP1\Prereqs
+ProductID=
+RoleCommunicationProtocol=HTTPorHTTPS
+SDKServer=BORIS.LAB.HINCHLEY.NET
+SMSInstallDir=C:\Program Files\Microsoft Configuration Manager
+SiteCode=LAB
+SiteName=PRIMARY SITE
+
+[SQLConfigOptions]
+DatabaseName=SQL01\CM_LAB
+SQLServerName=EDWARD.LAB.HINCHLEY.NET
+
+[HierarchyExpansionOption]</code></pre>
+      <p>To validate that we have all the prerequisites in place, run the following command from our existing PowerShell prompt:</p>
+      <pre><code>.\prereqchk.exe /NOUI /PRI /SQL EDWARD.LAB.HINCHLEY.NET\SQL01 /SDK BORIS.LAB.HINCHLEY.NET /MP BORIS.LAB.HINCHLEY.NET /DP BORIS.LAB.HINCHLEY.NET</code></pre>
+      <p>Review the log <code>C:\ConfigMgrPrereq.txt</code> and confirm the word "error" does not appear. Note: Ignore the error shown below; the prerequisite checker incorrectly reports this condition when permissions to the System Management container are delegated via group membership.</p>
+      <blockquote>
+        <p>ERROR: Site server does not have create child permission on AD 'System Management'.</p>
+      </blockquote>
+      <p>Provided the prerequisite check passed, and assuming the configuration script is saved as <code>C:\Scripts\SCCM.ini</code>, we can now use the following command from our existing PowerShell prompt to initiate the installation of SCCM 2012.</p>
+      <pre><code>.\setup.exe /script C:\scripts\SCCM.ini</code></pre>
+      <p>At this point I suggest you take a 20 minute break while waiting for SCCM to install. When the process completes, use the following command (from our existing PowerShell prompt) to eject the installation media:</p>
+      <pre><code>DisMount-DiskImage -ImagePath &quot;C:\Media\Microsoft SCCM 2012\SW_DVD5_Sys_Ctr_ConfigMgr_and_Endpnt_Prtctn_2012w_SP2_MultiLang_MLF_X20-21849.iso&quot;</code></pre>
+      <h2 id="install-r2">Install R2</h2>
+      <p>The final step is to enable "R2" features in SCCM (i.e. to transition from SCCM 2012 SP2 to SCCM 2012 R1 SP1). This requires we</p>
+      <pre><code>$mount = Mount-DiskImage -ImagePath &quot;C:\Media\Microsoft SCCM 2012\SW_DVD5_Sys_Ctr_ConfigMgrClt_ML_2012_R2w_SP1_MultiLang_ConfMgr2_MLF_X20-21853.iso&quot; -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + ':'
+
+Set-Location $drive\SMSSETUP\BIN\X64
+msiexec /i Configmgr2012R2SP1.msi /qb
+Set-Location C:\
+
+DisMount-DiskImage -ImagePath &quot;C:\Media\Microsoft SCCM 2012\SW_DVD5_Sys_Ctr_ConfigMgrClt_ML_2012_R2w_SP1_MultiLang_ConfMgr2_MLF_X20-21853.iso&quot;</code></pre>
+      <h2 id="install-sccm-2012-r2-sp1-cu1">Install SCCM 2012 R2 SP1 CU1</h2>
+      <p>To install <a href="https://support.microsoft.com/en-us/kb/3074857">Cumulative Update 1 (CU1) for SCCM 2012 R2 SP1</a>, download the hotfix to <code>C:\Media\Microsoft SCCM 2012\CU1\CM12_SP2R2SP1CU1-KB3074857-X64-ENU.exe</code>. To install the update silently:</p>
+      <pre><code>cd C:\Media\Microsoft SCCM 2012\CU1\
+CM12_SP2R2SP1CU1-KB3074857-X64-ENU.exe /unattended</code></pre>
+      <p>You can confirm the update was installed successfully by checking the <em>CULevel</em> value in the registry. The following command should return <em>1</em>:</p>
+      <pre><code>(Get-ItemProperty -Path HKLM:SOFTWARE\Microsoft\SMS\Setup -Name CULevel).CULevel</code></pre>
+      <h2 id="powershell-cmdlet-library">PowerShell Cmdlet Library</h2>
+      <p>To ensure compatibility with SCCM 2012 R2 SP1, we should update the SCCM PowerShell Cmdlet Library. Download the <a href="http://go.microsoft.com/fwlink/?LinkId=528947">latest version</a> and copy the MSI to <code>C:\Media\Microsoft SCCM 2012\Cmdlet Library</code>. To install the update, close all open PowerShell sessions and run:</p>
+      <pre><code>msiexec /i &quot;C:\Media\Microsoft SCCM 2012\Cmdlet Library\ConfigMgr2012PowerShellCmdlets.msi&quot; /qb</code></pre>
+      <h2 id="custom-web-site">Custom Web Site</h2>
+      <p>The final step (at least for this tutorial) is to change the ports used by SCCM for client communication (which are configured on the custom SMSWEB web site we previously created). Let's do this by opening an elevated PowerShell prompt and running the following commands:</p>
+      <pre><code>Import-Module -Name &quot;$(split-path $Env:SMS_ADMIN_UI_PATH)\ConfigurationManager.psd1&quot;
+Set-Location LAB:
+Get-CMSite | Set-CMSite -UseCustomWebSite $true -AddClientRequestServiceType ClientRequestHttpTcpDefault -PortForClientRequestServiceType 7080 -ClientComputerCommunicationType HttpsOrHttp</code></pre>
+      <h2 id="final-words">Final Words</h2>
+      <p>There is still much to do... We need to configure boundaries and boundary groups; create collections, packages and deployments; update boot images, create task sequences, and configure software updates. I'll try and cover these steps in future articles, but for now, at least, we have a working and patched installation of SCCM 2012 R2 SP1.</p>
+      <footer>
+        <p><span>Published: 2015-10-05</span> <span>Last Updated: 2015-12-23</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

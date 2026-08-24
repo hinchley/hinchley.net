@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Archive Your Twitter Timeline into a Sqlite Database using PHP</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Archive Your Twitter Timeline into a Sqlite Database using PHP</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">This article is based on a deprecated version of the Twitter API.</p>
+      <p>In this article I will describe how you can archive your Twitter timeline into a sqlite database using PHP.</p>
+      <p>You can view the working <a href="https://gist.github.com/hinchley/05c2872620b5618389d130107e084d6b">code</a> on Github.</p>
+      <p>Before using the code, you will need to create a <a href="https://apps.twitter.com/">Twitter application</a>. This straightforward process is necessary to generate the tokens required for authenticating to the Twitter REST API. In particular, you will need to generate a consumer key and secret, and an <a href="https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens">OATH token and secret</a>. Having generated these values, you must insert them into the code under the comment: <em>define api keys</em>.</p>
+      <p>The code calls the <a href="https://developer.twitter.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-user_timeline">REST API</a> to retrieve a collection of tweets. Each request is limited to 200 records, with an overall limit of 3,200 records. If you want to get older tweets, you will need to leverage an additional step, such as merging the data retrieved via the API with the older tweets obtained via a manually downloaded <a href="https://help.twitter.com/en/managing-your-account/how-to-download-your-twitter-archive">Twitter archive</a>.</p>
+      <p>A good chunk of the code is used to build an <a href="https://dev.twitter.com/oauth">OAuth token</a> necessary to authenticate to the REST API. The remainder of the code parses the JSON response, and adds each tweet to a sqlite database (the database is created automatically when the script is first executed).</p>
+      <p>In addition to storing the full JSON representation of each tweet, I have also pulled out a subset of properties into separate database fields. This includes the tweet's unique ID, full text content, and creation timestamp. I also store a flag indicating if the tweet was a reply or a retweet, and if so, the unique ID of both the corresponding tweet and its author.</p>
+      <p>The code processes the Twitter timeline using an approach named <em>cursoring</em>. The official documentation provides a <a href="https://developer.twitter.com/en/docs/twitter-api/v1/tweets/timelines/overview">detailed explanation</a> of this technique, but at a minimum, you should know that the timeline is processed in reverse chronological order (from newest to oldest), and the tweets retrieved with each request are governed by two key values: <em>max_id</em> and <em>since_id</em>. The <em>max_id</em> value identifies the ID of the oldest tweet you have processed, and <em>since_id</em> identifies the ID of the newest tweet.</p>
+      <p>To clarify the use of these variables, let's say you are reading a timeline of 2,000 tweets in chunks of 200. The first request will be made without the <em>max_id</em> value. This request will return the most recent 200 tweets from your timeline. The second request will be made with <em>max_id</em> set to the ID of the oldest tweet from the previous request; in effect, you are saying, get me the next 200 tweets, starting with the first tweet older than the tweet identified by <em>max_id</em>. This process repeats until the entire timeline is processed.</p>
+      <p>The <em>since_id</em> value is useful when you want to run the code multiple times (e.g. once per day to pick up new tweets). By setting <em>since_id</em> to the ID of the most recent tweet, the code will ensure it only reads tweets with higher IDs (i.e. more recent tweets). In this way, you avoid processing your entire timeline with each invocation of the script (and you also avoid adding the same tweets to the database over and over again).</p>
+      <p>Having archived your Twitter timeline, it's easy to work with the data. For example to display the text of a random tweet:</p>
+      <pre><code>$d = new PDO('sqlite:./db.sqlite3');
+$q = 'SELECT text, timestamp, isreply, isretweet FROM tweets ORDER BY RANDOM() LIMIT 1';
+$t = $d-&gt;query($q)-&gt;fetch();
+echo $t['text'];</code></pre>
+      <p>And to display the most recent tweet, just change the query statement to the following:</p>
+      <pre><code>$q = 'SELECT text, timestamp, isreply, isretweet FROM tweets ORDER BY guid + 0 DESC LIMIT 1';</code></pre>
+      <p>It is also easy to parse the raw text of each tweet, converting links and Twitter usernames into clickable hyperlinks. For example:</p>
+      <pre><code>function clickable($s) {
+  $s = preg_replace('@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?)?)@', '&lt;a href=&quot;$1&quot; target=&quot;_blank&quot;&gt;$1&lt;/a&gt;', $s);
+  return preg_replace('#@(\w{1,15})\b#', '&lt;a href=&quot;https://twitter.com/$1&quot; target=&quot;_blank&quot;&gt;@$1&lt;/a&gt;', $s);
+}
+
+echo clickable($t['text']);</code></pre>
+      <p>A couple of other points on the solution:</p>
+      <ul>
+        <li>I reverse the order of the tweets before adding them to the database (i.e. the tweets are organised from oldest to newest).</li>
+        <li>The complete JSON representation of each tweet is stored in the database as a serialised enumerated array.</li>
+        <li>Oh, and because I am pedantic, I actually sort the properties in the array before it is serialised.</li>
+        <li>The script reports the total number of tweets in the database after each execution.</li>
+        <li>I've scheduled the script (via a con job) to execute once per day (to pick up new tweets).</li>
+      </ul>
+      <footer>
+        <p><span>Published: 2017-03-18</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

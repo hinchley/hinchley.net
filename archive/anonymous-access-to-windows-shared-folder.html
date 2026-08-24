@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Anonymous Access to a Windows Shared Folder</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Anonymous Access to a Windows Shared Folder</h1>
+    </header>
+    <main class="archive">
+      <p>The following configuration is required to allow an application, running on a non-domain member computer, to write to a remote shared folder. All tasks need to be performed on the remote computer.</p>
+      <ol>
+        <li>Grant the <em>Everyone</em> group <em>change</em> permissions to the share.</li>
+        <li>Grant the <em>Everyone</em> group <em>read &amp; execute</em>, <em>list folder contents</em>, <em>read</em>, and <em>write</em> NTFS permissions to the shared folder.</li>
+        <li>Enable the <em>Guest</em> account.</li>
+        <li>Grant the <em>Everyone</em> group the user right <em>Access this computer from the network</em>.</li>
+        <li>Remove the <em>Everyone</em> group from the user right <em>Deny access to this computer from the network</em>.</li>
+        <li>Enable the network access policy to <em>Let Everyone permissions to apply to anonymous users</em>.</li>
+        <li>Disable the network access policy to <em>Restrict anonymous access to Named Pipes and Shares</em>.</li>
+        <li>Add the name of the share to the network access policy listing <em>Shares that can be accessed anonymously</em>.</li>
+      </ol>
+      <p>All steps can be performed via group policy, or via the Local Security Policy MMC snap-in.</p>
+      <footer>
+        <p><span>Published: 2015-09-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

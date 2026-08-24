@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Creating a Striped Volume using DiskPart</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Creating a Striped Volume using DiskPart</h1>
+    </header>
+    <main class="archive">
+      <p>I recently installed <a href="install-windows-server-2012-r2-on-a-mac-mini.html">Windows Server 2012 R2 on a Mac Mini</a> with two solid state hard drives. The operating system was installed on the first drive (using all available space after the required recovery, system and reserved partitions were created). The second drive contained a single data volume from a previous installation (also comprising all available space).</p>
+      <p>To summarise, I started with 2 disks and 4 volumes. The disks looked like this:</p>
+      <pre><code>Disk 0  233 GB  GPT  Basic
+Disk 1  233 GB       Basic</code></pre>
+      <p>The volumes looked like this:</p>
+      <pre><code>Volume 0  C  233 GB  Partition  Boot
+Volume 1     300 MB  Partition  Hidden (Recovery)
+Volume 2     100 MB  Partition  System
+Volume 3  D  233 GB  Partition</code></pre>
+      <p>And the partitions on <em>disk 0</em> looked like this (where the final column refers to the boundary offset):</p>
+      <pre><code>Partition 1  Recovery  300 MB    1 MB
+Partition 2  System    100 MB  301 MB
+Partition 3  Reserved  128 MB  401 MB
+Partition 4  Primary   233 GB  529 MB</code></pre>
+      <p>A couple of points:</p>
+      <ul>
+        <li>The two drives were configured as <em>basic disks</em> (i.e. not <em>dynamic</em>).</li>
+        <li>The first drive used the GPT partitioning scheme; the second used MBR.</li>
+      </ul>
+      <p>My goal was to reduce the size of the operating system partition, and to use the remaining space on disk 0, and the corresponding allocation of disk 1, to create a single striped volume (i.e. RAID 0).</p>
+      <p>The first task was to shrink the C: drive to 40 GB. From an elevated command prompt, I ran <em>diskpart</em>, and then used the <em>shrink</em> command, specifying the size in MB by which the volume should be reduced (197632 = 193 GB).</p>
+      <pre><code>select volume 0
+shrink desired=197632</code></pre>
+      <p>The next task was to wipe the second disk (which held the existing <em>Data</em> volume). I also switched the disk to GPT.</p>
+      <pre><code>select disk 1
+clean
+convert gpt</code></pre>
+      <p>The next step was to reconfigure both drives as dynamic disks (a requirement for creating a striped volume). Unfortunately, there is a catch, for if I were to run the <em>convert dynamic</em> command, a new reserved partition would be created on disk 1 with an offset of 17 KB (instead of 1024 KB). To avoid the misaligned offset, and the associated performance implications, I did the following:</p>
+      <pre><code>select partition 1
+delete partition override
+create partition msr size 128</code></pre>
+      <p>This created the reserved partition required for a dynamic disk with the correct offset. I then configured both drives as dynamic:</p>
+      <pre><code>convert dynamic
+select disk 0
+convert dynamic</code></pre>
+      <p>I then created the striped volume across both disks, using all available space on disk 0 (the same quantity of space will be allocated from disk 1 - leaving 40 GB unused).</p>
+      <pre><code>create volume stripe disk=0,1</code></pre>
+      <p>I then formatted and assigned a drive letter to the new volume:</p>
+      <pre><code>format fs=ntfs quick
+assign</code></pre>
+      <p>As the space allocated to a striped volume must be identical on each disk, and 40 GB of disk 0 was already consumed by the operating system, 40 GB was left unused on disk 1. I created a simple volume to use this remaining space:</p>
+      <pre><code>select disk 1
+create volume simple
+format fs=ntfs quick
+assign</code></pre>
+      <p>The disks now look like this:</p>
+      <pre><code>Disk 0  233 GB  GPT  Dynamic
+Disk 1  233 GB  GPT  Dynamic</code></pre>
+      <p>The volumes look like this:</p>
+      <pre><code>Volume 0  C  40  GB  Simple     Boot
+Volume 1     300 MB  Partition  Hidden (Recovery)
+Volume 2     100 MB  Partition  System
+Volume 3  D  386 GB  Stripe
+Volume 3  E  40  GB  Simple</code></pre>
+      <p>The partitions on disk 0 look like this:</p>
+      <pre><code>Partition 1  Recovery          300 MB    1 MB
+Partition 2  System            100 MB  301 MB
+Partition 5  Dynamic Reserved    1 MB  401 MB
+Partition 3  Reserved          127 MB  402 MB
+Partition 4  Dynamic Data       40 GB  529 MB
+Partition 6  Dynamic Data      193 GB   40 GB</code></pre>
+      <p>And finally, the partitions on disk 1 look like this:</p>
+      <pre><code>Partition 2  Dynamic Reserved    1 MB    1 MB
+Partition 1  Reserved          127 MB    2 MB
+Partition 3  Dynamic Data      233 GB  129 MB</code></pre>
+      <p>In summary:</p>
+      <ul>
+        <li>The two drives are configured as dynamic disks with the GPT partitioning scheme.</li>
+        <li>The operating system is installed on a 40 GB volume on disk 0.</li>
+        <li>A striped volume of 386 GB spans both disks. I will use this volume for hosting virtual machines.</li>
+        <li>A 40 GB data volume exists on disk 1. I will use this volume for storing media.</li>
+      </ul>
+      <footer>
+        <p><span>Published: 2015-09-26</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

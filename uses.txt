@@ -1,0 +1,221 @@
+Computer
+Lenovo ThinkPad X1 Carbon Gen 7
+https://www.lenovo.com/au/en/laptops/thinkpad/x1-series/X1-Carbon-Gen-7/p/22TP2TXX17G
+Hardware
+2026-08-01
+
+Monitor
+Dell C3422WE
+https://www.dell.com/en-au/shop/dell-34-curved-video-conferencing-monitor-c3422we/apd/210-ayvc/monitors-monitor-accessories
+Hardware
+2026-08-01
+
+Keyboard
+NuPhy Halo75 V2
+https://nuphy.com.au/products/nuphy-halo75-v2
+Hardware
+2026-08-01
+
+Mouse
+Logitch Anywhere 3S
+https://www.logitech.com/en-au/shop/p/mx-anywhere-3s
+Hardware
+2026-08-01
+
+Storage
+Synology Diskstation DS224+
+https://www.synology.com/en-us/products/DS224+
+Hardware
+2026-08-01
+
+Router
+Linksys WRT1900ACS
+https://www.tomsguide.com/us/inksys-wrt1900acs,review-3498.html
+Hardware
+2026-08-01
+
+Phone
+Apple iPhone 16 Pro Max
+https://www.apple.com/au/iphone-16-pro
+Hardware
+2026-08-01
+
+Watch
+Apple Watch Series 10
+https://support.apple.com/en-au/121202
+Hardware
+2026-08-01
+
+eReader
+Amazon Kindle Paperwhite 12th Gen
+https://www.amazon.com.au/kindle-paperwhite/s?k=kindle+paperwhite
+Hardware
+2026-08-01
+
+Stylus eReader
+Amazon Kindle Scribe 1st Gen
+https://www.amazon.com.au/New-Amazon-Kindle-Scribe-Redesigned/dp/B0CZB5RHWX
+Hardware
+2026-08-01
+
+Pocket eReader
+XTEINK 4
+http://xteink.com/products/xteink-x4
+Hardware
+2026-08-01
+
+Headphones
+Sony WH-1000XM6
+https://www.sony.com.au/headphones/products/wh-1000xm6
+Hardware
+2026-08-01
+
+Operating System
+Arch Linux
+https://archlinux.org
+Desktop Software
+2026-08-01
+
+Window Manager
+Hyprland
+https://hypr.land
+Desktop Software
+2026-08-01
+
+Web Browser
+Chromium
+https://www.chromium.org/Home/
+Desktop Software
+2026-08-01
+
+Code Editor
+Zed
+https://zed.dev
+Desktop Software
+2026-08-01
+
+Shell
+Fish
+https://fishshell.com
+Desktop Software
+2026-08-01
+
+Terminal Emulator
+Foot
+https://codeberg.org/dnkl/foot
+Desktop Software
+2026-08-01
+
+Coding
+C
+https://en.wikipedia.org/wiki/C_(programming_language)
+Desktop Software
+2026-08-01
+
+Source Control
+Git
+https://git-scm.com
+Desktop Software
+2026-08-01
+
+VPN
+Private Internet Access
+https://www.privateinternetaccess.com
+Desktop Software
+2026-08-01
+
+Music Player
+musikcube
+https://github.com/clangen/musikcube
+Desktop Software
+2026-08-01
+
+Video Player
+mpv
+https://mpv.io
+Desktop Software
+2026-08-01
+
+Downloader
+Rqbit
+https://github.com/ikatson/rqbit
+Desktop Software
+2026-08-01
+
+Image Viewer
+feh
+https://feh.finalrewind.org
+Desktop Software
+2026-08-01
+
+Email
+Fastmail
+https://fastmail.com
+Web Apps
+2026-08-01
+
+Messaging
+Signal
+https://signal.org
+Web Apps
+2026-08-01
+
+Password Vault
+Keeper
+https://keepersecurity.com.au
+Web Apps
+2026-08-01
+
+Notes
+Standard Notes
+https://standardnotes.com
+Web Apps
+2026-08-01
+
+Todo
+Tweek
+https://tweek.so
+Web Apps
+2026-08-01
+
+Music
+Spotify
+https://spotify.com
+Web Apps
+2026-08-01
+
+Password Manager
+Keeper
+https://chromewebstore.google.com/detail/keeper%C2%AE-password-manager/bfogiafebfohielmmehodmfbbebbbpei
+Chromium Extensions
+2026-08-01
+
+News Reader
+Modern for Hacker News
+https://chromewebstore.google.com/detail/modern-for-hacker-news/dabkegjlekdcmefifaolmdhnhdcplklo
+Chromium Extensions
+2026-08-01
+
+Ad Blocker
+uBlock Origin Lite
+https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh
+Chromium Extensions
+2026-08-01
+
+Desktop Background
+Nier Automata
+https://wallhaven.cc/w/eov3jw
+Other
+2026-08-01
+
+Font
+Berkeley Mono
+https://usgraphics.com/products/berkeley-mono
+Other
+2026-08-01
+
+Theme
+Tokyo Night Storm
+https://github.com/tokyo-night/tokyo-night-vscode-theme
+Other
+2026-08-01

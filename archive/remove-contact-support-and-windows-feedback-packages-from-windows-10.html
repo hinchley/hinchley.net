@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Remove Contact Support and Windows Feedback Packages from Windows 10</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Remove Contact Support and Windows Feedback Packages from Windows 10</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">This is an old post. It was written for an early version of Windows 10.</p>
+      <p>There are a few "modern-UI" applications in Windows 10 that have no place in the enterprise. For example, <em>Contact Support</em> and <em>Windows Feedback</em>. Unfortunately, these pesky apps are considered to be "part of the operating system", and cannot be removed using tools like <a href="https://technet.microsoft.com/en-us/library/hh852174.aspx">Remove-AppxProvisionedPackage</a>. Fear not; there is another way.</p>
+      <p>The following PowerShell script wraps some .NET code to take ownership of the <em>Contact Support</em> and <em>Windows Feedback</em> package keys in the registry. It then uses the now deprecated, but still functional <code>pkgmgr.exe</code> to permanently remove the applications.</p>
+      <p>The script can be easily modified to purge other packages - just swap out the identifiers at the end of the script with the relevant package names from the <em>component based servicing</em> section of the registry.</p>
+      <pre><code>function Enable-Privilege {
+  param($Privilege)
+  $Definition = @'
+using System;
+using System.Runtime.InteropServices;
+public class AdjPriv {
+  [DllImport(&quot;advapi32.dll&quot;, ExactSpelling = true, SetLastError = true)]
+  internal static extern bool AdjustTokenPrivileges(IntPtr htok, bool disall,
+    ref TokPriv1Luid newst, int len, IntPtr prev, IntPtr rele);
+  [DllImport(&quot;advapi32.dll&quot;, ExactSpelling = true, SetLastError = true)]
+  internal static extern bool OpenProcessToken(IntPtr h, int acc, ref IntPtr phtok);
+  [DllImport(&quot;advapi32.dll&quot;, SetLastError = true)]
+  internal static extern bool LookupPrivilegeValue(string host, string name,
+    ref long pluid);
+  [StructLayout(LayoutKind.Sequential, Pack = 1)]
+  internal struct TokPriv1Luid {
+    public int Count;
+    public long Luid;
+    public int Attr;
+  }
+  internal const int SE_PRIVILEGE_ENABLED = 0x00000002;
+  internal const int TOKEN_QUERY = 0x00000008;
+  internal const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
+  public static bool EnablePrivilege(long processHandle, string privilege) {
+    bool retVal;
+    TokPriv1Luid tp;
+    IntPtr hproc = new IntPtr(processHandle);
+    IntPtr htok = IntPtr.Zero;
+    retVal = OpenProcessToken(hproc, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+      ref htok);
+    tp.Count = 1;
+    tp.Luid = 0;
+    tp.Attr = SE_PRIVILEGE_ENABLED;
+    retVal = LookupPrivilegeValue(null, privilege, ref tp.Luid);
+    retVal = AdjustTokenPrivileges(htok, false, ref tp, 0, IntPtr.Zero,
+      IntPtr.Zero);
+    return retVal;
+  }
+}
+'@
+  $ProcessHandle = (Get-Process -id $pid).Handle
+  $type = Add-Type $definition -PassThru
+  $type[0]::EnablePrivilege($processHandle, $Privilege)
+}
+
+function Take-Over($path) {
+  $owner = [Security.Principal.NTAccount]'Administrators'
+
+  $key = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($path, 'ReadWriteSubTree', 'TakeOwnership')
+  $acl = $key.GetAccessControl()
+  $acl.SetOwner($owner)
+  $key.SetAccessControl($acl)
+
+  $acl = $key.getaccesscontrol()
+  $rule = New-Object System.Security.AccessControl.RegistryAccessRule &quot;Administrators&quot;, &quot;FullControl&quot;, &quot;ContainerInherit&quot;, &quot;None&quot;, &quot;Allow&quot;
+  $acl.SetAccessRule($rule)
+  $key.SetAccessControl($acl)
+}
+
+do {} until (Enable-Privilege SeTakeOwnershipPrivilege)
+
+function Remove-Package($name) {
+  $key = &quot;SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\Packages\$name&quot;
+  Take-Over $key
+  Remove-Item -Path HKLM:&quot;$key\Owners&quot; -Force -Recurse
+  &amp; C:\Windows\System32\PkgMgr.exe /up:$name /norestart /quiet
+}
+
+# Remove Contact Support.
+Remove-Package &quot;Microsoft-Windows-ContactSupport-Package~31bf3856ad364e35~amd64~en-US~10.0.10240.16384&quot;
+Remove-Package &quot;Microsoft-Windows-ContactSupport-Package~31bf3856ad364e35~amd64~~10.0.10240.16384&quot;
+
+# Remove Windows Feedback.
+Remove-Package &quot;Microsoft-WindowsFeedback-Package~31bf3856ad364e35~amd64~en-US~10.0.10240.16384&quot;
+Remove-Package &quot;Microsoft-WindowsFeedback-Package~31bf3856ad364e35~amd64~~10.0.10240.16384&quot;</code></pre>
+      <footer>
+        <p><span>Published: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

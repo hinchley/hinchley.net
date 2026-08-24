@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Add a User to HPE Content Manager using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Add a User to HPE Content Manager using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>The following PowerShell code will add a new user to HPE Content Manager. There a few things you will need to do before using the code. Firstly, you will need to change the <em>dataset</em> and <em>workgroupServer</em> variables as appropriate for your environment. Secondly, you will need to copy the following DLLs from the Content Manager server to the <em>C:\TRIM</em> folder of the computer from which you will execute the code. The files can be found under the <em>C:\Program Files\Hewlett Packard Enterprise\Content Manager</em> folder.</p>
+      <ul>
+        <li>dbghelp.dll</li>
+        <li>HP.HPTRIM.SDK.dll</li>
+        <li>trpz0409.dll</li>
+        <li>tsjApi.dll</li>
+        <li>tsjBoost.dll</li>
+        <li>tsjCentera.dll</li>
+        <li>tsjcore.dll</li>
+        <li>tsjFrame.dll</li>
+        <li>tsjIcas.dll</li>
+        <li>tsjLnEML.dll</li>
+        <li>tsjmpx.dll</li>
+        <li>tsjocx.dll</li>
+        <li>tsjOraOcci.dll</li>
+        <li>tsjPoco.dll</li>
+        <li>tsjrc.dll</li>
+        <li>tsjrcf.dll</li>
+        <li>tsjSpell.dll</li>
+        <li>tsjsth.dll</li>
+        <li>TSJTEM.dll</li>
+        <li>tsjTiOEx.dll</li>
+        <li>tsjtrim.dll</li>
+        <li>tsjvwr.dll</li>
+        <li>tsjwgs.dll</li>
+        <li>tsjZlib.dll</li>
+      </ul>
+      <p>Note: The code will need to execute under the context of an account with administrator access to Content Manager.</p>
+      <pre><code>Add-Type -Path &quot;C:\TRIM\HP.HPTRIM.SDK.dll&quot;
+
+$dataset = 'XX'
+$workgroupServer = 'TRIM'
+
+function add-trimuser($username, $givenName, $sn, $email, $expiry) {
+  $database = New-Object HP.HPTRIM.SDK.Database
+
+  $database.Id = $script:dataset
+  $database.WorkgroupServerName = $script:workgroupServer
+  $database.Connect()
+
+  # search for the user by login id.
+  $people = New-Object HP.HPTRIM.SDK.TrimMainObjectSearch($database, [HP.HPTRIM.SDK.BaseObjectTypes]::Location)
+  $people.SetSearchString(&quot;LogIn:$username&quot;)
+
+  # exit if the user already exists.
+  if ($people.count -ne 0) { write-warning 'The user already has a HPE Content Manager account.'; return $false }
+
+  $person = New-Object HP.HPTRIM.SDK.Location($database, [HP.HPTRIM.SDK.LocationType]::Person)
+
+  $person.givenNames = $givenName
+  $person.surname = $sn
+  $person.initials = $givenName.substring(0, 1) + $sn.substring(0, 1)
+
+  $person.logsInAs = $username
+
+  $person.emailAddress = $email
+  $person.userType = 'RecordsWorker'
+
+  # work out expiration dates.
+  $from = '1/01/0001'
+  if ($expiry -eq $null) { $to = $expiry = '' }
+  else { $to = $expiry }
+
+  $person.loginexpires = $expiry
+  $person.setActiveDateRange($from, $to)
+
+  # add relevant associations for the user.
+  # $person.addrelationship('Something', 'MemberOf', $true)
+
+  # accept logins.
+  $person.canlogin = $true
+
+  # set default security level.
+  $person.securitystring = 'UNCLASSIFIED, FOR OFFICIAL USE ONLY'
+
+  # set internal status.
+  $person.iswithin = $true
+
+  $person.save()
+
+  $database.dispose()
+}
+
+# example usage.
+$user = get-aduser jbloggs -properties mail, accountExpirationDate
+add-trimuser $user.sAMAccountName $user.givenName $user.surname $user.mail $user.accountExpirationDate</code></pre>
+      <footer>
+        <p><span>Published: 2018-05-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

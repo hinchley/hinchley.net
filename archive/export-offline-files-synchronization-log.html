@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Export Offline Files Synchronization Log</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Export Offline Files Synchronization Log</h1>
+    </header>
+    <main class="archive">
+      <p>If you are experiencing issues using the Offline Files capability within Windows to synchronize files and folders from a network share to a computer, you may benefit from enabling the Offline Files Sync Log.</p>
+      <p>This analytic log is not enabled by default. To enable the log, run the following command on the client device from an elevated PowerShell prompt:</p>
+      <pre><code>wevtutil sl Microsoft-Windows-OfflineFiles/SyncLog /e:true /q</code></pre>
+      <p>After forcing a sync, use the following PowerShell command to retrieve the list of successfully synchronized files (limited to the last 24 hours):</p>
+      <pre><code>get-winevent -oldest -filterhashtable @{ logname = &quot;Microsoft-Windows-OfflineFiles/SyncLog&quot;; starttime = (get-date).adddays(-1); id = 2005 } |  select-object TimeCreated, @{ name = &quot;Path&quot;; expression = { ([xml]$_.toxml()).Event.UserData.SyncSuccessInfo.Path } }</code></pre>
+      <p>This command will export the synchronization history in the following format:</p>
+      <pre><code>4/09/2017 6:00:49 PM \\lab\users\phinchley
+4/09/2017 6:00:49 PM \\lab\users\phinchley\stuff.txt
+4/09/2017 6:34:32 PM \\lab\users\phinchley\nonsense.txt
+4/09/2017 6:34:32 PM \\lab\users\phinchley\woot.txt  </code></pre>
+      <p>And finally, to disable the log:</p>
+      <pre><code>wevtutil sl Microsoft-Windows-OfflineFiles/SyncLog /e:false /q</code></pre>
+      <footer>
+        <p><span>Published: 2017-09-04</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

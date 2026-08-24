@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Disable Microsoft Edge First-Run Welcome Page for New Users</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Disable Microsoft Edge First-Run Welcome Page for New Users</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">This is an old post. Microsoft now provide out-of-the-box mechanisms for achieving this outcome.</p>
+      <p>It sounds simple. You want to prevent the "first-run" welcome page from appearing for new users when they open Microsoft Edge on Windows 10. Unfortunately, I couldn't find a group policy setting, or any other simple registry hack, that would to do the trick.</p>
+      <p>After digging about with Process Monitor, I noticed that on start, Edge looks for a registry value named <em>IE10TourNoShow</em>. This value is stored in the registry under:</p>
+      <pre><code>HKEY_CURRENT_USER\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main</code></pre>
+      <p>The most common method for setting a specific registry value for new users is to predefine the value in <code>C:\Users\Default\ntuser.dat</code>. However, the <code>SOFTWARE\Classes</code> key is actually a mount point for a separate registry hive that is not based on <em>ntuser.dat</em>. This second hive is created dynamically at first logon; it is not based on a pre-existing template. Note: The hive is also mounted under <em>HKEY_USERS</em>, where it is named after the user's SID, with a <em>_CLASSES</em> suffix. It is stored as <code>%LOCALAPPDATA%\Microsoft\Windows\UsrClass.dat</code>.</p>
+      <p>As we cannot predefine the required registry value for new users, we will need to dynamically configure it during first logon. Perhaps the easiest way of doing so would be to trigger the execution of a script via the <em>RunOnce</em> registry key (which can be pre-staged via <em>ntuser.dat</em>). However, it's not uncommon for this method to be disabled (as it is sometimes used as a vector for running malware).</p>
+      <p>An alternate method is to apply the change using Windows Installer via <a href="https://en.wikipedia.org/wiki/Active_Setup">Active Setup</a>. For this method to work, we first need to create a custom MSI.</p>
+      <p>The following PowerShell code will create a minimalist MSI which we will subsequently extend to configure Edge using Active Setup. I've isolated the code, as it is useful on its own for creating an installer that can be used as the starting point for a wide range of "setup" activities. Note: The code has only been tested on Windows 10.</p>
+      <pre><code>function guid() {
+  return (&quot;{&quot; + ([guid]::NewGuid()).guid + &quot;}&quot;).ToUpper()
+}
+
+function query($sql) {
+  $view = $db.OpenView($sql)
+  $view.Execute()
+  $view.Close()
+}
+
+function ies($a, $c, $s) {
+  query &quot;INSERT INTO InstallExecuteSequence (Action, Condition, Sequence) VALUES ('$a', '$c', '$s')&quot;
+}
+
+$name    = &quot;empty.msi&quot;
+$author  = &quot;Peter Hinchley&quot;
+$title   = &quot;Empty&quot;
+$version = &quot;1.0&quot;
+
+$msi  = New-Object -ComObject WindowsInstaller.Installer
+$db   = $msi.OpenDatabase($name, 3)
+
+query &quot;CREATE TABLE Component (Component char(72) NOT NULL, ComponentId char(38), Directory_ char(72) NOT NULL, Attributes short NOT NULL, Condition char(255), KeyPath char(72) PRIMARY KEY Component)&quot;
+query &quot;CREATE TABLE CustomAction (Action char(72) NOT NULL, Type short NOT NULL, Source char(72), Target char(255), ExtendedType long PRIMARY KEY Action)&quot;
+query &quot;CREATE TABLE Directory (Directory char(72) NOT NULL, Directory_Parent char(72), DefaultDir char(255) NOT NULL LOCALIZABLE PRIMARY KEY Directory)&quot;
+query &quot;CREATE TABLE Feature (Feature char(38) NOT NULL, Feature_Parent char(38), Title char(64) LOCALIZABLE, Description char(255) LOCALIZABLE, Display short, Level short NOT NULL, Directory_ char(72), Attributes short NOT NULL PRIMARY KEY Feature)&quot;
+query &quot;CREATE TABLE FeatureComponents (Feature_ char(38) NOT NULL, Component_ char(72) NOT NULL PRIMARY KEY Feature_, Component_)&quot;
+query &quot;CREATE TABLE InstallExecuteSequence (Action char(72) NOT NULL, Condition char(255), Sequence short PRIMARY KEY Action)&quot;
+query &quot;CREATE TABLE Media (DiskId short NOT NULL, LastSequence short NOT NULL, DiskPrompt char(64) LOCALIZABLE, Cabinet char(255), VolumeLabel char(32), Source char(72) PRIMARY KEY DiskId)&quot;
+query &quot;CREATE TABLE Property (Property char(72) NOT NULL, Value char NOT NULL LOCALIZABLE PRIMARY KEY Property)&quot;
+query &quot;CREATE TABLE Registry (Registry char(72) NOT NULL, Root short NOT NULL, ``Key`` char(255) NOT NULL LOCALIZABLE, Name char(255) LOCALIZABLE, Value char LOCALIZABLE, Component_ char(72) NOT NULL PRIMARY KEY Registry)&quot;
+
+query &quot;INSERT INTO Component (Component, ComponentId, Directory_, Attributes) VALUES ('DEFAULTCOMPONENT', '$(guid)', 'TARGETDIR', 2)&quot;
+query &quot;INSERT INTO Directory (Directory, DefaultDir) VALUES ('TARGETDIR', 'SourceDir')&quot;
+query &quot;INSERT INTO Feature (Feature, Level, Attributes) VALUES ('DEFAULTFEATURE', 1, 0)&quot;
+query &quot;INSERT INTO FeatureComponents (Feature_, Component_) VALUES ('DEFAULTFEATURE', 'DEFAULTCOMPONENT')&quot;
+query &quot;INSERT INTO Media (DiskId, LastSequence) VALUES (1, 1)&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('ProductName', '$title')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('ProductVersion', '$version')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('ProductCode', '$(guid)')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('ProductLanguage', '1033')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('ProductID', 'none')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('Manufacturer', '$author')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('UpgradeCode', '$(guid)')&quot;
+query &quot;INSERT INTO Property (Property, Value) VALUES ('ARPSYSTEMCOMPONENT', '0')&quot;
+
+ies 'AllocateRegistrySpace' 'NOT Installed' '1550'
+ies 'AppSearch' '' '400'
+ies 'BindImage' '' '4300'
+ies 'CCPSearch' 'NOT Installed' '500'
+ies 'CostFinalize' '' '1000'
+ies 'CostInitialize' '' '800'
+ies 'CreateFolders' '' '3700'
+ies 'CreateShortcuts' '' '4500'
+ies 'DeleteServices' 'VersionNT' '2000'
+ies 'DuplicateFiles' '' '4210'
+ies 'FileCost' '' '900'
+ies 'InstallFiles' '' '4000'
+ies 'InstallFinalize' '' '6600'
+ies 'InstallInitialize' '' '1500'
+ies 'InstallODBC' '' '5400'
+ies 'InstallServices' 'VersionNT' '5800'
+ies 'InstallValidate' '' '1400'
+ies 'LaunchConditions' '' '100'
+ies 'MoveFiles' '' '3800'
+ies 'MsiPublishAssemblies' '' '6250'
+ies 'PatchFiles' '' '4090'
+ies 'ProcessComponents' '' '1600'
+ies 'PublishComponents' '' '6200'
+ies 'PublishFeatures' '' '6300'
+ies 'PublishProduct' '' '6400'
+ies 'RMCCPSearch' 'NOT Installed' '600'
+ies 'RegisterClassInfo' '' '4600'
+ies 'RegisterComPlus' '' '5700'
+ies 'RegisterExtensionInfo' '' '4700'
+ies 'RegisterFonts' '' '5300'
+ies 'RegisterMIMEInfo' '' '4900'
+ies 'RegisterProduct' '' '6100'
+ies 'RegisterProgIdInfo' '' '4800'
+ies 'RegisterTypeLibraries' '' '5500'
+ies 'RegisterUser' '' '6000'
+ies 'RemoveDuplicateFiles' '' '3400'
+ies 'RemoveEnvironmentStrings' '' '3300'
+ies 'RemoveFiles' '' '3500'
+ies 'RemoveFolders' '' '3600'
+ies 'RemoveIniValues' '' '3100'
+ies 'RemoveODBC' '' '2400'
+ies 'RemoveRegistryValues' '' '2600'
+ies 'RemoveShortcuts' '' '3200'
+ies 'SelfRegModules' '' '5600'
+ies 'SelfUnregModules' '' '2200'
+ies 'SetODBCFolders' '' '1100'
+ies 'StartServices' 'VersionNT' '5900'
+ies 'StopServices' 'VersionNT' '1900'
+ies 'UnpublishComponents' '' '1700'
+ies 'UnpublishFeatures' '' '1800'
+ies 'UnregisterClassInfo' '' '2700'
+ies 'UnregisterComPlus' '' '2100'
+ies 'UnregisterExtensionInfo' '' '2800'
+ies 'UnregisterFonts' '' '2500'
+ies 'UnregisterMIMEInfo' '' '3000'
+ies 'UnregisterProgIdInfo' '' '2900'
+ies 'UnregisterTypeLibraries' '' '2300'
+ies 'ValidateProductID' '' '700'
+ies 'WriteEnvironmentStrings' '' '5200'
+ies 'WriteIniValues' '' '5100'
+ies 'WriteRegistryValues' '' '5000'
+
+$db.Commit()
+$db = $null
+[GC]::Collect()
+
+$msi  = New-Object -ComObject WindowsInstaller.Installer
+$info = $msi.SummaryInformation($name, 9)
+
+$info.Property(1) = 1252
+$info.Property(2) = $title
+$info.Property(3) = &quot;Empty&quot;
+$info.Property(4) = $author
+$info.Property(7) = &quot;Intel;1033&quot;
+$info.Property(9) = $(guid)
+$info.Property(14) = 200 # Minimum required for 64bit. Windows Installer 2.0.
+$info.Property(15) = 0
+$info.Property(18) = &quot;Windows Installer&quot;
+
+$info.Persist()</code></pre>
+      <p>Most of the code in the above script is used to construct the database tables required by a valid MSI. I won't go into the gory details, but if you are after more information, take a look at <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa367810(v=vs.85).aspx">MSDN</a>. It covers everything you need, whether it be working out how to interact with the <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa368254(v=vs.85).aspx">MSI database</a>, or deciphering the properties within the <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa372043(v=vs.85).aspx">Summary Information</a> table.</p>
+      <p>Having run the previous code to create <em>empty.msi</em>, let's now modify the MSI for the purpose of configuring Microsoft Edge. In particular, we will:</p>
+      <ul>
+        <li>Update the <em>ProductName</em> and <em>ProductCode</em> in the <em>Property</em> table.</li>
+        <li>Update the <em>ComponentId</em> in the <em>Component</em> table. Note: You should always refresh all GUIDs in the database when creating a new MSI.</li>
+        <li>Add a custom action to the <em>CustomAction</em> table. More on this later.</li>
+        <li>Add a row to the <em>InstallExecuteSequence</em> table to call the custom action.</li>
+        <li>Add several rows to the <em>Registry table</em>; two to configure Active Setup, and the third to configure Edge.</li>
+      </ul>
+      <p>Here's the code:</p>
+      <pre><code>function guid() {
+  return (&quot;{&quot; + ([guid]::NewGuid()).guid + &quot;}&quot;).ToUpper()
+}
+
+function query($sql) {
+  $view = $db.OpenView($sql)
+  $view.Execute()
+  $view.Close()
+}
+
+function ies($a, $c, $s) {
+  query &quot;INSERT INTO InstallExecuteSequence (Action, Condition, Sequence) VALUES ('$a', '$c', '$s')&quot;
+}
+
+$source = &quot;empty.msi&quot;
+$target = &quot;edge.msi&quot;
+$title  = &quot;Disable Microsoft Edge Welcome&quot;
+
+Copy-Item $source $target
+
+$msi = New-Object -ComObject WindowsInstaller.Installer
+$db  = $msi.OpenDatabase($target, 2)
+
+query &quot;UPDATE Property SET Value = '$title' WHERE Property = 'ProductName'&quot;
+query &quot;UPDATE Property SET Value = '$(guid)' WHERE Property = 'ProductCode'&quot;
+query &quot;UPDATE Component SET ComponentId = '$(guid)' WHERE Component = 'DEFAULTCOMPONENT'&quot;
+query &quot;INSERT INTO CustomAction (Action, Type, Target) VALUES ('CUSTOMACTION1', '37', 'var k,r=GetObject(`&quot;winmgmts:!root/default:StdRegProv`&quot;);while(r.EnumKey(0x80000001,`&quot;SOFTWARE\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\CurrentVersion\\AppContainer\\Storage\\microsoft.microsoftedge_8wekyb3d8bbwe`&quot;,k)){}')&quot;
+query &quot;INSERT INTO Registry (Registry, Root, ``Key``, Name, Value, Component_) VALUES ('ACTIVESETUP.VERSION', '2', 'Software\Microsoft\Active Setup\Installed Components\[ProductCode]', 'Version', '1.0', 'DEFAULTCOMPONENT')&quot;
+query &quot;INSERT INTO Registry (Registry, Root, ``Key``, Name, Value, Component_) VALUES ('ACTIVESETUP.STUBPATH', '2', 'Software\Microsoft\Active Setup\Installed Components\[ProductCode]', 'StubPath', 'msiexec.exe /fu [ProductCode]', 'DEFAULTCOMPONENT')&quot;
+query &quot;INSERT INTO Registry (Registry, Root, ``Key``, Name, Value, Component_) VALUES ('REG1', '1', 'Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main', 'IE10TourNoShow', '`#1', 'DEFAULTCOMPONENT')&quot;
+
+ies 'CUSTOMACTION1' 'Installed' '4950'
+
+$db.Commit()
+$db = $null
+[GC]::Collect()
+
+$msi  = New-Object -ComObject WindowsInstaller.Installer
+$info = $msi.SummaryInformation($target, 3)
+
+$info.Property(2) = $title
+$info.Property(9) = $(guid)
+$info.Persist()</code></pre>
+      <p>There are a few items in the above script that require further explanation:</p>
+      <ul>
+        <li>The <em>[ProductCode]</em> references in the registry table will be dynamically replaced (during installation) with the product code from the <em>Property</em> table.</li>
+        <li>The custom action is necessary to delay the addition of the registry value needed by Edge. This is required because, during testing, I noticed that Active Setup was adding the registry value prior to the user-based installation of Edge that occurs at first logon. This resulted in Edge overwriting (i.e. removing) the <em>IE10TourNoShow</em> value.</li>
+        <li>The custom action has a <em>Type</em> of <em>37</em>. This indicates that the <em>Target</em> property of the <em>Custom Action</em> table holds inline JScript. Refer to <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa372048(v=vs.85).aspx">Custom Action Types</a> for further information.</li>
+        <li>I used JScript, rather than VBScript, because the <em>Target</em> property can only contain a single line of code; and the code that I required could only be coerced into a single line by using semicolons (which is only possible with JScript).</li>
+        <li>The <em>Target</em> property is also limited to 255 characters; hence the rather terse JScript syntax. Note: The code fortunately came in at 232 characters.</li>
+        <li>The JScript code basically pauses the execution of Windows Installer until Edge has provisioned the registry key under which <em>IE10TourNoShow</em> value is to be added.</li>
+        <li>The custom action is sequenced to execute before the values in the <em>Registry</em> table are processed. This is achieved by configuring a <em>Sequence</em> value (<em>4950</em>) just lower than that assigned to the <em>WriteRegistryValues</em> action (<em>5000</em>).</li>
+        <li>When a new user logs onto the computer where the MSI has been installed, Active Setup will run <em>msiexec.exe /fu [guid]</em> (where [guid] is the product key of the MSI) to write the user-based registry values (i.e. <em>IE10TourNoShow</em>) from the <em>Registry</em> table of the MSI into the user's profile.</li>
+      </ul>
+      <p>Having run the above two scripts, you should have a file named <em>edge.msi</em>. To install it, open an elevated command prompt and run:</p>
+      <pre><code>msiexec.exe /i Edge.msi /qb ALLUSERS=1</code></pre>
+      <p>Now log into the same computer with a new user account (a user that hasn't previously logged on, or at the very least, as a user that hasn't launched Edge). Now, try opening Edge. If everything has gone to plan, the annoying welcome page won't be displayed.</p>
+      <footer>
+        <p><span>Published: 2016-01-31</span> <span>Last Updated: 2016-03-23</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Spoofing an Environment Variable for an Application using a Shim</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Spoofing an Environment Variable for an Application using a Shim</h1>
+    </header>
+    <main class="archive">
+      <p>I was recently asked to get Notes Shared Login (NSL) working on a Windows 2012 R2 server running Citrix XenDesktop. Now, officially this isn't supported; however, in theory, it should work.</p>
+      <p>After looking into the application start-up process, I was able to determine that Notes calls a function named <em>SECIsOKToNSLEnable</em> in <em>nnotes.dll</em> to query if Citrix is installed, and if so, it explicitly denies the use of NSL.</p>
+      <p>I wasn't able to easily determine how the <em>SECIsOKToNSLEnable</em> function actually detects the presence of Citrix, but based on previous experience, I took a guess that it was inspecting the value assigned to the <em>SESSIONNAME</em> environment variable. In a Citrix environment, this variable is typically set to a value in the form <em>ICA-XXXXX</em>. To test the theory, I manually set the value to <em>DUMMY</em>, launched Notes, and sure enough, this time NSL worked.</p>
+      <p>Obviously, changing the value of the <em>SESSIONNAME</em> variable globally (for the user's session) isn't a good idea. So I decided to create a shim that would modify the environment variable only for Notes.</p>
+      <p>This is the approach I used:</p>
+      <ol>
+        <li>On a development system, install the <em>Application Compatibility Tools</em> feature of the <a href="https://docs.microsoft.com/en-us/windows-hardware/get-started/adk-install">Windows 10 ADK</a>.</li>
+        <li>Run the <em>Compatibility Administrator</em> (<em>C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Application Compatibility Toolkit\Compatibility Administrator (32-bit)\Compatadmin.exe</em>). Note: You should use the 32-bit client when developing a shim for a 32-bit application.</li>
+        <li>Right click <em>New Database</em> listed under <em>Custom Databases</em>, and select <em>Rename</em>. Call it something meaningful. I used <em>IBM Notes</em>.</li>
+        <li>Once again, right click the database, and this time select <em>Create New / Application Fix</em>.</li>
+        <li>Set the <em>Name</em> and <em>Vendor</em>, and then browse to the relevant executable. I set <em>Name</em> to <em>Notes 9.0</em>, vendor to <em>IBM</em>, and <em>Program file location</em> to <em>C:\Program Files (x86)\IBM\Notes\notes.exe</em>.</li>
+        <li>Skip the wizard page titled <em>Compatibility Modes</em>.</li>
+        <li>On the wizard page titled <em>Compatibility Fixes</em> select <em>SetEnvironmentVariable</em>, and then click the <em>Parameters</em> button.</li>
+        <li>Add the required variable name and value to the command line field in the form: <em>Variable|Value</em>. For example, to set the <em>SESSIONNAME</em> variable to <em>DUMMY</em>, enter <em>SESSIONNAME|DUMMY</em>.</li>
+        <li>Complete the remainder of the wizard by selecting the default options.</li>
+        <li>Save the database (e.g. <em>C:\Temp\Notes.sdb</em>).</li>
+        <li>Copy the database to the system where you want to spoof the environment variable (e.g. <em>C:\Windows\Notes.sdb</em>).</li>
+        <li>Install the database via the command line using: <code>sdbinst.exe -q C:\Windows\Notes.sdb</code></li>
+      </ol>
+      <p>That's it. Now, when you run Notes it will read the value of the <em>SESSIONNAME</em> environment variable as <em>DUMMY</em>. You can confirm this by using <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/process-explorer">Process Explorer</a> (look at the <em>Environment</em> tab on the <em>Properties</em> dialog for the <em>notes.exe</em> process).</p>
+      <p>Happy spoofing.</p>
+      <footer>
+        <p><span>Published: 2017-03-15</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

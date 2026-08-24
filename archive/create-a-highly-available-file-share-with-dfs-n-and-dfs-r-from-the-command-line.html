@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create a Highly Available File Share with DFS-N and DFS-R from the Command Line</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create a Highly Available File Share with DFS-N and DFS-R from the Command Line</h1>
+    </header>
+    <main class="archive">
+      <p>In this article I will demonstrate how to use the command line to create a highly available file share with DFS-N and DFS-R. In particular, I will describe the configuration required for creating a "users" share suitable for hosting user home drives.</p>
+      <p>From an elevated command prompt, let's start by creating the required folder structure:</p>
+      <pre><code>mkdir C:\Shares
+mkdir C:\Shares\Users</code></pre>
+      <p>Now, let's share the <em>Users</em> folder, granting the <em>Everyone</em> group <em>Full Control</em>:</p>
+      <pre><code>net share Users=C:\Shares\Users /Grant:Everyone,Full</code></pre>
+      <p>The next step is to remove all inherited permissions on <code>C:\Shares</code>, and to explicitly grant <em>Administrators</em> and <em>System</em> <em>Full Control</em>:</p>
+      <pre><code>icacls C:\Shares /inheritance:r
+icacls C:\Shares /grant Administrators:(OI)(CI)F
+icacls C:\Shares /grant System:(OI)(CI)F</code></pre>
+      <p>We then grant <em>Authenticated Users</em> the <em>Create folders / append data</em> permission on <code>C:\Shares\Users</code>, limiting the permission to <em>This folder only</em>. This is necessary to facilitate the auto-creation of a user home drive when a new user logs onto a domain-member workstation for the first time (assuming group policy is configured to enable this behaviour). We also grant <em>Creator Owner</em> the <em>Modify</em> permission on <em>Subfolders and files only</em>, thereby ensuring that users are able to add/remove content within their home drive folder once it is created.</p>
+      <pre><code>icacls C:\Shares\Users /grant &quot;Creator Owner&quot;:(OI)(CI)(IO)M
+icacls C:\Shares\Users /grant &quot;Authenticated Users&quot;:(S,AD)</code></pre>
+      <p>Having completed the configuration of the file system, we will now install the DFS-N and DFS-R features. We also explicitly configure the DFS namespace server to use fully qualified name referrals. From an elevated PowerShell prompt run:</p>
+      <pre><code>Install-WindowsFeature FS-DFS-Namespace, FS-DFS-Replication
+Set-DfsnServerConfiguration . -UseFqdn:$true
+Stop-Service dfs; Start-Service dfs</code></pre>
+      <p>This completes the basic configuration on the first server; the exact same procedure should now be completed on the second filer server.</p>
+      <p>The next step is to create a DFS namespace named &quot;Users&quot; that points to the share on the first file server:</p>
+      <pre><code>New-DfsnRoot -TargetPath &quot;\\server1.lab.hinchley.net\users&quot; -Type DomainV2 -Path &quot;\\lab.hinchley.net\users&quot;</code></pre>
+      <p>And then add a second DFS-N target, which points to the second file server:</p>
+      <pre><code>New-DfsnRootTarget -TargetPath &quot;\\server2.lab.hinchley.net\users&quot; -Path &quot;\\lab.hinchley.net\users&quot;</code></pre>
+      <p>That's it. DFS-N is done. Now let's move onto DFS-R.</p>
+      <p>The PowerShell cmdlets required to configure DFS-R are installed via the <em>DFS Management Tools</em> feature (RSAT-DFS-Mgmt-Con). Unfortunately, this feature has a dependency on the <em>Graphical Management Tools and Infrastructure</em> feature (Server-Gui-Mgmt-Infra). Hence, if you want to avoid installing any GUI components on your file server, and you want to configure DFS-R using PowerShell, you will need to do so from a remote server that includes the requisite tools.</p>
+      <p>Assuming you've got this covered, the following commands will create a DFS-R replication group named &quot;LAN&quot;, consisting of &quot;server1&quot; and &quot;server 2&quot;, and replicating a folder named &quot;Users&quot;, referencing the folder path <code>C:\Shares\Users</code>:</p>
+      <pre><code>New-DfsReplicationGroup -GroupName LAN | New-DfsReplicatedFolder -FolderName Users | Add-DfsrMember -ComputerName server1.lab.hinchley.net, server2.lab.hinchley.net
+Set-DfsrMembership -GroupName &quot;LAN&quot; -FolderName &quot;Users&quot; -ContentPath C:\Shares\Users -ComputerName server1.lab.hinchley.net, server1.lab.hinchley.net -confirm:$false -Force</code></pre>
+      <p>The next two commands will create a bi-directional connection between the members of the replication group, and configure &quot;server1&quot; as the primary node:</p>
+      <pre><code>Add-DfsrConnection -GroupName LAN -SourceComputerName server1.lab.hinchley.net -DestinationComputerName server2.lab.hinchley.net
+Set-DfsrMembership -GroupName LAN -FolderName Users -ComputerName server1.lab.hinchley.net -PrimaryMember $true -Force</code></pre>
+      <p>Finally, we will create a link between the DFS-N namespace we previously created, and the new DFS-R replicated folder:</p>
+      <pre><code>$Object = [adsi]&quot;LDAP://CN=Users,CN=Content,CN=LAN,CN=DFSR-GlobalSettings,CN=System,DC=lab,DC=hinchley,DC=net&quot;
+$Object.put(&quot;msDFSR-DfsPath&quot;, &quot;\\lab.hinchley.net\Users&quot;)
+$Object.SetInfo()</code></pre>
+      <p>Let's repeat the process, but this time we will create a &quot;group&quot; share, and as an added bonus, we will only use PowerShell. There are a couple of steps that don't need to be repeated; the creation of the top-level &quot;shares&quot; folder, and the creation of the DFS-R replication group (we will reuse the LAN group).</p>
+      <p>This code should be executed on both file servers:</p>
+      <pre><code># Set the folder path.
+$folder = &quot;C:\Shares\Groups&quot;
+
+# Create the folder.
+New-Item -Type Directory $folder
+
+# Create the share.
+New-SmbShare –Name Groups –Path $folder -FullAccess Everyone
+
+# Grant &quot;Authenticated Users&quot; the &quot;Modify&quot; permission to the folder.
+$acl = Get-Acl $folder
+$rule = New-Object  System.Security.AccessControl.FileSystemAccessRule(&quot;Authenticated Users&quot;, &quot;Modify&quot;, &quot;ContainerInherit, ObjectInherit&quot;, &quot;None&quot;, &quot;Allow&quot;)
+$acl.SetAccessRule($rule)
+Set-Acl $folder $acl </code></pre>
+      <p>This code should be executed from a server with access to both the DFS-N and DFS-R cmdlets:</p>
+      <pre><code># Create the DFS-N namespace.
+New-DfsnRoot -TargetPath &quot;\\server1.lab.hinchley.net\groups&quot; -Type DomainV2 -Path &quot;\\lab.hinchley.net\groups&quot;
+New-DfsnRootTarget -TargetPath &quot;\\server2.lab.hinchley.net\groups&quot; -Path &quot;\\lab.hinchley.net\groups&quot;
+
+# Configure DFS-R replication.
+Get-DfsReplicationGroup -GroupName LAN | New-DfsReplicatedFolder -FolderName Groups
+
+Set-DfsrMembership -GroupName LAN -FolderName Groups -ContentPath C:\Shares\Groups -ComputerName server1.lab.hinchley.net, server2.lab.hinchley.net -Force
+
+Set-DfsrMembership -GroupName LAN -FolderName Groups -ComputerName server1.lab.hinchley.net -PrimaryMember $true
+
+# Link DFS-R and DFS-N.
+$Object = [adsi]&quot;LDAP://CN=Groups,CN=Content,CN=LAN,CN=DFSR-GlobalSettings,CN=System,DC=lab,DC=hinchley,DC=net&quot;
+
+$Object.put(&quot;msDFSR-DfsPath&quot;, &quot;\\lab.hinchley.net\Groups&quot;)
+
+$Object.SetInfo()</code></pre>
+      <p>That's it.</p>
+      <footer>
+        <p><span>Published: 2015-09-30</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Configure a Task Sequence in SCCM 2012 R2 SP1 using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Configure a Task Sequence in SCCM 2012 R2 SP1 using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>In this article I will demonstrate how to use PowerShell to deploy a previously captured operating system image using Microsoft Configuration Manager 2012 R2 SP1.</p>
+      <p>This post is a continuation of a series of articles that describe the <a href="install-microsoft-sccm-2012-r2-sp1.html">installation of SCCM 2012 R2 SP1</a>, <a href="post-installation-configuration-of-microsoft-sccm-2012-r2-sp1.html">post-installation configuration of SCCM</a>, and the <a href="/articles/install-and-configure-microsoft-deployment-toolkit-2013-using-powershell/">installation and configuration of MDT 2013</a>.</p>
+      <p>To import a captured operating system image (i.e. captured via MDT) into SCCM:</p>
+      <pre><code>Import-Module -Name &quot;$(split-path $Env:SMS_ADMIN_UI_PATH)\ConfigurationManager.psd1&quot;
+Set-Location LAB:
+
+$SiteCode   = (Get-CMSite).SiteCode
+$SiteServer = (Get-CMSite).ServerName
+
+New-CMOperatingSystemImage -Name &quot;Windows 10&quot; -Path &quot;\\lab.hinchley.net\Software\Operating System Images\Windows 10\Windows 10.wim&quot;</code></pre>
+      <p>To copy the content in this package to a package share, enable binary differential distribution, and to actually distribute the package to the distribution point on the primary site server:</p>
+      <pre><code>Set-CMOperatingSystemImage -Name &quot;Windows 10&quot; -CopyToPackageShareOnDistributionPoint $true -EnableBinaryDeltaReplication $true
+Start-CMContentDistribution -OperatingSystemImageName &quot;Windows 10&quot; -DistributionPointName $SiteServer</code></pre>
+      <p>Unfortunately, we can't customise the default WinPE 10 boot images using the native SCCM 2012 cmdlets. To overcome this issue, we will use WMI to copy the images to a package share, enable differential distribution, and also to enable <em>F8 command support</em>:</p>
+      <pre><code>Get-WmiObject -Namespace &quot;root\SMS\site_$($SiteCode)&quot; -Class SMS_BootImagePackage | %{
+  $image = [wmi]&quot;$($_.__PATH)&quot;
+  # enable F8 command support
+  $image.EnableLabShell = $true
+  # copy to package share
+  $image.PkgFlags = $image.PkgFlags -bor 0x00000080
+  # differential replication
+  $image.PkgFlags = $image.PkgFlags -bor 0x04000000
+  $image.Put()
+}</code></pre>
+      <p>And now we can distribute the boot images:</p>
+      <pre><code>Get-CMBootImage | %{
+  Start-CMContentDistribution -BootImageName $_.Name -DistributionPointName $SiteServer
+}</code></pre>
+      <p>To ensure we can run task sequences directly from a distribution point, it is necessary that all packages referenced by a task sequence are copied to a package share. Unfortunately, the default Configuration Manager package is "locked" and the <em>copy to package share</em> property cannot be set. To overcome this issue, we will create a new version of the package:</p>
+      <pre><code>$Client = &quot;Microsoft Configuraiton Manager Client&quot;
+New-CMPackage -Name $Client -Path &quot;\\$SiteServer\SMS_$SiteCode\Client&quot;
+Set-CMPackage -Name $Client -CopyToPackageShareOnDistributionPoint $true -EnableBinaryDeltaReplication $true
+Start-CMContentDistribution -PackageName $Client -DistributionPointName $SiteServer</code></pre>
+      <p>The next step is to create a task sequence for deploying the operating system:</p>
+      <pre><code>New-CMTaskSequence -InstallOperatingSystemImageOption `
+  -TaskSequenceName &quot;Windows 10&quot; `
+  -BootImagePackageId (Get-CMBootImage -Name &quot;Boot image (x64)&quot;).PackageID `
+  -OperatingSystemImagePackageId (Get-CMOperatingSystemImage -Name &quot;Windows 10&quot;).PackageID `
+  -OperatingSystemImageIndex 1 `
+  -ClientPackagePackageId (Get-CMPackage -Name &quot;Microsoft Configuraiton Manager Client&quot;).PackageID `
+  -JoinDomain DomainType `
+  -DomainName &quot;lab.hinchley.net&quot; `
+  -DomainAccount &quot;LAB\administrator&quot; `
+  -DomainPassword (Read-Host &quot;Domain Join Password&quot; -AsSecureString) `
+  -DomainOrganizationUnit &quot;LDAP://OU=Workstations,DC=lab,DC=hinchley,DC=net&quot; `
+  -PartitionAndFormatTarget $true `
+  -LocalAdminPassword (Read-Host &quot;Local Admin Password&quot; -AsSecureString)</code></pre>
+      <p>And finally, we will create a deployment for the task sequence, advertising the operating system to <em>All Unknown Computers</em>:</p>
+      <pre><code>Start-CMTaskSequenceDeployment `
+  -TaskSequencePackageId (Get-CMTaskSequence -Name &quot;Windows 10&quot;).PackageID `
+  -CollectionName &quot;All Unknown Computers&quot; `
+  -DeployPurpose Available `
+  -Availability MediaAndPxe `
+  -ShowTaskSequenceProgress $true `
+  -DeploymentOption RunFromDistributionPoint
+  -AllowFallback $false
+  -AllowSharedContent $false</code></pre>
+      <p>Assuming you have DHCP enabled on your network, try PXE-booting a virtual machine - you should see an option to deploy Windows 10 via SCCM.</p>
+      <footer>
+        <p><span>Published: 2015-10-17</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

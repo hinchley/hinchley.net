@@ -1,0 +1,1178 @@
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pete Hinchley: Bookmarks</title>
+  <id>tag:hinchley.net,2026:bookmarks</id>
+  <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html" />
+  <link rel="self" type="application/atom+xml" href="https://hinchley.net/bookmarks.xml" />
+  <updated>2026-08-24T00:00:00Z</updated>
+  <author><name>Pete Hinchley</name></author>
+  <entry>
+    <title>TechPowerUp - IT News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-08-24-1" />
+    <id>tag:hinchley.net,2026:bookmark-2026-08-24-1</id>
+    <published>2026-08-24T00:00:00Z</published>
+    <updated>2026-08-24T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.techpowerup.com">TechPowerUp</a> - IT News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Typing - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-08-24-2" />
+    <id>tag:hinchley.net,2026:bookmark-2026-08-24-2</id>
+    <published>2026-08-24T00:00:00Z</published>
+    <updated>2026-08-24T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://typ.ing">Typing</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Bruce Ediger - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-1" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-1</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://bruceediger.com">Bruce Ediger</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Cyrus Lopez - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-2" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-2</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://unix.foo">Cyrus Lopez</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Dan Heskett - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-3" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-3</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://danheskett.com">Dan Heskett</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Dan Luu - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-4" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-4</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://danluu.com">Dan Luu</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Denis Defreyne - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-5" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-5</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://denisdefreyne.com">Denis Defreyne</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Gwern Branwen - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-6" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-6</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://gwern.net">Gwern Branwen</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Julia Evans - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-7" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-7</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://jvns.ca">Julia Evans</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Kevin Boone - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-8" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-8</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://kevinboone.me">Kevin Boone</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Kognise - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-9" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-9</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://kognise.dev">Kognise</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Kottke - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-10" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-10</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://kottke.org">Kottke</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Linus Lee - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-11" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-11</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://thesephist.com">Linus Lee</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>mrusme - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-12" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-12</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://xn--gckvb8fzb.com">mrusme</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Nelson Figueroa - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-13" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-13</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://nelson.cloud">Nelson Figueroa</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Patrick Boyd - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-14" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-14</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://blog.ppb1701.com">Patrick Boyd</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Shaygan Hooshyari - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-15" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-15</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://glyphack.com">Shaygan Hooshyari</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Simon Wilson - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-16" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-16</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://simonwillison.net">Simon Wilson</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Stratechery - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-17" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-17</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://stratechery.com">Stratechery</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Terence Eden - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-18" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-18</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://shkspr.mobi/blog/">Terence Eden</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Waxy - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-19" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-19</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://waxy.org">Waxy</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>XXIIVV - Blogs</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-20" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-20</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://wiki.xxiivv.com/site/home.html">XXIIVV</a> - Blogs.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>EXT - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-21" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-21</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://ext.to">EXT</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>FMHY - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-22" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-22</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://fmhy.net">FMHY</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Library Genesis - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-23" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-23</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://libgen.im">Library Genesis</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>LimeTorrents - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-24" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-24</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://limetorrents.fun">LimeTorrents</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Standard eBooks - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-25" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-25</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://standardebooks.org">Standard eBooks</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>The Pirate Bay - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-26" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-26</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://thepiratebay.org/index.html">The Pirate Bay</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Torrent Downloads - Downloads</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-27" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-27</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.torrentdownloads.pro">Torrent Downloads</a> - Downloads.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Bubbles - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-28" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-28</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://bubbles.town">Bubbles</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Hacker News - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-29" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-29</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://news.ycombinator.com">Hacker News</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Lobsters - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-30" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-30</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://lobste.rs">Lobsters</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Reddit - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-31" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-31</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.reddit.com">Reddit</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>TextLog - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-32" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-32</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://textlog.cc">TextLog</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Whirlpool Forums - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-33" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-33</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://forums.whirlpool.net.au">Whirlpool Forums</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>X (Cancel) - Forums</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-34" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-34</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://xcancel.com">X (Cancel)</a> - Forums.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Ars Technica - IT News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-35" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-35</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://arstechnica.com">Ars Technica</a> - IT News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>IT News - IT News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-36" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-36</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.itnews.com.au">IT News</a> - IT News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>The Verge - IT News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-37" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-37</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.theverge.com">The Verge</a> - IT News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Wired - IT News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-38" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-38</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.wired.com">Wired</a> - IT News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Coder Musings - Learning</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-39" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-39</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.codermusings.com">Coder Musings</a> - Learning.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Making Software - Learning</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-40" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-40</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.makingsoftware.com">Making Software</a> - Learning.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Software Construction (MIT) - Learning</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-41" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-41</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://web.mit.edu/6.031">Software Construction (MIT)</a> - Learning.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Ambiphone - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-42" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-42</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://ambiph.one">Ambiphone</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Five Books - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-43" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-43</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://fivebooks.com">Five Books</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Metacritic: New Albums - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-44" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-44</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.metacritic.com/browse/albums/release-date/new-releases/date">Metacritic: New Albums</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>My Noise - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-45" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-45</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://mynoise.net/noiseMachines.php">My Noise</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Pitchfork - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-46" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-46</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://pitchfork.com">Pitchfork</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Spotify - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-47" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-47</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://open.spotify.com">Spotify</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>TV Guide - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-48" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-48</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.yourtv.com.au/guide/canberra/">TV Guide</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Wallhaven - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-49" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-49</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://wallhaven.cc">Wallhaven</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>YouTube - Media</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-50" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-50</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.youtube.com">YouTube</a> - Media.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>BGP Tools - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-51" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-51</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://bgp.tools">BGP Tools</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>DNS Leak Test - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-52" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-52</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://dnsleaktest.com">DNS Leak Test</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>DNS Lookup - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-53" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-53</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://dnslookup.online">DNS Lookup</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>ifconfig - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-54" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-54</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://ifconfig.co">ifconfig</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>MX Toolbox - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-55" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-55</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://mxtoolbox.com/SuperTool.aspx">MX Toolbox</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Never SSL - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-56" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-56</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="http://neverssl.com">Never SSL</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Port Tester - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-57" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-57</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="http://portquiz.net">Port Tester</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Web Check - Network Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-58" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-58</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://web-check.xyz">Web Check</a> - Network Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>ABC - News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-59" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-59</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.abc.net.au">ABC</a> - News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>News as Facts - News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-60" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-60</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://newsasfacts.com">News as Facts</a> - News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>New York Times - News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-61" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-61</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.nytimes.com">New York Times</a> - News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>ProPublica - News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-62" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-62</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.propublica.org">ProPublica</a> - News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Rest of World - News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-63" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-63</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://restofworld.org">Rest of World</a> - News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Vox - News</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-64" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-64</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.vox.com">Vox</a> - News.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Fastmail - Productivity</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-65" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-65</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://app.fastmail.com">Fastmail</a> - Productivity.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Keeper - Productivity</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-66" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-66</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.keepersecurity.com/?data_region=au">Keeper</a> - Productivity.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Standard Notes - Productivity</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-67" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-67</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://app.standardnotes.com">Standard Notes</a> - Productivity.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Tweek - Productivity</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-68" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-68</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://tweek.so">Tweek</a> - Productivity.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>C Documentation - Reference</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-69" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-69</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://devdocs.io/c/">C Documentation</a> - Reference.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Google Maps - Reference</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-70" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-70</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.google.com/maps">Google Maps</a> - Reference.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Linux man Pages - Reference</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-71" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-71</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.mankier.com">Linux man Pages</a> - Reference.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Wikipedia - Reference</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-72" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-72</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.wikipedia.org">Wikipedia</a> - Reference.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Brave - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-73" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-73</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://search.brave.com">Brave</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Duck Duck Go - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-74" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-74</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://duckduckgo.com">Duck Duck Go</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Google - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-75" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-75</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.google.com">Google</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Google Search (UDM14) - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-76" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-76</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://udm14.com">Google Search (UDM14)</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Marginalia - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-77" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-77</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://marginalia-search.com">Marginalia</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Mwmbl - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-78" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-78</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://mwmbl.org">Mwmbl</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Yandex - Search</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-79" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-79</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://yandex.com">Yandex</a> - Search.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>ChatGPT - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-80" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-80</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://chatgpt.com">ChatGPT</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Claude - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-81" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-81</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://claude.ai">Claude</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Copilot - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-82" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-82</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://copilot.microsoft.com">Copilot</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Gemini - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-83" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-83</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://gemini.google.com/app">Gemini</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Grok - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-84" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-84</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="http://grok.com">Grok</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Kimi - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-85" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-85</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.kimi.com">Kimi</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Meta.ai - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-86" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-86</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://meta.ai">Meta.ai</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Mistral - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-87" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-87</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://chat.mistral.ai/chat">Mistral</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Perplexity - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-88" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-88</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.perplexity.ai">Perplexity</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Qwen - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-89" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-89</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://chat.qwen.ai">Qwen</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Sigma - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-90" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-90</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://app.sigmabrowser.com/chat">Sigma</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Tropes - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-91" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-91</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://tropes.fyi">Tropes</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Z.ai - Slop</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-92" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-92</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://chat.z.ai">Z.ai</a> - Slop.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>ANSI 101 - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-93" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-93</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.ansi101.com">ANSI 101</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>ASCII Flow - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-94" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-94</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://asciiflow.com">ASCII Flow</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Base64 - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-95" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-95</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.base64.sh">Base64</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Compiler Explorer - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-96" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-96</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://godbolt.org">Compiler Explorer</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Copy Char - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-97" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-97</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://copychar.cc">Copy Char</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>C Repl - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-98" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-98</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.online-cpp.com/online_c_compiler">C Repl</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Epoch Converter - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-99" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-99</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://epoch.vercel.app">Epoch Converter</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>EPUB to AZW - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-100" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-100</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://convertio.co/epub-azw3/">EPUB to AZW</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Hemingway - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-101" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-101</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://hemingwayapp.com">Hemingway</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Keybr - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-102" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-102</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.keybr.com">Keybr</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Send to Kindle - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-103" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-103</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.amazon.com.au/sendtokindle">Send to Kindle</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Squoosh - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-104" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-104</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://squoosh.app">Squoosh</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Time.fyi - Tools</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-105" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-105</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://time.fyi">Time.fyi</a> - Tools.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Bolly - Weather</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-106" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-106</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://brolly.sh/forecast/rug3AbnB">Bolly</a> - Weather.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Forecast: BOM - Weather</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-107" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-107</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="http://www.bom.gov.au/act/forecasts/canberra.shtml">Forecast: BOM</a> - Weather.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Forecast: YR - Weather</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-108" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-108</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.yr.no/en/forecast/daily-table/2-2172517/Australia/Australian%20Capital%20Territory/Canberra">Forecast: YR</a> - Weather.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Rain Radar - Weather</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-109" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-109</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://theweatherchaser.com/radar/IDR403-canberra">Rain Radar</a> - Weather.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Wind Map - Weather</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-110" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-110</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://earth.nullschool.net">Wind Map</a> - Weather.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Fireship - YouTube</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-111" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-111</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.youtube.com/@Fireship">Fireship</a> - YouTube.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Never to Small - YouTube</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-112" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-112</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.youtube.com/@nevertoosmall">Never to Small</a> - YouTube.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Nir Lichtman - YouTube</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-113" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-113</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.youtube.com/@nirlichtman">Nir Lichtman</a> - YouTube.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Tsoding - YouTube</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-114" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-114</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.youtube.com/@Tsoding">Tsoding</a> - YouTube.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Tsoding Daily - YouTube</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-115" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-115</id>
+    <published>2026-01-01T00:00:00Z</published>
+    <updated>2026-01-01T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://www.youtube.com/@TsodingDaily">Tsoding Daily</a> - YouTube.]]>
+    </content>
+  </entry>
+</feed>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Use PowerShell to Mute the Volume when Headphones are not Connected to a Windows Computer</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Use PowerShell to Mute the Volume when Headphones are not Connected to a Windows Computer</h1>
+    </header>
+    <main class="archive">
+      <p>I was recently asked to devise a solution to prevent staff from listening to audio on a Windows computer without using headphones (i.e. to disable sound via speakers, but to allow sound via headphones). An odd request, I admit, and not quite as simple to implement as I first expected.</p>
+      <p>In many computers, the internal speakers/audio-out jack, and the headphone jack, are represented as distinct devices that can be independently enabled and disabled. In these systems, preventing sound via speakers, but allowing sound via headphones, is as straight forward as disabling the associated device. However, in some computers, the audio interfaces are all managed via a single device, and it isn't possible to disable one interface, without also disabling the others.</p>
+      <p>To cater for this scenario, I decided on the following approach:</p>
+      <ol>
+        <li>I would mute the sound when headphones were not attached to the computer, and unmute the sound when headphones were attached.</li>
+        <li>I would override any attempt to unmute the sound when headphones were not attached.</li>
+      </ol>
+      <p>Instead of muting the sound, I could have chosen to completely disable the Windows Audio service (<em>audiosrv</em>) - this would have been an easier solution - but stopping and starting the service seemed like an overly heavy-handed approach.</p>
+      <p>The first step in building the solution was to find a way of detecting when headphones were plugged into to the computer. Unfortunately, on the system I was using, which managed all audio through a single device, this proved difficult. In the end, instead of trying to proactively hook a system event that signalled a change in the status of the headphone jack, I decided to look for a registry value that would toggle state whenever headphones were connected. This was relatively easy - I started <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/procmon">Process Monitor</a>, filtered on the <em>RegSetValue</em> operation, and then plugged/unplugged a set of headphones. This revealed that a specific registry value was changed to <em>1</em> whenever headphones were connected, and <em>0</em> when they were disconnected.</p>
+      <p>Note: I have intentionally omitted the actual registry value from this article, as it is specific to the model of computer (and audio device driver) that I was using, and therefore unlikely to be relevant to others. You should use Process Monitor to determine the path that is used on your system.</p>
+      <p>Now that I had a way of programmatically determining if headphones were connected, I needed a way of triggering an action whenever the value of the corresponding registry entry was changed. For this I decided to use a <a href="https://docs.microsoft.com/en-us/windows/win32/wmisdk/registering-for-system-registry-events">registry monitor</a>.</p>
+      <p>Before delving into the actual code I used in the final solution, it might be helpful to provide a quick generic example of how to monitor changes to a registry value using the <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/register-wmievent">register-wmievent</a> PowerShell cmdlet.</p>
+      <p>The following code will monitor the <em>Bar</em> value under the <code>HKLM:\Software\Foo</code> key, and output a message (the name of the key) to the console each time the value is modified. Note: The script assumes the registry entry already exists.</p>
+      <p>As you can see, the auto-generated <em>$event</em> variable within the <em>action</em> scriptblock is used to retrieve information about the registry value that was changed.</p>
+      <pre><code># always use double slashes for the registry key.
+$key = &quot;software\\foo&quot;
+
+# the registry value (under the key) to monitor.
+$val = &quot;bar&quot;
+
+# the name assigned to the event filter.
+$sourceidentifier = &quot;regmon&quot;
+
+# the wmi query defining the event filter.
+$query = &quot;select * from registryvaluechangeevent where hive = 'HKEY_LOCAL_MACHINE' and keypath = '$key' and valuename = '$val'&quot;
+
+# the scriptblock to run when the event is triggered.
+$action = {
+  $e = $event.sourceargs.newevent
+  write-host $(&quot;{0} was passed into the event action&quot; -f $event.messagedata.foo)
+  write-host $(&quot;HKLM:{0}\{1} was changed&quot; -f $e.keypath, $e.valuename)
+}
+
+# data to pass into the action.
+$messagedata = @{ foo = &quot;Foobar&quot; }
+
+# start monitoring.
+register-wmievent -sourceidentifier $sourceidentifier -query $query -action $action -messagedata $messagedata</code></pre>
+      <p>To stop the event monitor, run the following command:</p>
+      <pre><code>unregister-event &quot;regmon&quot;</code></pre>
+      <p>The next step involves programmatically muting the sound of the computer. There is a great example on <a href="http://stackoverflow.com/questions/255419/how-can-i-mute-unmute-my-sound-from-powershell/19348221#19348221">StackOverflow</a> demonstrating how this can be achieved with PowerShell via the <a href="https://docs.microsoft.com/en-us/windows/win32/coreaudio/core-audio-apis-in-windows-vista">Core Audio API</a>. Unfortunately, invoking COM from managed code is never pretty, so after looking for a cleaner solution, I decided to leverage the <a href="https://github.com/naudio/NAudio">NAudio Library</a>.</p>
+      <p>Working with NAudio in PowerShell is straight forward. Just download the <a href="https://www.nuget.org/packages/NAudio/">compiled library</a>, reference the extracted <em>NAudio.dll</em>, and start exploring the API.</p>
+      <p>As an example, the following script uses the library to prevent users from changing the system volume level. The approach is similar to that used in the previous example; however, in this case we are using the <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/register-objectevent">register-objectevent</a> cmdlet to hook the <em>OnVolumeNotification</em> event, which is then used to reset the volume to the value retrieved (via the <em>MasterVolumeLevelScalar</em> property) at the time the handler was registered.</p>
+      <pre><code>add-type -path 'c:/naudio/naudio.dll'
+
+$devices = new-object naudio.coreaudioapi.mmdeviceenumerator
+$defaultdevice = $devices.getdefaultaudioendpoint([naudio.coreaudioapi.dataflow]::render, [naudio.coreaudioapi.role]::multimedia)
+$volumecontrol = $defaultdevice.audioendpointvolume
+
+register-objectevent -inputobject $volumecontrol -sourceidentifier 'volume' -eventname onvolumenotification -action { $volumecontrol.mastervolumelevelscalar = $event.messagedata } -messagedata $volumecontrol.mastervolumelevelscalar</code></pre>
+      <p>And this time, to unregister the monitor:</p>
+      <pre><code>unregister-event &quot;volume&quot;</code></pre>
+      <p>We can now combine the concepts explored in these two examples - using a registry monitor to detect the presence of headphones, and another monitor to detect changes in system volume - to develop the final solution (as shown below).</p>
+      <p>When the script is started it will query the registry to determine if headphones are connected (I am using a bogus registry path of <code>HKLM\Software\Audio\Headphones</code>; you should use the path that is appropriate for your system), and if they are not, it will mute the volume, and register an event handler to detect changes to it. It will also configure a registry monitor to detect when the headphone status changes. When headphones are connected, the handler will remove the event monitor for detecting changes to the volume, and then unmute the system; and conversely, when headphones are removed, the volume will be muted, and the volume control event monitor will be re-instated.</p>
+      <pre><code>add-type -path 'c:/naudio/naudio.dll'
+
+$key = &quot;software\\audio&quot;;
+$val = &quot;headphones&quot;
+
+$devices = new-object naudio.coreaudioapi.mmdeviceenumerator
+$defaultdevice = $devices.getdefaultaudioendpoint([naudio.coreaudioapi.dataflow]::render, [naudio.coreaudioapi.role]::multimedia)
+$volumecontrol = $defaultdevice.audioendpointvolume
+
+function mute($volumecontrol) {
+  $volumecontrol.mute = $true
+  register-objectevent -inputobject $volumecontrol -sourceidentifier mute -eventname onvolumenotification -action { $volumecontrol.mute = $true }
+}
+
+function unmute($volumecontrol) {
+  unregister-event -sourceidentifier mute
+  $volumecontrol.mute = $false
+}
+
+$action = {
+  $volumecontrol = $event.messagedata.volumecontrol
+
+  $mute = $event.messagedata.mute
+  $unmute = $event.messagedata.unmute
+
+  $key = $event.sourceeventargs.newevent.keypath
+  $val = $event.sourceeventargs.newevent.valuename
+
+  $status = get-itemproperty -path hklm:$key -name $val | select -expandproperty $val
+
+  if ($noheadphones = $status -eq 0) { &amp; $mute $volumecontrol } else { &amp; $unmute $volumecontrol }
+}
+
+$wmi = @{
+  sourceidentifier = &quot;regmon&quot;;
+  query = &quot;select * from registryvaluechangeevent where hive = 'hkey_local_machine' and keypath = '$key' and valuename = '$val'&quot;;
+  action = $action;
+  messagedata = @{ volumecontrol = $volumecontrol; mute = ${function:mute}; unmute = ${function:unmute} }
+}
+
+$status = get-itemproperty -path hklm:$($key -replace '\\', '\') -name $val | select -expandproperty $val
+if ($noheadphones = $status -eq 0) { mute $volumecontrol }
+
+$result = register-wmievent @wmi</code></pre>
+      <p>It is worth pointing out that both event monitors used in the script (one for the registry, and the other for the volume) retrospectively respond to changes of state. i.e. the event handlers fire after the event has occurred; they do not actually block the event. In other words, if a user attempts to unmute the volume when headphones are not connected, there will be a brief period (in the order of milliseconds) before the event handler is effective in reversing the action.</p>
+      <p>The final step in implementing the solution is to create a scheduled task, running under the context of the local system account, that will launch the PowerShell script on system startup. This will ensure the requirement for using headphones to listen to audio will apply to all users of the computer, and furthermore, it will prevent non-privileged users from circumventing the restriction by killing the executing process (only local administrators will be able to terminate the script).</p>
+      <p>Note: When executing the above script via a non-interactive PowerShell session, it is essential you use the <em>-noexit</em> switch, as the event monitors will be torn down when the parent process exits. For example:</p>
+      <pre><code>powershell.exe -noexit -file c:\scripts\mute.ps1</code></pre>
+      <p>I don't expect too many people will need to implement a solution such as this, but hopefully the examples that demonstrate the use of event monitors and the NAudio library via PowerShell are helpful to others.</p>
+      <footer>
+        <p><span>Published: 2016-12-05</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

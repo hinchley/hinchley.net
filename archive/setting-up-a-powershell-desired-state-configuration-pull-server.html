@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Setting up a PowerShell Desired State Configuration Pull Server</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Setting up a PowerShell Desired State Configuration Pull Server</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">This is an old post, and the technology is no longer supported.</p>
+      <p>In this post I will show how you can deploy a PowerShell Desired State Configuration (DSC) Pull Server on Windows Server 2016.</p>
+      <p>I am assuming you already have two systems deployed with Windows Server 2016. The first system, which we will configure as the Pull Server, is running IIS and has been assigned a valid web server certificate (e.g. from an enterprise certificate authority). The second system will be used as a DSC client.</p>
+      <p>Let's start by installing NuGet on the Pull Server:</p>
+      <pre><code>Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force</code></pre>
+      <p>Next, we will trust the <em>PSGallery</em> repository:</p>
+      <pre><code>Set-PSRepository -Name PSGallery -InstallationPolicy Trusted</code></pre>
+      <p>Let's list all the modules available within the <em>DSCResourceKit</em>:</p>
+      <pre><code>Find-Module -Tag DSCResourceKit</code></pre>
+      <p>You should see the <em>xPSDesiredStateConfiguration</em> module. We will use this module to configure the Pull Server. Let's install it:</p>
+      <pre><code>Install-Module xPSDesiredStateConfiguration</code></pre>
+      <p>With that out of the way, let's create <em>C:\DSC\PullServer\PullServer.ps1</em> with the following content:</p>
+      <pre><code>configuration DscPullServer {
+  param (
+    [string[]]$NodeName = 'localhost',
+
+    [ValidateNotNullOrEmpty()]
+    [string] $certificateThumbPrint,
+
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string] $RegistrationKey
+  )
+
+  Import-DSCResource –ModuleName PSDesiredStateConfiguration
+  Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+
+  Node $NodeName {
+    WindowsFeature DscServiceFeature {
+      Ensure = 'Present'
+      Name   = 'DSC-Service'
+    }
+
+    xDscWebService PSDSCPullServer {
+      Ensure                   = 'Present'
+      EndpointName             = 'PSDSCPullServer'
+      Port                     = 4430
+      PhysicalPath             = &quot;$env:SystemDrive\inetpub\PSDSCPullServer&quot;
+      CertificateThumbPrint    = $certificateThumbPrint
+      ModulePath               = &quot;$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules&quot;
+      ConfigurationPath        = &quot;$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration&quot;
+      State                    = 'Started'
+      DependsOn                = '[WindowsFeature]DscServiceFeature'
+      UseSecurityBestPractices = $false
+    }
+
+    File RegistrationKeyFile {
+      Ensure          = 'Present'
+      Type            = 'File'
+      DestinationPath = &quot;$env:ProgramFiles\WindowsPowerShell\DscService\RegistrationKeys.txt&quot;
+      Contents        = $RegistrationKey
+    }
+  }
+}</code></pre>
+      <p>The above configuration document outlines the configuration of the Pull Server. In particular, it will be used to create a new web site in IIS named <em>PSDSCPullServer</em> that listens on port 4430.</p>
+      <p>To invoke the configuration we will need to specify the thumbprint of the web server certificate already deployed to the server. You can see the thumbprints of the available certificates using the following command:</p>
+      <pre><code>dir Cert:\LocalMachine\my</code></pre>
+      <p>You will also need to generate a GUID that will be used as the unique key for registering new clients. The key provided by clients during the registration process must match this value - which is stored on the Pull Server in <em>C:\Program Files\WindowsPowerShell\DscService\RegistrationKeys.txt</em>. To generate a new GUID, run the following command:</p>
+      <pre><code>$key = [guid]::newGuid()</code></pre>
+      <p>We can now dot-source the configuration script, and invoke the configuration as follows (where <em>$cert</em> is set to the thumbprint of the web server certificate):</p>
+      <pre><code>cd C:\DSC\PullServer
+. .\DscPullServer.ps1
+DscPullServer -certificateThumbprint $cert -RegistrationKey $key -OutputPath C:\DSC\PullServer
+Start-DscConfiguration -Path . -Wait -Verbose</code></pre>
+      <p>If everything went to plan, the Pull Server will be successfully configured.</p>
+      <p>We will now move onto the client configuration. There are two parts to this process. First, we will create a configuration document, implemented as a role-based <a href="https://web.archive.org/web/20190110105958/https://docs.microsoft.com/en-us/powershell/dsc/pull-server/partialConfigs">partial</a> named <em>DefaultServer</em>, that will leverage the <a href="https://web.archive.org/web/20190108152435/https://docs.microsoft.com/en-us/powershell/dsc/reference/resources/windows/fileResource">File</a> resource to ensure that <em>C:\Temp</em> exists. We will then create another document to setup the Local Configuration Manager (LCM) on the target (which will force it to register with the Pull Server).</p>
+      <p>To create the configuration role, add the following content to <em>C:\DSC\DefaultServer\DefaultServer.ps1</em>:</p>
+      <pre><code>Configuration DefaultServer {
+  Import-DscResource -ModuleName PSDesiredStateConfiguration
+  Node DefaultServer {
+    File TempDirectoryExists {
+      Ensure          = 'Present'
+      Type            = 'Directory'
+      DestinationPath = 'C:\Temp'
+    }
+  }
+}</code></pre>
+      <p>Now dot-source the configuration, compile it, and deploy the resultant MOF (and the associated checksum) to the Pull Server configuration folder:</p>
+      <pre><code>cd C:\DSC\DefaultServer
+. .\DefaultServer.ps1
+DefaultServer
+New-DSCChecksum .\DefaultServer
+Copy-Item .\DefaultServer\* &quot;C:\Program Files\WindowsPowerShell\DscService\Configuration&quot; -Force</code></pre>
+      <p>Now create the LCM configuration document <em>C:\DSC\DefaultServer\DefaultServer.ps1</em> with the following content:</p>
+      <pre><code>[DSCLocalConfigurationManager()]
+Configuration LCMMetaConfig {
+  param (
+    [string[]] $ComputerName = 'localhost',
+
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string] $RegistrationKey
+  )
+
+  node $ComputerName {
+    Settings {
+      RefreshMode                    = 'Pull'
+      ConfigurationMode              = 'ApplyAndMonitor'
+      ActionAfterReboot              = 'ContinueConfiguration'
+      RebootNodeIfNeeded             = $false
+      ConfigurationModeFrequencyMins = '15'
+      RefreshFrequencyMins           = '30'
+      AllowModuleOverwrite           = $true
+    }
+
+    ConfigurationRepositoryWeb PullServerConfig {
+      ServerURL               = 'https://dsc.lab.hinchley.net:4430/PSDSCPullServer.svc'
+      AllowUnsecureConnection = $false
+      RegistrationKey         = $RegistrationKey
+      ConfigurationNames      = @('DefaultServer')
+    }
+
+    ReportServerWeb ReportServerConfig {
+      ServerURL               = 'https://dsc.lab.hinchley.net:4430/PSDSCPullServer.svc'
+      AllowUnsecureConnection = $false
+      RegistrationKey         = $RegistrationKey
+    }
+
+    PartialConfiguration DefaultServer {
+      Description         = 'DefaultServer'
+      ConfigurationSource = @('[ConfigurationRepositoryWeb]PullServerConfig')
+      RefreshMode         = 'Pull'
+    }
+  }
+}</code></pre>
+      <p>The above document will configure LCM to use the Pull Server <em>dsc.lab.hinchley.net</em>, assign the <em>DefaultServer</em> partial, and enable remediation of configuration drift (via the <em>ApplyAndAutoCorrect</em> mode).</p>
+      <p>To compile the configuration, we need to supply the name of the target system (which in my case is named <em>WINSTON</em>), and the previously defined registration key:</p>
+      <pre><code>cd C:\DSC\DefaultServer
+. .\LCMMetaConfig.ps1
+LCMMetaConfig -ComputerName WINSTON -RegistrationKey $key</code></pre>
+      <p>And to deploy the configuration to <em>WINSTON</em>:</p>
+      <pre><code>Set-DscLocalConfigurationManager -ComputerName WINSTON -Path '.\LCMMetaConfig' -Verbose</code></pre>
+      <p>This command should initiate the registration of the target system with the Pull Server. The client will then download and apply the <em>DefaultServer</em> configuration, which will force the creation of <em>C:\Temp</em> (if it doesn't already exist). The client will reapply the configuration every 15 minutes (recreating <em>C:\Temp</em> if necessary), and poll the Pull Server for policy updates every 30 minutes.</p>
+      <p>To check the configuration has applied successfully, run the following command on the client:</p>
+      <pre><code> Get-DSCLocalConfigurationManager</code></pre>
+      <p>The <em>PartialConfigurations</em> property should be set to <em>{[PartialConfiguration]DefaultServer}</em>.</p>
+      <p>And should you ever want to force the existing policy to be applied, run the following from the client:</p>
+      <pre><code>Start-DscConfiguration –UseExisting –Verbose –Wait</code></pre>
+      <footer>
+        <p><span>Published: 2017-04-17</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

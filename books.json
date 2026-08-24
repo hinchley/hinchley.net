@@ -1,0 +1,569 @@
+[
+  {
+    "name": "A Single Man",
+    "author": "Christopher Isherwood",
+    "url": "https://en.wikipedia.org/wiki/A_Single_Man_%28novel%29",
+    "date": "2026-08-19",
+    "id": "book-2026-08-19-1"
+  },
+  {
+    "name": "The Bell Jar",
+    "author": "Sylvia Plath",
+    "url": "https://en.wikipedia.org/wiki/The_Bell_Jar",
+    "date": "2026-08-08",
+    "id": "book-2026-08-08-1"
+  },
+  {
+    "name": "The Talented Mr Ripley",
+    "author": "Patricia Highsmith",
+    "url": "https://en.wikipedia.org/wiki/The_Talented_Mr._Ripley",
+    "date": "2026-08-03",
+    "id": "book-2026-08-03-1"
+  },
+  {
+    "name": "Darkness at Noon",
+    "author": "Arthur Koestler",
+    "url": "https://en.wikipedia.org/wiki/Darkness_at_Noon",
+    "date": "2026-07-29",
+    "id": "book-2026-07-29-1"
+  },
+  {
+    "name": "And Then There Were None",
+    "author": "Agatha Christie",
+    "url": "https://en.wikipedia.org/wiki/And_Then_There_Were_None",
+    "date": "2026-07-27",
+    "id": "book-2026-07-27-1"
+  },
+  {
+    "name": "Death of an Ordinary Man",
+    "author": "Sarah Perry",
+    "url": "https://app.thestorygraph.com/books/1c94021c-aa1d-4b5a-9f73-e5b86e024c0e",
+    "date": "2026-07-17",
+    "id": "book-2026-07-17-1"
+  },
+  {
+    "name": "Great Expectations",
+    "author": "Charles Dickens",
+    "url": "https://en.wikipedia.org/wiki/Great_Expectations",
+    "date": "2026-07-16",
+    "id": "book-2026-07-16-1"
+  },
+  {
+    "name": "Of Human Bondage",
+    "author": "W. Somerset Maugham",
+    "url": "https://en.wikipedia.org/wiki/Of_Human_Bondage",
+    "date": "2026-07-02",
+    "id": "book-2026-07-02-1"
+  },
+  {
+    "name": "Jayber Crow",
+    "author": "Wendell Berry",
+    "url": "https://app.thestorygraph.com/books/02003d94-e9d5-4e24-b757-ed11de34c1ad",
+    "date": "2026-06-10",
+    "id": "book-2026-06-10-1"
+  },
+  {
+    "name": "Like, Follow, Subscribe: Influencer Kids and the Cost of a Childhood Online",
+    "author": "Fortesa Latifi",
+    "url": "https://app.thestorygraph.com/books/3e9f3613-f4c1-4f2a-b02b-b6da5461ab3a",
+    "date": "2026-06-01",
+    "id": "book-2026-06-01-1"
+  },
+  {
+    "name": "A Hymn To Life",
+    "author": "Gisèle Pelicot",
+    "url": "https://app.thestorygraph.com/books/b28d595a-a2b5-4176-a057-3f047fc8dd0e",
+    "date": "2026-05-22",
+    "id": "book-2026-05-22-1"
+  },
+  {
+    "name": "The Seven Husbands of Evelyn Hugo",
+    "author": "Taylor Jenkins Reid",
+    "url": "https://en.wikipedia.org/wiki/The_Seven_Husbands_of_Evelyn_Hugo",
+    "date": "2026-05-12",
+    "id": "book-2026-05-12-1"
+  },
+  {
+    "name": "Stoner",
+    "author": "John Williams",
+    "url": "https://en.wikipedia.org/wiki/Stoner_(novel)",
+    "date": "2026-05-06",
+    "id": "book-2026-05-06-1"
+  },
+  {
+    "name": "The Infinity Machine",
+    "author": "Sebastian Mallaby",
+    "url": "https://app.thestorygraph.com/books/c5c60101-5166-4356-8e0f-3def46505604",
+    "date": "2026-04-30",
+    "id": "book-2026-04-30-1"
+  },
+  {
+    "name": "There Is No Antimemetics Division",
+    "author": "Sam Hughes",
+    "url": "https://en.wikipedia.org/wiki/There_Is_No_Antimemetics_Division",
+    "date": "2026-04-24",
+    "id": "book-2026-04-24-1"
+  },
+  {
+    "name": "The Secret History",
+    "author": "Donna Tartt",
+    "url": "https://en.wikipedia.org/wiki/The_Secret_History",
+    "date": "2026-04-15",
+    "id": "book-2026-04-15-1"
+  },
+  {
+    "name": "Hamnet",
+    "author": "Maggie O'Farrell",
+    "url": "https://en.wikipedia.org/wiki/Hamnet_(novel)",
+    "date": "2026-03-22",
+    "id": "book-2026-03-22-1"
+  },
+  {
+    "name": "The Martian Chronicles",
+    "author": "Ray Bradbury",
+    "url": "https://en.wikipedia.org/wiki/The_Martian_Chronicles",
+    "date": "2026-03-08",
+    "id": "book-2026-03-08-1"
+  },
+  {
+    "name": "The Culture Map",
+    "author": "Erin Meyer",
+    "url": "https://app.thestorygraph.com/books/f0d396c1-fcd9-4beb-9538-4d11e04e3e1c",
+    "date": "2026-02-10",
+    "id": "book-2026-02-10-1"
+  },
+  {
+    "name": "Breakneck: China's Quest to Engineer the Future",
+    "author": "Dan Wang",
+    "url": "https://en.wikipedia.org/wiki/Breakneck:_China%27s_Quest_to_Engineer_the_Future",
+    "date": "2026-01-21",
+    "id": "book-2026-01-21-1"
+  },
+  {
+    "name": "What We Can Know",
+    "author": "Ian McEwan",
+    "url": "https://en.wikipedia.org/wiki/What_We_Can_Know",
+    "date": "2025-11-17",
+    "id": "book-2025-11-17-1"
+  },
+  {
+    "name": "Dusk",
+    "author": "Robbie Arnott",
+    "url": "https://en.wikipedia.org/wiki/Dusk_(Arnott_novel)",
+    "date": "2025-10-21",
+    "id": "book-2025-10-21-1"
+  },
+  {
+    "name": "The Shortest History of AI",
+    "author": "Toby Walsh",
+    "url": "https://app.thestorygraph.com/books/77d1e7da-c11c-431c-8a7c-0a1e12d99cb5",
+    "date": "2025-10-03",
+    "id": "book-2025-10-03-1"
+  },
+  {
+    "name": "Cult Bride",
+    "author": "Liz Cameron",
+    "url": "https://app.thestorygraph.com/books/affec6f4-3aca-4ab4-8067-39b7a5cf430c",
+    "date": "2025-09-29",
+    "id": "book-2025-09-29-1"
+  },
+  {
+    "name": "Empire of AI",
+    "author": "Karen Hao",
+    "url": "https://en.wikipedia.org/wiki/Empire_of_AI",
+    "date": "2025-08-03",
+    "id": "book-2025-08-03-1"
+  },
+  {
+    "name": "Meditations for Mortals",
+    "author": "Oliver Burkeman",
+    "url": "https://app.thestorygraph.com/books/ab57bc2b-afcf-405a-a57b-c753cc74727e",
+    "date": "2025-07-15",
+    "id": "book-2025-07-15-1"
+  },
+  {
+    "name": "The Nickel Boys",
+    "author": "Colson Whitehead",
+    "url": "https://en.wikipedia.org/wiki/The_Nickel_Boys",
+    "date": "2025-06-16",
+    "id": "book-2025-06-16-1"
+  },
+  {
+    "name": "Tomorrow, Tomorrow and Tomorrow",
+    "author": "Bill Gates",
+    "url": "https://en.wikipedia.org/wiki/Tomorrow,_and_Tomorrow,_and_Tomorrow_(novel)",
+    "date": "2025-06-02",
+    "id": "book-2025-06-02-1"
+  },
+  {
+    "name": "Source Code",
+    "author": "Bill Gates",
+    "url": "https://en.wikipedia.org/wiki/Source_Code_(memoir)",
+    "date": "2025-05-13",
+    "id": "book-2025-05-13-1"
+  },
+  {
+    "name": "Careless People",
+    "author": "Sarah Wynn-Williams",
+    "url": "https://en.wikipedia.org/wiki/Careless_People",
+    "date": "2025-04-25",
+    "id": "book-2025-04-25-1"
+  },
+  {
+    "name": "The Ocean at the End of the Lane",
+    "author": "Neil Gaiman",
+    "url": "https://en.wikipedia.org/wiki/The_Ocean_at_the_End_of_the_Lane",
+    "date": "2025-04-06",
+    "id": "book-2025-04-06-1"
+  },
+  {
+    "name": "A Night to Remember",
+    "author": "Walter Lord",
+    "url": "https://en.wikipedia.org/wiki/A_Night_to_Remember_(book)",
+    "date": "2025-03-26",
+    "id": "book-2025-03-26-1"
+  },
+  {
+    "name": "Unix: A History and a Memoir",
+    "author": "Brian Kernighan",
+    "url": "https://app.thestorygraph.com/books/01196a68-7481-4e08-9aad-1f114e98b43e",
+    "date": "2025-03-14",
+    "id": "book-2025-03-14-1"
+  },
+  {
+    "name": "Tracers in the Dark",
+    "author": "Andy Greenberg",
+    "url": "https://app.thestorygraph.com/books/fc1d9111-27f5-466e-8a73-f7448e675d05",
+    "date": "2025-03-06",
+    "id": "book-2025-03-06-1"
+  },
+  {
+    "name": "My Brilliant Friend",
+    "author": "Elena Ferrante",
+    "url": "https://en.wikipedia.org/wiki/My_Brilliant_Friend",
+    "date": "2025-02-13",
+    "id": "book-2025-02-13-1"
+  },
+  {
+    "name": "Devil in the Stack",
+    "author": "Andrew Smith",
+    "url": "https://app.thestorygraph.com/books/0e861db2-59fc-4de7-8c3a-04bb9b7937ca",
+    "date": "2025-01-19",
+    "id": "book-2025-01-19-1"
+  },
+  {
+    "name": "Status Anxiety",
+    "author": "Alain de Botton",
+    "url": "https://en.wikipedia.org/wiki/Status_Anxiety",
+    "date": "2025-01-07",
+    "id": "book-2025-01-07-1"
+  },
+  {
+    "name": "A Therapeutic Journey: Lessons from The School of Life",
+    "author": "Alain de Botton",
+    "url": "https://app.thestorygraph.com/books/a03ca487-ac65-441a-ade7-4c5932baafa6",
+    "date": "2025-01-02",
+    "id": "book-2025-01-02-1"
+  },
+  {
+    "name": "Fancy Bear Goes Phishing",
+    "author": "Scott Shapiro",
+    "url": "https://en.wikipedia.org/wiki/Fancy_Bear_Goes_Phishing",
+    "date": "2024-12-29",
+    "id": "book-2024-12-29-1"
+  },
+  {
+    "name": "Nexus: A Brief History of Information Networks from the Stone Age to AI",
+    "author": "Yuval Noah Harari",
+    "url": "https://en.wikipedia.org/wiki/Nexus:_A_Brief_History_of_Information_Networks_from_the_Stone_Age_to_AI",
+    "date": "2024-11-09",
+    "id": "book-2024-11-09-1"
+  },
+  {
+    "name": "Sum: Forty Tales from the Afterlives",
+    "author": "David Eagleman",
+    "url": "https://en.wikipedia.org/wiki/Sum:_Forty_Tales_from_the_Afterlives",
+    "date": "2024-09-23",
+    "id": "book-2024-09-23-1"
+  },
+  {
+    "name": "The Pact",
+    "author": "Jodi Picoult",
+    "url": "https://en.wikipedia.org/wiki/The_Pact_(novel)",
+    "date": "2024-09-02",
+    "id": "book-2024-09-02-1"
+  },
+  {
+    "name": "Nineteen Minutes",
+    "author": "Jodi Picoult",
+    "url": "https://en.wikipedia.org/wiki/Nineteen_Minutes",
+    "date": "2024-08-07",
+    "id": "book-2024-08-07-1"
+  },
+  {
+    "name": "Space Rogue: How the Hackers Known as L0pht Changed the World",
+    "author": "Chris Thomas",
+    "url": "https://app.thestorygraph.com/books/5b14a9f3-daf0-4f5f-a5d6-c32ce9a5319e",
+    "date": "2024-06-23",
+    "id": "book-2024-06-23-1"
+  },
+  {
+    "name": "Men Without Women",
+    "author": "Haruki Murakami",
+    "url": "https://en.wikipedia.org/wiki/Men_Without_Women_(Murakami_short_story_collection)",
+    "date": "2024-06-07",
+    "id": "book-2024-06-07-1"
+  },
+  {
+    "name": "The Everything War: Amazon's Ruthless Quest to Own the World and Remake Corporate Power",
+    "author": "Dana Mattioli",
+    "url": "https://app.thestorygraph.com/books/da996854-8bc2-4c99-82cb-e7fbaa475c79",
+    "date": "2024-05-24",
+    "id": "book-2024-05-24-1"
+  },
+  {
+    "name": "Extremely Hardcore",
+    "author": "Zoë Schiffer",
+    "url": "https://app.thestorygraph.com/books/61eaebcd-6559-4099-b6d2-a7a4e78b5047",
+    "date": "2024-04-26",
+    "id": "book-2024-04-26-1"
+  },
+  {
+    "name": "The Lovers",
+    "author": "Paolo Cognetti",
+    "url": "https://app.thestorygraph.com/books/482ef968-45eb-42e0-821b-c1cc6a349cf0",
+    "date": "2024-04-10",
+    "id": "book-2024-04-10-1"
+  },
+  {
+    "name": "Benjamin Franklin: An American Life",
+    "author": "Walter Isaacson",
+    "url": "https://en.wikipedia.org/wiki/Benjamin_Franklin:_An_American_Life",
+    "date": "2024-03-30",
+    "id": "book-2024-03-30-1"
+  },
+  {
+    "name": "The Eight Mountains",
+    "author": "Paolo Cognetti",
+    "url": "https://en.wikipedia.org/wiki/The_Eight_Mountains_(novel)",
+    "date": "2024-01-03",
+    "id": "book-2024-01-03-1"
+  },
+  {
+    "name": "Force of Nature",
+    "author": "Jane Harper",
+    "url": "https://en.wikipedia.org/wiki/Force_of_Nature_(novel)",
+    "date": "2023-12-04",
+    "id": "book-2023-12-04-1"
+  },
+  {
+    "name": "69",
+    "author": "Ryu Murakami",
+    "url": "https://en.wikipedia.org/wiki/69_(novel)",
+    "date": "2023-11-20",
+    "id": "book-2023-11-20-1"
+  },
+  {
+    "name": "In the Miso Soup",
+    "author": "Ryu Murakami",
+    "url": "https://en.wikipedia.org/wiki/In_the_Miso_Soup",
+    "date": "2023-10-08",
+    "id": "book-2023-10-08-1"
+  },
+  {
+    "name": "The Creative Act",
+    "author": "Rick Rubin",
+    "url": "https://app.thestorygraph.com/books/c2731500-a535-44ac-8b38-21c2f502db6f",
+    "date": "2023-10-04",
+    "id": "book-2023-10-04-1"
+  },
+  {
+    "name": "The Beach",
+    "author": "Alex Garland",
+    "url": "https://en.wikipedia.org/wiki/The_Beach_(novel)",
+    "date": "2023-09-30",
+    "id": "book-2023-09-30-1"
+  },
+  {
+    "name": "Chatter",
+    "author": "Ethan Kross",
+    "url": "https://en.wikipedia.org/wiki/Chatter:_The_Voice_in_Our_Head",
+    "date": "2023-09-06",
+    "id": "book-2023-09-06-1"
+  },
+  {
+    "name": "Zen Mind, Beginner's Mind",
+    "author": "Shunryu Suzuki",
+    "url": "https://en.wikipedia.org/wiki/Zen_Mind,_Beginner%27s_Mind",
+    "date": "2023-08-27",
+    "id": "book-2023-08-27-1"
+  },
+  {
+    "name": "Breath - The New Science of a Lost Art",
+    "author": "James Nestor",
+    "url": "https://en.wikipedia.org/wiki/Breath:_The_New_Science_of_a_Lost_Art",
+    "date": "2023-08-11",
+    "id": "book-2023-08-11-1"
+  },
+  {
+    "name": "Where Wizards Stay Up Late: The Origins of the Internet",
+    "author": "Katie Hafner",
+    "url": "https://app.thestorygraph.com/books/6320969b-b402-4fa0-ae52-b8df06c0e05e",
+    "date": "2023-07-16",
+    "id": "book-2023-07-16-1"
+  },
+  {
+    "name": "Dune",
+    "author": "Frank Herbet",
+    "url": "https://en.wikipedia.org/wiki/Dune_(novel)",
+    "date": "2023-07-15",
+    "id": "book-2023-07-15-1"
+  },
+  {
+    "name": "Beej's Guide to C Programming",
+    "author": "Beej Jorgensen",
+    "url": "https://beej.us/guide/bgc/html/split/index.html",
+    "date": "2023-06-12",
+    "id": "book-2023-06-12-1"
+  },
+  {
+    "name": "Hackers",
+    "author": "Steven Levy",
+    "url": "https://en.wikipedia.org/wiki/Hackers:_Heroes_of_the_Computer_Revolution",
+    "date": "2023-04-25",
+    "id": "book-2023-04-25-1"
+  },
+  {
+    "name": "The Winners",
+    "author": "Fredrik Backman",
+    "url": "https://app.thestorygraph.com/books/6a202edf-6a11-4d89-a361-506071675bbf",
+    "date": "2023-03-16",
+    "id": "book-2023-03-16-1"
+  },
+  {
+    "name": "Faith, Hope and Carnage",
+    "author": "Nick Cave + Sean O'Hagan",
+    "url": "https://en.wikipedia.org/wiki/Faith,_Hope,_and_Carnage",
+    "date": "2023-02-05",
+    "id": "book-2023-02-05-1"
+  },
+  {
+    "name": "Exiles",
+    "author": "Jane Harper",
+    "url": "https://en.wikipedia.org/wiki/Exiles_(novel)",
+    "date": "2022-12-30",
+    "id": "book-2022-12-30-1"
+  },
+  {
+    "name": "Life in Code",
+    "author": "Ellen Ullman",
+    "url": "https://app.thestorygraph.com/books/677bae24-85fa-4bcc-9251-75ed31a39efe",
+    "date": "2022-12-25",
+    "id": "book-2022-12-25-1"
+  },
+  {
+    "name": "Rise of the Extreme Right",
+    "author": "Lydia Khalil",
+    "url": "https://app.thestorygraph.com/books/c1383db7-de04-4bb3-b278-25667d3dc578",
+    "date": "2022-11-19",
+    "id": "book-2022-11-19-1"
+  },
+  {
+    "name": "I Am Glad My Mom Died",
+    "author": "Jennette McCurdy",
+    "url": "https://en.wikipedia.org/wiki/I%27m_Glad_My_Mom_Died",
+    "date": "2022-11-06",
+    "id": "book-2022-11-06-1"
+  },
+  {
+    "name": "The Man from the Future: The Visionary Life of John Von Neumann",
+    "author": "Ananyo Bhattacharya",
+    "url": "https://app.thestorygraph.com/books/abacadcc-363d-414e-949f-7667f992d7d4",
+    "date": "2022-11-01",
+    "id": "book-2022-11-01-1"
+  },
+  {
+    "name": "What Does It All Mean?",
+    "author": "Thomas Nagel",
+    "url": "https://app.thestorygraph.com/books/dfdd0ef6-d2fa-41dc-92f2-98690ecd02f3",
+    "date": "2022-10-07",
+    "id": "book-2022-10-07-1"
+  },
+  {
+    "name": "Einstein: His Life and Universe",
+    "author": "Walter Isaacson",
+    "url": "https://en.wikipedia.org/wiki/Einstein:_His_Life_and_Universe",
+    "date": "2022-09-29",
+    "id": "book-2022-09-29-1"
+  },
+  {
+    "name": "Beethoven: The Man Revealed",
+    "author": "John Suchet",
+    "url": "https://app.thestorygraph.com/books/62c20ecf-594f-4fc3-b55e-2d57160e8761",
+    "date": "2022-08-27",
+    "id": "book-2022-08-27-1"
+  },
+  {
+    "name": "Leonardo Da Vinci",
+    "author": "Walter Isaacson",
+    "url": "https://en.wikipedia.org/wiki/Leonardo_da_Vinci_(Isaacson_book)",
+    "date": "2022-08-25",
+    "id": "book-2022-08-25-1"
+  },
+  {
+    "name": "The Devil in White City",
+    "author": "Erik Larson",
+    "url": "https://en.wikipedia.org/wiki/The_Devil_in_the_White_City",
+    "date": "2022-07-19",
+    "id": "book-2022-07-19-1"
+  },
+  {
+    "name": "The Splendid and the Vile",
+    "author": "Erik Larson",
+    "url": "https://en.wikipedia.org/wiki/The_Splendid_and_the_Vile",
+    "date": "2022-06-23",
+    "id": "book-2022-06-23-1"
+  },
+  {
+    "name": "When We Cease to Understand the World",
+    "author": "Benjamín Labatut",
+    "url": "https://en.wikipedia.org/wiki/When_We_Cease_to_Understand_the_World",
+    "date": "2022-05-10",
+    "id": "book-2022-05-10-1"
+  },
+  {
+    "name": "The Happiest Man on Earth",
+    "author": "Eddie Jaku",
+    "url": "https://app.thestorygraph.com/books/a1651886-6810-41e1-b52c-019507827617",
+    "date": "2022-05-02",
+    "id": "book-2022-05-02-1"
+  },
+  {
+    "name": "Gathering Blue",
+    "author": "Lois Lowry",
+    "url": "https://en.wikipedia.org/wiki/Gathering_Blue",
+    "date": "2022-04-28",
+    "id": "book-2022-04-28-1"
+  },
+  {
+    "name": "The Giver",
+    "author": "Lois Lowry",
+    "url": "https://en.wikipedia.org/wiki/The_Giver",
+    "date": "2022-04-23",
+    "id": "book-2022-04-23-1"
+  },
+  {
+    "name": "Flowers for Algernon",
+    "author": "Daniel Keyes",
+    "url": "https://en.wikipedia.org/wiki/Flowers_for_Algernon",
+    "date": "2022-04-17",
+    "id": "book-2022-04-17-1"
+  },
+  {
+    "name": "A Man Called Ove",
+    "author": "Fredrik Backman",
+    "url": "https://en.wikipedia.org/wiki/A_Man_Called_Ove_(novel)",
+    "date": "2022-03-28",
+    "id": "book-2022-03-28-1"
+  }
+]

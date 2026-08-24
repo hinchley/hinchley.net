@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Creating a Responsive Full Width Image Gallery with HTML and CSS using Flex</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Creating a Responsive Full Width Image Gallery with HTML and CSS using Flex</h1>
+    </header>
+    <main class="archive">
+      <p>Today I started work on the development of an image gallery using HTML and CSS. The gallery was based on a grid of thumbnails. Each image was square, and all were of the same size: 240px x 240px.</p>
+      <p>These were the requirements:</p>
+      <ol>
+        <li>The grid was to be "full width". In other words, the thumbnails must expand/contract/wrap to ensure whitespace never appears at the sides of the grid when the browser window is resized.</li>
+        <li>The thumbnails are never to grow beyond their original size.</li>
+        <li>The thumbnails are never to shrink beyond 50% of their original size.</li>
+        <li>The aspect ratio of the thumbnails must be retained.</li>
+        <li>All thumbnails are to be shown at the same size.</li>
+        <li>The last row is to be left aligned.</li>
+        <li>No JavaScript.</li>
+      </ol>
+      <p>I experimented with a few options that made use of <em>flex-grow</em> to dynamically scale the thumbnails to yield a "full width" experience, but in each case, I couldn't find a non-hacky way of preventing the images within a partial last row from growing too large. Here is a CodePen <a href="https://codepen.io/hinchley/pen/OpQVbd">demonstrating the issue</a>.</p>
+      <p>So instead of using <em>flex-grow</em> I switched to a combination of <em>flex-shrink</em> and media queries; the latter being used to effectively control the number of columns within the grid based on 240px increments. Here is a CodePen with a <a href="https://codepen.io/hinchley/pen/wJyaBN">working demonstration</a>.</p>
+      <p>And here is the same pen but with the CSS <a href="https://codepen.io/hinchley/pen/jBZPzb/">written using SCSS</a>.</p>
+      <footer>
+        <p><span>Published: 2017-03-20</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

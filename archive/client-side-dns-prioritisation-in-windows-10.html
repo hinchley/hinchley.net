@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Client-Side DNS Prioritisation in Windows 10</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Client-Side DNS Prioritisation in Windows 10</h1>
+    </header>
+    <main class="archive">
+      <p>By default, a Windows Server 2012 R2 DNS server is enabled for "round-robin" and "netmask ordering". These settings come into effect when there are multiple addresses registered for the same host. The round-robin setting will instruct the DNS server to rotate the order in which the addresses are returned; while netmask ordering will give priority to addresses that are within the same subnet as the client (as they are considered to be "local"). Note: This comparison defaults to a class C network, but it can be modified.</p>
+      <p>When netmask ordering is enabled (and round robin disabled), the order in which the "local" addresses are returned is random. When both settings are in effect, local addresses will still be given priority over remote addresses, and their order randomised, while the order of non-local addresses will be rotated.</p>
+      <p>By default, when a Microsoft Windows 10 client initiates a DNS query, and is returned more than one IP address, it will select the first entry in the list. This typically works well when the DNS server is configured with round-robin and netmask ordering enabled.</p>
+      <p>However, you can override this behaviour, and force Windows 10 to perform its own client-side prioritisation of addresses in accordance with <a href="https://tools.ietf.org/rfc/rfc6724.txt">RFC 6724</a>. Rule 9 of the specification is particularly interesting. It requires the DNS client to compare its own IP address with each of the addresses returned from a query, and to select the value with the longest matching prefix.</p>
+      <p>You can switch to RFC 6724, by creating a DWORD value named <em>OverrideDefaultAddressSelection</em> under <code>HKLM\SYSTEM\CurrentControlSet\services\TcpIp\Parameters</code>, and setting the value to 0.</p>
+      <p>Unfortunately, there is a catch; as of today, the implementation of the RFC in Windows 10, or at least the implementation of rule 9, is fundamentally broken. As indicated, rule 9 compares the client IP address with each address retrieved from a DNS query, identifying the value with the longest matching prefix. This comparison is based on the IPv6 translation of an IPv4 address (even if IPv6 is not enabled), but unfortunately, instead of basing the comparison on the length of an IPv6 address, the comparison incorrectly uses the length of an IPv4 address (i.e. only a part of the translated IPv6 address is actually used in the comparison). The product team at Microsoft have confirmed the bug, and have developed a private hotfix, which should be publicly available in the next few weeks.</p>
+      <p>So you might be wondering why rule 9 is important. Well, let's say you operate a large network with multiple sites connected via high-latency WAN links. Each site includes a local domain controller acting as a DNS server, with both round robin and netmask ordering enabled (the default configuration). In this scenario, the workstations at each site are not within the same class C subnet as the domain controller, and hence server-side netmask ordering is not invoked. In this hypothetical configuration, when a client initiates a DNS query for the domain name, it may end up resolving a domain controller located at a remote site.</p>
+      <p>We can potentially mitigate this issue, by forcing clients to perform client-side address prioritisation based on RFC 6724. In this case, if the IP ranges assigned to each site mirror the network topology, when a client initiates a DNS query for the domain, it should be able to select the "closest" domain controller from the list of returned addresses, as the client will have "more in common" (or a longer common prefix) with the address of a local server, than with the address of any of the remote domain controllers.</p>
+      <p>This is good, but it's not a silver bullet, as it relies on the adoption of an IP plan that ensures a high degree of commonality between the address ranges assigned to a site (e.g. contiguous addressing). Unfortunately, this is not always possible. To identify cases where this doesn't occur, and hence rule 9 of RFC 6724 may not be effective, I wrote the following PowerShell script. It identifies which domain controller will be selected by a client following a DNS query for the domain when rule 9 is invoked.</p>
+      <p>Note: The behaviour described in this article pertains to DNS queries, and not domain controller locator requests (which are "site aware").</p>
+      <pre><code>$dcs = @{}
+
+function longest($ip, $mask) {
+  $max = 0; $dcs.getenumerator() | %{
+    for ($i = 0; $i -lt $mask; $i++) {
+      if ($ip[$i] -ne $_.value[$i]) { return }
+      if ($i -ge $max) { $max = $i; $found = $_.name }
+    }
+  }
+
+  return $found
+}
+
+function tobinary($ip, $mask) {
+  $n = [convert]::tostring(([ipaddress][string]([ipaddress]$ip).address).address,2)
+  return (&quot;0&quot; * (32 - $n.length)) + $n
+}
+
+function frombinary($ip) {
+  return ([system.net.ipaddress]&quot;$([convert]::toint64($ip,2))&quot;).ipaddresstostring
+
+}
+
+function closestdc($ip) {
+  $temp = $ip.split(&quot;/&quot;)
+  $mask = $temp[1]
+  $ip   = $temp[0]
+
+  return longest (tobinary $ip) $mask
+}
+
+[system.directoryservices.activedirectory.domain]::getcurrentdomain().domaincontrollers | %{
+  $dcs.add($_.name, (tobinary $_.ipaddress))
+}</code></pre>
+      <p>To find the name of the domain controller that will be selected by a client with an IP address of 10.0.1.100 and a class C mask:</p>
+      <pre><code>closestdc &quot;10.0.1.100/24&quot;</code></pre>
+      <p>The mask is required, because RFC 6724 actually mandates that the IP address comparison is restricted by the length of the client IP mask. This is different behaviour from that used in Windows 7, which in accordance with the now obsolete <a href="https://www.ietf.org/rfc/rfc3484.txt">RFC 3484</a>, uses the entire address in the comparison.</p>
+      <p>Note: The above code does not translate IPv4 addresses to IPv6 prior to checking similarity, but the end result should be unchanged.</p>
+      <p>As a side note, you can confirm the bug in Windows 10 by setting the <em>OverrideDefaultAddressSelection</em> registry value to 0, rebooting, and then running the following command to initiate a network trace:</p>
+      <pre><code>logman create trace &quot;net_netio&quot; -ow -o c:\temp\netio.etl -p &quot;Microsoft-Windows-TCPIP&quot; 0xffffffffffffffff 0xff -nb 16 16 -bs 1024 -mode circular -f bincirc -max 4096 -ets</code></pre>
+      <p>Now perform a ping test to a system with multiple DNS A records.</p>
+      <p>To stop the trace, and convert the resultant ETL file to text format:</p>
+      <pre><code>logman stop &quot;net_netio&quot; -ets
+netsh trace convert c:\temp\netio.etl</code></pre>
+      <p>Open <code>c:\temp\netio.txt</code> and search for &quot;address pair&quot;. You should find an event such as the following (one for each A record):</p>
+      <pre><code>[0]0A0C.0A2C::2016-06-06 21:12:46.215 [Microsoft-Windows-TCPIP]IP: Address pair (::ffff:10.0.1.60, ::ffff:10.0.1.30) is preferred over (::ffff:10.0.1.60, ::ffff:10.0.2.20) by SortOptions = 0, Rule = S 10.0. </code></pre>
+      <p>The suffix of "Rule = S 10.0" indicates that rule 10 was matched. This is a dummy rule that indicates all other nine rules of RFC 6724 were ignored.</p>
+      <p>Once Microsoft release a patch to fix the implementation of the RFC, the network trace should show that rule 9 was invoked when the test is repeated.</p>
+      <p>So where to from here? Well, as indicated previously, even when this bug is fixed, client-side DNS prioritisation based on address similarity won't work in all scenarios. If you are specifically needing to resolve a domain name to a local IP address, well, you could always try hacking the <em>hosts</em> file :)</p>
+      <p>I don't recommend this approach, but for the brave of heart (or foolhardy), you could create a script to programmatically determine the IP address of a local domain controller, and then write that value into <code>c:\windows\system32\drivers\etc\hosts</code>. The best way of triggering the script would be to create a scheduled task that runs on system startup, at scheduled intervals (e.g. hourly), and whenever the network status changes (e.g. in response to event <em>10000</em> in the <em>Microsoft-Windows-NetworkProfile/Operational</em> event log). The script could determine the Active Directory site of the client computer, select a random domain controller from the site, check the server is responsive, and then add the IP address of the server to the <em>hosts</em> file. And of course, if no domain controller is accessible, the <em>hosts</em> file would be cleared.</p>
+      <p>Here is a script to implement the above process:</p>
+      <pre><code>$domainfqdn = (get-itemproperty HKLM:SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -name domain).domain
+$domain     = $domainfqdn.split('.')[0]
+
+[system.directoryservices.activedirectory.activedirectorysite]::getcomputersite().servers | select-object ipaddress | sort-object {get-random} | %{
+  if (test-connection -count 1 $_.ipaddress) {
+    $entry = &quot;{0} {1} {2}&quot; -f $_.ipaddress, $domain, $domainfqdn; return
+  }
+}
+
+$entry | set-content c:\windows\system32\drivers\etc\hosts</code></pre>
+      <p>It's not ideal, but it might get you out of a bind.</p>
+      <p>Or you could wait for <a href="https://docs.microsoft.com/en-us/windows-server/networking/dns/deploy/primary-geo-location">DNS policies</a> in Windows Server 2016.</p>
+      <footer>
+        <p><span>Published: 2016-06-09</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

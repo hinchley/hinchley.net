@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Configuration Manager Automatic Deployment Rule for Windows 10 Updates</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Configuration Manager Automatic Deployment Rule for Windows 10 Updates</h1>
+    </header>
+    <main class="archive">
+      <p>When setting up an automatic deployment rule (ADR) in Microsoft System Center Configuration Manager it is generally a good idea to exclude software updates that aren't relevant to your environment. For example, if you don't have any 32-bit deployments of Windows 10, it seems a waste to download x86 updates. Similarly, if all of your clients are version 1607 or later, why download updates for 1507 or 1511? Fortunately, this is easy to do within the properties of an ADR by filtering on the <em>Title</em> field.</p>
+      <p>This screen shot shows the filter for only retrieving x64 updates for Windows 10 Version 1607 and 1703.</p>
+      <img src="../static/adr.jpg" alt="Automatic Deployment Rule" />
+      <p>This configuration yields the following SQL query, which you can run independently to confirm which updates will be downloaded:</p>
+      <pre><code>SELECT CI.CI_ID, DisplayName
+FROM dbo.fn_ListUpdateCIs(1033) CI
+JOIN (
+  SELECT B.CI_ID, SUM(CF.FileSize)/1024 AS ContentSize
+  FROM v_UpdateInfo B
+  JOIN vCIAllContents AC ON AC.CI_ID = B.CI_ID
+  JOIN vSMS_CIContentFiles AS CF ON CF.Content_ID = AC.Content_ID
+  GROUP BY B.CI_ID) AS CS ON CI.CI_ID = CS.CI_ID
+  WHERE IsExpired = 0
+  and (IsSuperseded=0)
+  and (DisplayName like N'%%Version 1607%x64%%' or DisplayName like N'%%Version 1703%x64%%')
+  and (CI.CI_ID in (
+    SELECT CI_ID FROM v_CICategories_All
+    WHERE CategoryInstance_UniqueID in (N'Product:a3c2375d-0c8a-42f9-bce0-28333e198407')
+  ))
+  and (CI.CI_ID in (
+  SELECT CI_ID
+  FROM v_CICategories_All
+  WHERE CategoryInstance_UniqueID in (N'UpdateClassification:e6cf1350-c01b-414d-a61f-263d14d133b4', N'UpdateClassification:0fa1201d-4330-4fa8-8ae9-b877473b6441', N'UpdateClassification:cd5ffd1e-e932-4e3a-bf74-18bf0b1bbd83')
+  )
+) </code></pre>
+      <footer>
+        <p><span>Published: 2017-04-09</span> <span>Last Updated: 2018-06-09</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Remove Open File Security Warning Dialog</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Remove Open File Security Warning Dialog</h1>
+    </header>
+    <main class="archive">
+      <p>If you attempt to run an executable from a UNC path you may encounter an <em>Open File - Security Warning</em> dialog as shown below:</p>
+      <img src="../static/securitywarning.jpg" alt="Security Warning" />
+      <p>This dialog will be displayed if the server hosting the share is not within the Internet Explorer <em>intranet zone</em>. You can obviously prevent the dialog from appearing by adding the server to the intranet zone (in the form: file://\server\share), however, another option is to add the server to the <em>trusted sites zone</em>, and then customise the zone to allow the execution of unsafe files. This is achieved by enabling the <em>Launching applications and unsafe files</em> option via the trusted sites zone security settings dialog (the option is located under the <em>Miscellaneous</em> section) as shown below:</p>
+      <img src="../static/zonesettings.jpg" alt="Zone Settings" />
+      <p>You can also set this option via group policy via: <em>Computer Policy \ Policies \ Administrative Templates \ Windows Components \ Internet Explorer \ Internet Control Panel \ Security Page \ Trusted Sites Zone \ Show security warning for potentially unsafe files</em>. To prevent the security warning dialog from appearing, enable this policy and set its value to <em>Enable</em>.</p>
+      <footer>
+        <p><span>Published: 2017-08-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

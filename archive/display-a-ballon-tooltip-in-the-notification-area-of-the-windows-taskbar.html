@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Display a Ballon Tooltip in the Notification Area of the Windows Taskbar</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Display a Ballon Tooltip in the Notification Area of the Windows Taskbar</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">The tooltip timeout discussed in this post is not respected in current versions of Windows.</p>
+      <p>The <em>notification area</em> (also known as the <em>status area</em> or the <em>system tray</em>) is the region of the Windows taskbar that includes the system clock. The area is used to display icons for headless or minimised programs. It can also be used to display transient tooltip messages.</p>
+      <p>The following PowerShell code will display a balloon tooltip in the notification area. The tooltip title, message, and taskbar icon path, are required fields, and all can be customised. The tooltip timeout is also required, and must be set between 10 and 30 seconds.</p>
+      <pre><code># Set notification title and message.
+$Title   = &quot;Notification Title&quot;
+$Message = &quot;This is the notification message.&quot;
+
+# How long to display the notification in milliseconds.
+# Must be between 10 and 30 seconds.
+$Timeout = 30000
+
+# Balloon icon type: None, Info, Warning or Error.
+$BalloonIcon = &quot;Info&quot;
+
+# Path to icon to display in taskbar.
+$TaskbarIconPath = &quot;C:\Path\To\icon.ico&quot;
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName(&quot;System.Windows.Forms&quot;)
+
+$NotifyIcon = New-Object System.Windows.Forms.NotifyIcon
+
+$NotifyIcon.Icon = $TaskbarIconPath
+$NotifyIcon.BalloonTipTitle = $Title
+$NotifyIcon.BalloonTipText  = $Message
+$NotifyIcon.BalloonTipIcon  = $BalloonIcon
+
+$NotifyIcon.Visible = $True
+$NotifyIcon.ShowBalloonTip($Timeout)
+</code></pre>
+      <p>The icon should be 16x16 pixels, although larger icons will be resampled. If you don't have access to a custom icon, just search your computer for files with an <em>.ico</em> extension, and select a result that suits your purpose.</p>
+      <img src="../static/notification.png" alt="Balloon Tooltip" />
+      <p>If you save the code as <em>notify.ps1</em>, it can be run using:</p>
+      <pre><code>powershell.exe -file notify.ps1
+</code></pre>
+      <footer>
+        <p><span>Published: 2013-10-30</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

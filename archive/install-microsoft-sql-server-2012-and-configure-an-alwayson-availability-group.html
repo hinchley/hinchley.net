@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Install Microsoft SQL Server 2012 and Configure an AlwaysOn Availability Group</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Install Microsoft SQL Server 2012 and Configure an AlwaysOn Availability Group</h1>
+    </header>
+    <main class="archive">
+      <p>In this article I will describe how to install Microsoft SQL Server 2012 SP1 on Windows Server 2012 R2 (Server Core). I will also outline the steps required to deploy a highly available SQL implementation by configuring a two-node AlwaysOn availability group.</p>
+      <h2 id="overview-of-environment">Overview of Environment</h2>
+      <p>Let's start with an overview of the environment:</p>
+      <ul>
+        <li>There are two Windows Server 2012 R2 servers deployed in <em>Server Core</em> mode.</li>
+        <li>The servers are named <em>EDWARD</em> (10.0.0.20) and <em>RONALD</em> (10.0.0.21).</li>
+        <li>The servers will be configured as nodes in a Windows Server Failover Cluster (WSFC) named <em>SHERYL</em> (10.0.0.22).</li>
+        <li>The availability group will be accessed using an availability group listener named <em>SHERYL-01</em> (10.0.0.23).</li>
+        <li>The cluster will rely on a file share witness hosted on a server named <em>WINSTON</em>.</li>
+        <li>All servers reside in an Active Directory domain named <em>LAB</em> (<em>lab.hinchley.net</em>).</li>
+        <li>The Windows Server 2012 R2 media is located on each server at <code>C:\Media\en_windows_server_2012_r2_with_update_x64.iso</code>.</li>
+        <li>The SQL Server 2012 Enterprise Edition SP1 media is located on each server at: <code>C:\Media\SQL_Svr_Enterprise_Core_2012_SP1.iso</code>.</li>
+      </ul>
+      <h2 id="prerequisites">Prerequisites</h2>
+      <blockquote>
+        <p>Perform this step on both SQL Servers.</p>
+      </blockquote>
+      <p>A prerequisite for the installation of SQL Server 2012 is Microsoft .NET Framework 3.5. This feature can be installed using the following commands:</p>
+      <pre><code>$mount = Mount-DiskImage -ImagePath C:\Media\en_windows_server_2012_r2_with_update_x64.iso -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + ':'
+
+Add-WindowsFeature NET-Framework-Core -Source $drive\sources\sxs
+
+DisMount-DiskImage -ImagePath C:\Media\en_windows_server_2012_r2_with_update_x64.iso</code></pre>
+      <h2 id="installation">Installation</h2>
+      <blockquote>
+        <p>Perform this step on both SQL Servers.</p>
+      </blockquote>
+      <p>We will prepare for the installation of SQL by creating an installation script named <code>C:\Scripts\SQL.ini</code>. This file specifies the options required to perform a silent installation of SQL Server. In this example, the only SQL features installed are the database engine and replication.</p>
+      <pre><code>[OPTIONS]
+ACTION=&quot;Install&quot;
+ENU=&quot;True&quot;
+QUIET=&quot;True&quot;
+QUIETSIMPLE=&quot;False&quot;
+UpdateEnabled=&quot;False&quot;
+FEATURES=SQLENGINE,REPLICATION
+UpdateSource=&quot;MU&quot;
+HELP=&quot;False&quot;
+INDICATEPROGRESS=&quot;False&quot;
+X86=&quot;False&quot;
+INSTALLSHAREDDIR=&quot;C:\Program Files\Microsoft SQL Server&quot;
+INSTALLSHAREDWOWDIR=&quot;C:\Program Files (x86)\Microsoft SQL Server&quot;
+INSTANCENAME=&quot;SQL01&quot;
+INSTANCEID=&quot;SQL01&quot;
+SQMREPORTING=&quot;False&quot;
+ERRORREPORTING=&quot;False&quot;
+INSTANCEDIR=&quot;C:\Instances\SQL01&quot;
+SQLUSERDBDIR=&quot;C:\Databases\SQL01&quot;
+SQLUSERDBLOGDIR=&quot;C:\Logs\SQL01&quot;
+SQLBACKUPDIR=&quot;C:\Backups\SQL01&quot;
+AGTSVCACCOUNT=&quot;NT AUTHORITY\SYSTEM&quot;
+AGTSVCSTARTUPTYPE=&quot;Automatic&quot;
+COMMFABRICPORT=&quot;0&quot;
+COMMFABRICNETWORKLEVEL=&quot;0&quot;
+COMMFABRICENCRYPTION=&quot;0&quot;
+MATRIXCMBRICKCOMMPORT=&quot;0&quot;
+SQLSVCSTARTUPTYPE=&quot;Automatic&quot;
+FILESTREAMLEVEL=&quot;0&quot;
+ENABLERANU=&quot;False&quot;
+SQLCOLLATION=&quot;SQL_Latin1_General_CP1_CI_AS&quot;
+SQLSVCACCOUNT=&quot;NT AUTHORITY\SYSTEM&quot;
+SQLSYSADMINACCOUNTS=&quot;BUILTIN\Administrators&quot;
+ADDCURRENTUSERASSQLADMIN=&quot;False&quot;
+TCPENABLED=&quot;1&quot;
+NPENABLED=&quot;1&quot;
+BROWSERSVCSTARTUPTYPE=&quot;Automatic&quot;
+IACCEPTSQLSERVERLICENSETERMS=&quot;True&quot;</code></pre>
+      <p>Use the following commands to install SQL Server using the configuration file:</p>
+      <pre><code>$mount = Mount-DiskImage -ImagePath C:\Media\SQL_Svr_Enterprise_Core_2012_SP1.iso -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + ':'
+
+Set-Location $drive\
+&amp; .\setup.exe /configurationfile=C:\Scripts\SQL.ini
+
+DisMount-DiskImage -ImagePath C:\Media\SQL_Svr_Enterprise_Core_2012_SP1.iso</code></pre>
+      <p>After SQL Server is installed, download Shared Management Objects (<code>ENU\x64\SharedManagementObjects.msi</code>) and PowerShell Tools (<code>ENU\x64\PowerShellTools.msi</code>) from the <a href="https://www.microsoft.com/en-AU/download/details.aspx?id=29065">SQL Server 2012 SP1 Feature Pack</a>. Copy the files to <code>C:\Media</code> and install them with the following commands:</p>
+      <pre><code>msiexec /i C:\Media\SharedManagementObjects.msi /qb
+msiexec /i C:\Media\PowerShellTools.msi /qb</code></pre>
+      <h2 id="ports-and-firewall">Ports and Firewall</h2>
+      <blockquote>
+        <p>Perform this step on both SQL Servers.</p>
+      </blockquote>
+      <p>Use the following code to configure SQL Server to listen on port <em>1433</em> (instead of using dynamic ports):</p>
+      <pre><code>[System.Reflection.Assembly]::LoadWithPartialName(&quot;Microsoft.SQLServer.SMO&quot;) | Out-Null
+[System.Reflection.Assembly]::LoadWithPartialName(&quot;Microsoft.SQLServer.SQLWMIManagement&quot;) | Out-Null
+
+$c = New-Object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer .
+$i = $C.ServerInstances['SQL01']
+$p = $I.ServerProtocols['Tcp']
+$a = $P.IPAddresses['IPAll']
+
+$a.IPAddressProperties['TcpDynamicPorts'].Value = ''
+$a.IPAddressProperties['TcpPort'].Value = '1433'
+
+$p.Alter()</code></pre>
+      <p>Use the following commands to create the required firewall rules:</p>
+      <pre><code>netsh advfirewall firewall add rule name=&quot;SQL01&quot; dir=in action=allow profile=domain localport=&quot;1433,5022&quot; protocol=TCP
+netsh advfirewall firewall add rule name=&quot;SQL Browser&quot; dir=in action=allow profile=domain localport=1434 protocol=UDP</code></pre>
+      <h2 id="enable-clustering">Enable Clustering</h2>
+      <blockquote>
+        <p>Perform this step on both SQL Servers.</p>
+      </blockquote>
+      <p>Use the following command to install the <em>Failover Clustering</em> feature:</p>
+      <pre><code>Install-WindowsFeature Failover-Clustering</code></pre>
+      <h2 id="active-directory-security-group">Active Directory Security Group</h2>
+      <blockquote>
+        <p>Perform this step once on a server with the Active Directory PowerShell module installed.</p>
+      </blockquote>
+      <p>We will now create an Active Directory security group to hold the computer accounts for both SQL nodes and the cluster. Note: We can't add the cluster account into the group yet, as it doesn't currently exist.</p>
+      <p>To create a global security group named <em>sql-nodes-sheryl</em> with <em>EDWARD</em> and <em>RONALD</em> as members, run the following command:</p>
+      <pre><code>New-ADGroup -Name &quot;sql-nodes-sheryl&quot; -GroupScope Global -Path &quot;OU=Groups, DC=lab, DC=hinchley, DC=net&quot; -PassThru | Add-ADGroupMember -Members &quot;EDWARD$&quot;, &quot;RONALD$&quot;</code></pre>
+      <p>Reboot both servers to ensure they pick up the change of group membership.</p>
+      <h2 id="active-directory-service-accounts">Active Directory Service Accounts</h2>
+      <blockquote>
+        <p>Perform this step once on a server with the Active Directory PowerShell module installed.</p>
+      </blockquote>
+      <p>The next step is to create two service accounts in Active Directory. The first, which will be named <em>sql-sheryl</em>, will be used for the SQL Server service, and the second, named <em>sql-sheryl-a</em>, will be used for the SQL Agent service. I will specifically create the latter as a Group Managed Service Account (gMSA); unfortunately, this type of account isn't supported for the database engine when using SQL Server 2012. We could use a non-group MSA, but this would require the creation of two accounts for the SQL Server service - one for each node (an MSA can only be used on a single system) - thereby breaking Kerberos authentication.</p>
+      <p>Use the following command to create the &quot;standard&quot; service account to be used by the SQL Server service:</p>
+      <pre><code>New-ADUser -Name &quot;sql-sheryl&quot; -SamAccountName &quot;sql-sheryl&quot; -DisplayName &quot;sql-sheryl&quot; -UserPrincipalName &quot;sql-sheryl@lab.hinchley.net&quot; -Path &quot;ou=Service Accounts,dc=lab,dc=hinchley,dc=net&quot; -AccountPassword (Read-Host &quot;Password&quot; -AsSecureString) -ChangePasswordAtLogon $false -Enabled $true</code></pre>
+      <p>If you haven't previously created a gMSA in your environment, you will need to create the <em>Key Distribution Services KDS Root Key</em> prior to creating the second service account. This can be done by running the following command on a domain controller:</p>
+      <pre><code>Add-KdsRootKey –EffectiveImmediately</code></pre>
+      <p>Unfortunately, the <em>EffectiveImmediately</em> parameter really means: &quot;wait up to 10 hours&quot;. In the context of a lab, this can be short circuited as follows:</p>
+      <pre><code>Add-KdsRootKey –EffectiveTime ((Get-Date).AddHours(-10))</code></pre>
+      <p>Now we can create the service account. Note: Access to the account is restricted to the members of the <em>sql-nodes-sheryl</em> group we previously created.</p>
+      <pre><code>New-ADServiceAccount –Name &quot;sql-sheryl-a&quot; -DNSHostName &quot;sheryl.lab.hinchley.net&quot; -PrincipalsAllowedToRetrieveManagedPassword &quot;sql-nodes-sheryl&quot;</code></pre>
+      <p>The next step is to configure the two SQL servers to use the managed service account. Unfortunately, this requires the Active Directory PowerShell module to be installed on each node:</p>
+      <pre><code>Add-WindowsFeature RSAT-AD-PowerShell</code></pre>
+      <p>Now use the following command to install the service account on each node:</p>
+      <pre><code>Install-AdServiceAccount &quot;sql-sheryl-a&quot;</code></pre>
+      <p>If the gMSA is working as expected, the following command should return <em>True</em>:</p>
+      <pre><code>Test-AdServiceAccount &quot;sql-sheryl-a&quot;</code></pre>
+      <h2 id="file-share-witness">File Share Witness</h2>
+      <blockquote>
+        <p>Perform this step once on the server that will host the file share witness. Note: The witness should not be accessed using DFS-N.</p>
+      </blockquote>
+      <p>To create the file share witness, and configure the appropriate permissions, run the following commands:</p>
+      <pre><code># Create C:\Shares\Witness and share as &quot;Witness&quot;.
+New-Item -Type Directory &quot;C:\Shares\Witness&quot; -Force
+New-SmbShare –Name Witness –Path &quot;C:\Shares\Witness&quot; -FullAccess Everyone
+
+function New-Rule($account, $permission) {
+  return New-Object System.Security.AccessControl.FileSystemAccessRule($account, $permission, &quot;ContainerInherit, ObjectInherit&quot;, &quot;None&quot;, &quot;Allow&quot;)
+}
+
+# Grant Administrators and System &quot;Full Control&quot; to C:\Shares.
+$acl = Get-Acl &quot;C:\Shares&quot;
+$acl.SetAccessRuleProtection($True, $False)
+$acl.AddAccessRule((New-Rule &quot;system&quot; &quot;FullControl&quot;))
+$acl.AddAccessRule((New-Rule &quot;administrators&quot; &quot;FullControl&quot;))
+Set-Acl &quot;C:\Shares&quot; $acl
+
+# Grant the &quot;LAB\sql-nodes-sheryl&quot; group &quot;Full Control&quot; to C:\Shares\Witness\SHERYL.
+$folder = &quot;C:\Shares\Witness\SHERYL&quot;
+New-Item -Type Directory $folder -Force
+$acl = Get-Acl $folder
+$acl.AddAccessRule((New-Rule &quot;lab\sql-nodes-sheryl&quot; &quot;FullControl&quot;))
+Set-Acl $folder $acl  </code></pre>
+      <h2 id="failover-cluster-configuration">Failover Cluster Configuration</h2>
+      <blockquote>
+        <p>Perform this step from a server with the cluster management tools (<em>RSAT-Clustering</em>) installed.</p>
+      </blockquote>
+      <p>Ok, let's kick on with the creation of the Windows Server Failover Cluster by running the following command:</p>
+      <pre><code>New-Cluster -Name SHERYL -Node @(&quot;EDWARD.lab.hinchley.net&quot;, &quot;RONALD.lab.hinchley.net&quot;) -NoStorage -StaticAddress 10.0.0.22
+Get-ADGroup &quot;sql-nodes-sheryl&quot; | Add-ADGroupMember -Members &quot;SHERYL$&quot;
+Set-ClusterQuorum -Cluster SHERYL -NodeAndFileShareMajority \\WINSTON.lab.hinchley.net\Witness\SHERYL</code></pre>
+      <h2 id="test-database">Test Database</h2>
+      <blockquote>
+        <p>Perform this step once from the first SQL Server.</p>
+      </blockquote>
+      <p>To create an AlwaysOn availability group we need a database. To create a database named <em>Test</em>, run the following command:</p>
+      <pre><code>sqlcmd -S &quot;EDWARD\SQL01&quot; -Q &quot;CREATE DATABASE Test;&quot;</code></pre>
+      <h2 id="backup-share">Backup Share</h2>
+      <blockquote>
+        <p>Perform this step once on a file server.</p>
+      </blockquote>
+      <p>A database must be backed up before it can be added to an AlwaysOn availability group. In this step we will create a UNC share, accessible to both SQL nodes, where we can backup and restore the test database.</p>
+      <p>I will use the process I described in an <a href="create-a-highly-available-file-share-with-dfs-n-and-dfs-r-from-the-command-line.html">earlier blog post</a> to create a highly available share (via DFS-N and DFS-R) for storing the SQL backups. I won't repeat the details, other than to say I created a share named <em>SQL</em>, mapped to <code>C:\Shares\SQL</code>, and referenced as <code>\\lab.hinchley.net\sql</code>. The SQL folder includes a sub-directory named <em>SHERYL</em> that is only accessible to Administrators and System (both inherited), and the explicitly assigned <em>sql-sheryl-a</em> account (with <em>Modify</em> permissions). The SQL share is replicated across two file servers using an existing DFS-R replication group named <em>LAN</em>.</p>
+      <p>As a quick tip, here is the command I used to set the permissions on <code>C:\Shares\SQL\SHERYL</code>:</p>
+      <pre><code>icacls C:\Shares\SQL\SHERYL /grant &quot;lab\sql-sheryl&quot;:(OI)(CI)M</code></pre>
+      <h2 id="service-configuration">Service Configuration</h2>
+      <blockquote>
+        <p>Perform this step on each SQL Server.</p>
+      </blockquote>
+      <p>We will now reconfigure the SQL Server service and the SQL Agent service to run under the context of the service accounts we previously created.</p>
+      <pre><code>[System.Reflection.Assembly]::LoadWithPartialName(&quot;Microsoft.SqlServer.SqlWmiManagement&quot;) | Out-Null
+$c = New-Object Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer .
+$s = $c.Services | ? Name -eq 'MSSQL$SQL01'
+$s.SetServiceAccount(&quot;lab\sql-sheryl&quot;, (Read-Host &quot;Password&quot;))
+$s = $c.Services | ? Name -eq 'SQLAgent$SQL01'
+$s.SetServiceAccount('lab\sql-sheryl-a$', &quot;&quot;)
+Restart-Service 'MSSQL$SQL01' -Force
+Restart-Service 'SQLAgent$SQL01'</code></pre>
+      <p>A couple of points of clarification:</p>
+      <ul>
+        <li>The code shown above will prompt for the password of the <em>sql-sheryl</em> account.</li>
+        <li>The <em>sql-sheryl-a</em> account is entered with a <em>$</em> suffix and no password. This is the format required for a gMSA.</li>
+      </ul>
+      <h2 id="availability-group-listener">Availability Group Listener</h2>
+      <blockquote>
+        <p>Perform this step once on a server with the Active Directory PowerShell module installed.</p>
+      </blockquote>
+      <p>The WSFC cluster will attempt to create a computer object in Active Directory when instantiating a new availability group listener. This action will fail if the cluster does not have the required privileges. To avoid this issue, we will pre-stage the account, and then grant the cluster <em>Full Control</em> permissions to the object.</p>
+      <pre><code>New-ADComputer -Name SHERYL-01 -Path &quot;OU=Servers,DC=lab,DC=hinchley,DC=net&quot;
+$computer = [ADSI]&quot;LDAP://CN=SHERYL-01,OU=Servers,DC=lab,DC=hinchley,DC=net&quot;
+$cluster = Get-ADComputer SHERYL
+$sid = [System.Security.Principal.SecurityIdentifier] $cluster.SID
+$identity = [System.Security.Principal.IdentityReference] $sid
+$rights = [System.DirectoryServices.ActiveDirectoryRights] &quot;GenericAll&quot;
+$type = [System.Security.AccessControl.AccessControlType] &quot;Allow&quot;
+$inheritance = [System.DirectoryServices.ActiveDirectorySecurityInheritance] &quot;All&quot;
+$ace = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $identity, $rights, $type, $inheritance
+$computer.psbase.ObjectSecurity.AddAccessRule($ace)
+$computer.psbase.CommitChanges()</code></pre>
+      <h2 id="alwayson-availability-group">AlwaysOn Availability Group</h2>
+      <blockquote>
+        <p>Perform the steps within this section on the first SQL node. The commands should be run from a PowerShell prompt with the <em>sqlps</em> module imported (i.e. <code>import-module sqlps</code>).</p>
+      </blockquote>
+      <p>We will start by backing up and restoring the <em>Test</em> database we previously created.</p>
+      <pre><code># Set variables.
+$database  = &quot;Test&quot;
+$backups   = &quot;\\lab.hinchley.net\sql\SHERYL&quot;
+$instance1 = &quot;EDWARD\SQL01&quot;
+$instance2 = &quot;RONALD\SQL01&quot;
+
+# Backup the test database on the primary server.
+Backup-SqlDatabase `
+    -Database $database `
+    -BackupFile &quot;$backups\$database.bak&quot; `
+    -ServerInstance $instance1
+Backup-SqlDatabase `
+    -Database $database `
+    -BackupFile &quot;$backups\$database.log&quot; `
+    -ServerInstance $instance1 `
+    -BackupAction Log
+
+# Restore the test database on the secondary server.
+Restore-SqlDatabase `
+    -Database $database `
+    -BackupFile &quot;$backups\$database.bak&quot; `
+    -ServerInstance $instance2 `
+    -NoRecovery
+Restore-SqlDatabase `
+    -Database $database `
+    -BackupFile &quot;$backups\$database.log&quot; `
+    -ServerInstance $instance2 `
+    -RestoreAction Log `
+    -NoRecovery</code></pre>
+      <p>The next step is to create the database mirroring endpoints required by an AlwaysOn availability group:</p>
+      <pre><code>$endpoint = New-SqlHADREndpoint -Port 5022 -Owner sa -Encryption Supported -EncryptionAlgorithm Aes -Name AlwaysOnEndpoint -Path &quot;SQLSERVER:\SQL\$instance1&quot;
+Set-SqlHADREndpoint -InputObject $endpoint -State Started
+$endpoint = New-SqlHADREndpoint -Port 5022 -Owner sa -Encryption Supported -EncryptionAlgorithm Aes -Name AlwaysOnEndpoint -Path &quot;SQLSERVER:\SQL\$instance2&quot;
+Set-SqlHADREndpoint -InputObject $endpoint -State Started</code></pre>
+      <p>To grant the SQL Server service access to the endpoints:</p>
+      <pre><code>sqlcmd -S $instance1 -Q &quot;CREATE LOGIN [LAB\sql-sheryl] FROM WINDOWS; GRANT CONNECT ON ENDPOINT::AlwaysOnEndpoint TO [LAB\sql-sheryl]&quot;;
+sqlcmd -S $instance2 -Q &quot;CREATE LOGIN [LAB\sql-sheryl] FROM WINDOWS; GRANT CONNECT ON ENDPOINT::AlwaysOnEndpoint TO [LAB\sql-sheryl]&quot;;</code></pre>
+      <p>The next step creates an in-memory representation of the replicas:</p>
+      <pre><code>$replica1 = New-SqlAvailabilityReplica `
+  -Name $instance1 `
+  -EndpointURL &quot;TCP://EDWARD.lab.hinchley.net:5022&quot; `
+  -AvailabilityMode &quot;SynchronousCommit&quot; `
+  -FailoverMode &quot;Automatic&quot; `
+  -Version 11 `
+  -AsTemplate
+
+$replica2 = New-SqlAvailabilityReplica `
+  -Name $instance2 `
+  -EndpointURL &quot;TCP://RONALD.lab.hinchley.net:5022&quot; `
+  -AvailabilityMode &quot;SynchronousCommit&quot; `
+  -FailoverMode &quot;Automatic&quot; `
+  -Version 11 `
+  -AsTemplate</code></pre>
+      <p>We will now enable the use of AlwaysOn availability groups on both nodes:</p>
+      <pre><code>Enable-SqlAlwaysOn -Path &quot;SQLSERVER:\SQL\$instance1&quot; -Force
+Enable-SqlAlwaysOn -Path &quot;SQLSERVER:\SQL\$instance2&quot; -Force</code></pre>
+      <p>And then create the availability group:</p>
+      <pre><code>New-SqlAvailabilityGroup `
+  -Name &quot;SHERYL-01&quot; `
+  -Path &quot;SQLSERVER:\SQL\$instance1&quot; `
+  -AvailabilityReplica @($replica1, $replica2) `
+  -Database $database</code></pre>
+      <p>Next, we join the secondary replica to the availability group:</p>
+      <pre><code>Join-SqlAvailabilityGroup -Path &quot;SQLSERVER:\SQL\$instance2\AvailabilityGroups&quot; -Name &quot;SHERYL-01&quot;</code></pre>
+      <p>And then we join the secondary database to the availability group:</p>
+      <pre><code>Add-SqlAvailabilityDatabase -Path &quot;SQLSERVER:\SQL\$instance2\AvailabilityGroups\SHERYL-01&quot; -Database $database</code></pre>
+      <p>The final step is to create the availability group listener:</p>
+      <pre><code>New-SqlAvailabilityGroupListener -Name &quot;SHERYL-01&quot; -StaticIp &quot;10.0.0.23/255.255.255.0&quot; -Path &quot;SQLSERVER:\SQL\$instance1\AvailabilityGroups\SHERYL-01&quot;</code></pre>
+      <h2 id="kerberos-authentication">Kerberos Authentication</h2>
+      <blockquote>
+        <p>Perform this step once from any server.</p>
+      </blockquote>
+      <p>To setup the SPNs required for Kerberos authentication to the availability group:</p>
+      <pre><code>SetSPN -s &quot;MSSQLSvc/SHERYL-01.lab.hinchley.net:SQL01&quot; &quot;LAB\sql-sheryl&quot;
+SetSPN -s &quot;MSSQLSvc/SHERYL-01.lab.hinchley.net:1433&quot; &quot;LAB\sql-sheryl&quot;</code></pre>
+      <p>You should also set SPNs for direct connections to each node. For example:</p>
+      <pre><code>SetSPN -s &quot;MSSQLSvc/EDWARD.lab.hinchley.net:SQL01&quot; &quot;LAB\sql-sheryl&quot;
+SetSPN -s &quot;MSSQLSvc/EDWARD.lab.hinchley.net:1433&quot; &quot;LAB\sql-sheryl&quot;</code></pre>
+      <p>The following code can be used to test a Kerberos connection to the availability group:</p>
+      <pre><code>$Server = New-Object Microsoft.SqlServer.Management.Smo.Server(&quot;SHERYL-01.lab.hinchley.net&quot;)
+$Server.ConnectionContext.ApplicationName = &quot;Listener Connection&quot;
+$Server.Status</code></pre>
+      <p>Now run the following and confirm that <em>KERBEROS</em> is displayed:</p>
+      <pre><code>sqlcmd -S SHERYL-01 -Q &quot;select c.auth_scheme from sys.dm_exec_connections c inner join sys.dm_exec_sessions s on c.session_id = s.session_id where program_name like 'Listener Connection';&quot;</code></pre>
+      <h2 id="management-console">Management Console</h2>
+      <blockquote>
+        <p>Perform this step on a "management server" with the GUI (i.e. not on the SQL nodes).</p>
+      </blockquote>
+      <p>Assuming you have mounted the SQL installation media, use the following command to install the SQL Server Management Studio:</p>
+      <pre><code>setup.exe /ACTION=&quot;Install&quot; /IACCEPTSQLSERVERLICENSETERMS /Q /INDICATEPROGRESS /FEATURES=&quot;Tools&quot;</code></pre>
+      <h2 id="next-steps">Next Steps</h2>
+      <p>The next steps include creating a database maintenance plan, configuring delegated management, and testing database failover. But that can wait for another day.</p>
+      <footer>
+        <p><span>Published: 2015-10-04</span> <span>Last Updated: 2015-12-22</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

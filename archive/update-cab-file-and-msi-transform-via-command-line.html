@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Update CAB File and MSI Transform via Command Line</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Update CAB File and MSI Transform via Command Line</h1>
+    </header>
+    <main class="archive">
+      <p>Here is the scenario: You've been provided with an MSI. The installer includes a transform (an MST) that references a cabinet (CAB) file. The cabinet includes a single configuration file which you want to modify. This involves updating the cabinet with a modified configuration file, and then updating the transform, as ths MST includes a reference to the size of each file within the cabinet.</p>
+      <p>Here is the setup:</p>
+      <ul>
+        <li>The MSI: <code>c:\scripts\app.msi</code></li>
+        <li>The MST: <code>c:\scripts\app.mst</code></li>
+        <li>The CAB: <code>c:\scripts\app.cab</code></li>
+      </ul>
+      <p>Let's start by extracting the content of the cabinet into a subfolder of <code>c:\scripts</code>. From a command prompt, run the following:</p>
+      <pre><code>mkdir c:\scripts\cabinet
+expand c:\scripts\app.cab -F:*.* c:\scripts\cabinet</code></pre>
+      <p>Let's assume the cabinet contained a single configuration file named <code>app.ini</code>. After you have modified the extracted file, you need to add it back into a new cabinet. To do this, create a "cabinet directive" file named <code>c:\scripts\cabinet\cabinet.ddf</code> with the following content:</p>
+      <pre><code>.OPTION EXPLICIT
+.Set CabinetNameTemplate=&quot;app.cab&quot;
+.set DiskDirectoryTemplate=CDROM
+.Set CompressionType=MSZIP
+.Set UniqueFiles=&quot;OFF&quot;
+.Set Cabinet=on
+.Set DiskDirectory1=.
+app.ini</code></pre>
+      <p>Note: If the cabinet included more than one file, it is essential those files are listed at the bottom of the <em>ddf</em> in the exact same order as they are listed within the <em>Files</em> table of the MSI/MST.</p>
+      <p>Now we can run the following commands to create the new cabinet (replacing the original):</p>
+      <pre><code>cd c:\scripts\cabinet
+makecab.exe /f cabinet.ddf
+move /Y cabinet.ddf ..</code></pre>
+      <p>Now that you have updated the cabinet, you need to update the MST to reflect the size of the modified configuration file (<code>app.ini</code>). We will do this via the following PowerShell script:</p>
+      <pre><code>$installer = &quot;C:\Scripts\app.msi&quot;
+$transform = &quot;C:\Scripts\app.mst&quot;
+
+$tempmsi = &quot;$installer.tmp&quot;
+$tempmst = &quot;$transform.tmp&quot;
+
+copy-item $installer $tempmsi -force
+copy-item $transform $tempmst -force
+
+# id of file to be modified within file table of msi.
+$id = &quot;app.ini&quot;
+
+# path to file that has been updated in the cabinet.
+$file = &quot;c:\scripts\cabinet\app.ini&quot;
+
+# size of updated file.
+$size = (get-item $file).length
+
+$msi = New-Object -ComObject WindowsInstaller.Installer
+
+$db1 = $msi.OpenDatabase($tempmsi, 2)
+$db1.ApplyTransform($tempmst, 0)
+
+$view = $db1.OpenView(&quot;UPDATE File SET FileSize = $size WHERE File = '$id'&quot;)
+$view.Execute()
+$view.Close()
+$view = $null
+
+$db2 = $msi.OpenDatabase($installer, 2)
+$db1.GenerateTransform($db2, $transform)
+
+$transform = $null
+$db1 = $null
+$db2 = $null
+$msi = $null
+
+[GC]::Collect()
+
+start-sleep -seconds 5
+
+remove-item $tempmsi -force
+remove-item $tempmst -force</code></pre>
+      <p>The following PowerShell script can be used to confirm that the MST was updated successfully.</p>
+      <pre><code>$installer = &quot;C:\Scripts\app.msi&quot;
+$transform = &quot;C:\Scripts\app.mst&quot;
+
+$id = &quot;app.ini&quot;
+
+$file = &quot;c:\scripts\cabinet\app.ini&quot;
+
+# actual size of file updated in the cabinet.
+$actualsize = (get-item $file).length
+
+$msi = New-Object -ComObject WindowsInstaller.Installer
+$db  = $msi.OpenDatabase($installer, 0)
+$db.ApplyTransform($transform, 0)
+$view = $db.OpenView(&quot;SELECT FileSize FROM File WHERE File = '$id'&quot;)
+
+$view.Execute()
+$item = $view.Fetch()
+$size = $item.StringData(1)
+$view.Close()
+$view = $null
+
+if ($size -eq $actualsize) {
+  write-host &quot;The transform was updated successfully.&quot;
+} else {
+  write-host &quot;The size of the file in the transform does not match the actual size of the file.&quot;
+}
+
+$transform = $null
+$db = $null
+$msi = $null
+
+[GC]::Collect()</code></pre>
+      <p>Note: The <code>$id</code> variable is used to identify the relevant row in the <em>File</em> table of the MSI/MST. This is a unique identifier, and is not always the same as the unqualified file name.</p>
+      <footer>
+        <p><span>Published: 2016-03-25</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

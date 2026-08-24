@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Inspecting the Properties of a Windows Executable using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Inspecting the Properties of a Windows Executable using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>This is a short post demonstrating how you can determine the properties of a Windows executable by inspection of the Portable Executable (PE) header of the file using PowerShell. The example code shown below will identify the "bitness" of an executable (either 32 or 64 bit), and whether the program is a GUI or console based application.</p>
+      <pre><code>function getExecutableProperties($path) {
+  $pointerOffset = 60
+  $machineTypeOffset = 4
+  $subsystemOffset = 92
+
+  $buffer = 4096
+
+  $bytes = new-object byte[]($buffer)
+
+  $stream = new-object system.io.filestream($path, [system.io.filemode]::open, [system.io.fileaccess]::read)
+
+  if (! ($stream.read($bytes, 0, $buffer) -and $bytes[0] -eq 0x4d -and $bytes[1] -eq 0x5a)) {
+    write-host 'Not PE image.'; exit
+  }
+
+  $headerOffset = [system.bitconverter]::touint32($bytes, $pointerOffset)
+  $machineType  = [system.bitconverter]::touint16($bytes, $headerOffset + $machineTypeOffset)
+  $subsystem    = [system.bitconverter]::touint16($bytes, $headerOffset + $subsystemOffset)
+
+  $stream.close()
+
+  $bitness = switch ($machineType) {
+    0x014c  { 'x86' }
+    0x8664  { 'x64' }
+    default { 'Unknown' }
+  }
+
+  $mode = switch ($subsystem) {
+    2  { 'GUI' }
+    3  { 'Console' }
+    default { 'Unknown' }
+  }
+
+  return [pscustomobject]@{'Bitness' = $bitness; 'Mode' = $mode}
+}</code></pre>
+      <p>Calling the function as shown below:</p>
+      <pre><code>getExecutableProperties c:\windows\syswow64\notepad.exe
+getExecutableProperties c:\windows\system32\reg.exe</code></pre>
+      <p>Yields the following output:</p>
+      <pre><code>Bitness Mode
+------- ----
+x86     GUI
+x64     Console</code></pre>
+      <p>I was able to determine the appropriate offsets by reviewing this graphic of the PE header (taken from the <a href="https://en.wikipedia.org/wiki/Portable_Executable">Portable Executable</a> page on Wikipedia. And the relevant property values were determined from the <a href="https://docs.microsoft.com/en-us/windows/win32/debug/pe-format">PE Format</a> page from Microsoft.</p>
+      <img src="../static/portableexeheader.png" alt="PE Header" />
+      <footer>
+        <p><span>Published: 2018-05-28</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

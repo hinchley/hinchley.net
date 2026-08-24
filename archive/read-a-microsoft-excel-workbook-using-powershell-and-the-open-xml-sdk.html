@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Read a Microsoft Excel Workbook using PowerShell and the Open XML SDK</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Read a Microsoft Excel Workbook using PowerShell and the Open XML SDK</h1>
+    </header>
+    <main class="archive">
+      <p>There are a few options for reading a Microsoft Excel workbook using PowerShell, but one of the most efficient is to use the Open XML SDK.</p>
+      <ol>
+        <li>Firstly, download the <a href="https://web.archive.org/web/20190116000204/https://www.microsoft.com/en-us/download/details.aspx?id=30425">Open XML SDK 2.5</a> from Microsoft. You only need <em>OpenXMLSDKV25.msi</em>.</li>
+        <li>Install the SDK. The installation directory on an x64 computer will default to: <code>C:\Program Files (x86)\Open XML SDK\V2.5</code></li>
+        <li>Download <a href="https://github.com/dlwyatt/PSGenericMethods/blob/master/GenericMethods.psm1">GenericMethods.psm1</a> from the <a href="https://github.com/dlwyatt/PSGenericMethods">PSGenericMethods</a> GitHub repository. Save the file within a directory on the same computer where you installed the Open XML SDK. e.g. <code>C:\Scripts</code>. This module will make it easier to work with the generic methods exposed by the SDK.</li>
+        <li>Create an Excel document and add some sample data. e.g. <code>C:\Scripts\Test.xlsx</code>.</li>
+        <li>Create a PowerShell script named <em>Excel.ps1</em> with the code shown below and also save it under <code>C:\Scripts</code>.</li>
+        <li>Now run the PowerShell script from a command prompt: <code>powershell.exe -executionpolicy bypass -file C:\Scripts\Excel.ps1 -path &quot;C:\Scripts\Test.xlsx&quot;</code></li>
+      </ol>
+      <pre><code>Param ([string]$path = $(throw &quot;-path is required.&quot;))
+
+Import-Module &quot;$PSScriptRoot\GenericMethods.psm1&quot;
+[System.Reflection.Assembly]::LoadFrom(&quot;C:\Program Files (x86)\Open XML SDK\V2.5\lib\DocumentFormat.OpenXml.dll&quot;) | out-null
+
+[Reflection.Assembly]::LoadWithPartialName(&quot;DocumentFormat.OpenXml&quot;) | out-null
+[Reflection.Assembly]::LoadWithPartialName(&quot;DocumentFormat.OpenXml.Packaging&quot;) | out-null
+[Reflection.Assembly]::LoadWithPartialName(&quot;DocumentFormat.OpenXml.Spreadsheet&quot;) | out-null
+[Reflection.Assembly]::LoadWithPartialName(&quot;OpenXmlPowerTools&quot;) | out-null
+
+[DocumentFormat.OpenXml.Packaging.SpreadsheetDocument]$document = $null
+$document = [DocumentFormat.OpenXml.Packaging.SpreadsheetDocument]::Open($path, $false)
+
+[DocumentFormat.OpenXml.Packaging.WorkbookPart]$workBookPart = $document.WorkbookPart
+$elements = $workBookPart.SharedStringTablePart.SharedStringTable.Elements
+
+[DocumentFormat.OpenXml.Spreadsheet.Workbook]$workBook = $workBookPart.Workbook
+[DocumentFormat.OpenXml.Spreadsheet.Sheets]$sheets = $workBook.Sheets
+
+[DocumentFormat.OpenXml.Spreadsheet.Sheet]$sheet = $null
+
+foreach ($sheet in $sheets) {
+  [DocumentFormat.OpenXml.Packaging.WorksheetPart]$workSheetPart = $workBookPart.GetPartById($sheet.Id)
+
+  $cells = Invoke-GenericMethod -InputObject $workSheetPart.Worksheet -MethodName Descendants -GenericType DocumentFormat.OpenXml.Spreadsheet.Cell
+
+  foreach ($cell in $cells) {
+    if ($cell.DataType.Value -eq &quot;SharedString&quot;) {
+      $stringTable = Invoke-GenericMethod -InputObject $workBookPart -MethodName GetPartsOfType -GenericType DocumentFormat.OpenXml.Packaging.SharedStringTablePart
+      $value = $stringTable.SharedStringTable.InnerText
+    } else {
+      [String]$value = $cell.InnerText
+    }
+
+    &quot;Value at {0}: {1}&quot; -f $cell.CellReference, $value
+    [DocumentFormat.OpenXml.Packaging.SharedStringTablePart]$sharedTablePart = $null
+  }
+}
+
+$document.Close()</code></pre>
+      <p>The code will iterate through the cells of the workbook (left to right, top to bottom) and output the reference and value of any non-empty cell. For example:</p>
+      <pre><code>Value at A1: 321
+Value at A2: ABC
+Value at B1: XYZ</code></pre>
+      <footer>
+        <p><span>Published: 2016-02-06</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

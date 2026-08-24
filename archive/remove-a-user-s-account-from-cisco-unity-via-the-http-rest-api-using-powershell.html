@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Remove a User's Account from Cisco Unity via the HTTP REST API using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Remove a User's Account from Cisco Unity via the HTTP REST API using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>Here is some code I wrote this week to remove a user's account from Cisco Unity via the REST API using PowerShell. There are a few parts to the solution:</p>
+      <ol>
+        <li>A query is initiated to retrieve the user's account.</li>
+        <li>The script aborts if a single record is not returned.</li>
+        <li>The unique object id of the retrieved user account is obtained.</li>
+        <li>A request to delete the matched user is submitted using the object id of the account.</li>
+      </ol>
+      <p>To use the code, set the <em>login</em> variable to the login id of the user to be deleted, the <em>username</em> and <em>password</em> variables to those of an account with administrator privileges within Cisco Unity, and the <em>api</em> variable to the user REST API endpoint relevant to your environment.</p>
+      <p>I am sure this is a fairly niche task, but I hope someone may find the code useful.</p>
+      <pre><code># the login id of the user to delete.
+$login = 'jbloggs'
+
+# creds for connecting to the api.
+$username = 'admin'
+$password = 'password'
+
+# api endpoint.
+$api = 'https://10.1.1.1/vmrest/users'
+
+# build authorization header.
+$cred = [system.text.utf8encoding]::utf8.getbytes($username + ':' + $password)
+$auth = 'BASIC ' + [system.convert]::tobase64string($cred)
+
+add-type @&quot;
+  using System.Net;
+  using System.Security.Cryptography.X509Certificates;
+  public class TrustAllCertsPolicy : ICertificatePolicy {
+    public bool CheckValidationResult(
+      ServicePoint srvPoint,
+      X509Certificate certificate,
+      WebRequest request,
+      int certificateProblem
+    ) { return true; }
+  }
+&quot;@
+
+# used to bypass certificate validity check.
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
+# build the request uri for retrieving the user by login id.
+$query = '?query=(alias is {0})' -f $user
+$request = $api, $query -join '/'
+
+try {
+  $result = invoke-restmethod $request -method GET -headers @{Authorization = $auth}
+} catch { write-warning 'Error retrieving the account in Cisco Unity.'; exit }
+
+if ($result.users.total -eq 0) { write-host 'User does not have an account in Cisco Unity.'; exit }
+if ($result.users.total -gt 1) { write-host 'Unable to disambiguate the user account in Cisco Unity.'; exit }
+
+# build a request for deleting the user based on the unique object id of the account.
+$request = $api, $result.Users.FirstChild.ObjectId -join '/'
+
+try {
+  $result = invoke-restmethod $request -method DELETE -headers @{Authorization = $auth}
+} catch { write-warning &quot;Error deleting the user's account in Cisco Unity.&quot;; exit }</code></pre>
+      <footer>
+        <p><span>Published: 2018-05-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

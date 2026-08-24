@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create a Nano Server Image using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create a Nano Server Image using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>Here are a few PowerShell scripts for automating the creation of a new Windows Server 2016 Nano Server image.</p>
+      <p>The following code is used to create a folder structure suitable for creating new Nano Server images. The script creates a new parent folder named <em>D:\Nano</em>, with 4 sub-folders; <em>Images</em> for storing the new Nano Server images, <em>Logs</em> for storing the logs generated during the build process, <em>Scripts</em> for storing a custom post-deployment PowerShell script, and <em>Updates</em> for storing the latest Windows Server 2016 cumulative update cabinet.</p>
+      <pre><code># Path to Windows Server 2016 media.
+$media = &quot;D:\Media\Windows Server 2016\en_windows_server_2016_x64_dvd.iso&quot;
+
+# Path used for building Nano Server images.
+$build = &quot;D:\Nano&quot;
+
+# Mount media.
+$mount = Mount-DiskImage -ImagePath $media -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + &quot;:&quot;
+
+# Create the &quot;build&quot; folder.
+New-Item -Type Directory -Path $build -Force | Out-Null
+
+# Change into the &quot;build&quot; folder.
+pushd $build
+
+# Create required sub-folders.
+New-Item -Type Directory -Path 'Images', 'Logs', Scripts', 'Updates' -Force | Out-Null
+
+# Copy Nano Server media from mounted media.
+Copy-Item &quot;$drive\NanoServer&quot; . -Recurse -Force
+
+# Un-mount media.
+Dismount-DiskImage -ImagePath $media
+
+# Return to original directory.
+popd</code></pre>
+      <p>This next script, which should be named <em>configure.ps1</em>, and stored under the previously created <em>Scripts</em> folder, will be run immediately after the Nano Server image is created. It is used to configure the Windows Update client of the Nano Server to use a WSUS server (automatically installing available updates at 1am each Sunday).</p>
+      <pre><code># WSUS sever.
+$wsus = &quot;http://wsus.lab.hinchley.net:8530/&quot;
+
+# Windows Update registry key.
+$key = &quot;HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate&quot;
+
+# Configure Windows Update.
+New-Item -Path $key\AU -Force | Out-Null
+New-ItemProperty -Path $key -Name WUServer -Value $wsus -Type String -Force | Out-Null
+New-ItemProperty -Path $key -Name WUStatusServer -Value $wsus -Type String -Force | Out-Null
+New-ItemProperty -Path $key\AU -Name UseWUServer -Value 1 -Type Dword -Force | Out-Null
+New-ItemProperty -Path $key\AU -Name AUOptions -Value 4 -Type Dword -Force | Out-Null
+New-ItemProperty -Path $key\AU -Name ScheduledInstallDay -Value 1 -Type Dword -Force | Out-Null
+New-ItemProperty -Path $key\AU -Name ScheduledInstallTime -Value 1 -Type Dword -Force | Out-Null</code></pre>
+      <p>This next script is used to actually create the Nano Server as a VHDX image suitable for deployment as a second generation Hyper-V virtual machine. In addition to setting the name, edition, timezone, disk size, and IP details of the image, the script also applies the cumulative update stored within the <em>Updates</em> folder, and joins the server to the local Active Directory domain (i.e. the domain of the server on which this script is executed). The script also initiates the execution of the previously created post-deployment script to configure the Windows Update client.</p>
+      <p>You will be prompted to set the local administrator password when running the script.</p>
+      <p>Note: It is essential that the cumulative update to be applied to the Nano Server is already installed on the server on which this script is executed.</p>
+      <pre><code># Name of Nano Server.
+$name = &quot;NANO&quot;
+
+# Disk size.
+$disksize = 20GB
+
+# Timezone.
+$timezone = &quot;AUS Eastern Standard Time&quot;
+
+# IP configuration.
+$ip = New-Object PSObject –Property @{
+  'address' = &quot;192.168.1.206&quot;;
+  'mask'    = &quot;255.255.255.0&quot;;
+  'gateway' = &quot;192.168.1.254&quot;;
+  'dns'     = &quot;192.168.1.200&quot;, &quot;192.168.1.201&quot;;}
+
+# Path used for building Nano images.
+$build = &quot;D:\Nano&quot;
+
+# Change into the &quot;build&quot; folder.
+pushd $build
+
+# Import the Nano Server image generator module.
+Import-Module &quot;.\NanoServer\NanoServerImageGenerator&quot; -Verbose -Force
+
+# Delete the existing image (if it exists).
+if (Test-Path .\Images\$name.vhdx) { Remove-Item .\Images\$name.vhdx -Force }
+
+# Delete the existing logs (if they exists).
+if (Test-Path .\Logs\$name\DISM.log) { Remove-Item .\Logs\$name\* -Force }
+
+# Get the name of the latest cumulative update from the Updates folder.
+$update = (Get-ChildItem .\Updates)[0].Name
+
+# Create the Nano Server image.
+New-NanoServerImage -DeploymentType Guest -Edition Standard -MediaPath . -BasePath .\Base -TargetPath .\Images\$name.vhdx -ComputerName $name -DomainName $env:userdnsdomain -ReuseDomainNode -EnableRemoteManagementPort -InterfaceNameOrIndex Ethernet -Ipv4Address $ip.address -Ipv4SubnetMask $ip.mask -Ipv4Gateway $ip.gateway -Ipv4Dns $ip.dns -MaxSize $disksize -CopyPath .\Scripts -SetupCompleteCommand &quot;tzutil.exe /s `&quot;$timezone`&quot;&quot;, 'powershell.exe -file &quot;C:\Scripts\configure.ps1&quot;' -ServicingPackagePath .\Updates\$update -LogPath .\Logs\$name
+
+# Return to original directory.
+popd</code></pre>
+      <p>This final script is used to create a new Hyper-V virtual machine from the VHDX image.</p>
+      <pre><code># Name of Nano Server.
+$name = &quot;NANO&quot;
+
+# Path to Nano Server image.
+$image = &quot;D:\Nano\Images\$name.vhdx&quot;
+
+# Path to Hyper-V VMs.
+$vms = &quot;D:\VMs&quot;
+
+# Name of VM switch.
+$switch = &quot;LAB&quot;
+
+# Create a folder for the new Nano Server.
+New-Item -Type Directory &quot;$vms\$name&quot; -Force | Out-Null
+
+# Copy the Nano Server image to the VM folder.
+Copy-Item $image &quot;$vms\$name\$name.vhdx&quot; -Force
+
+# Create the VM.
+New-VM -VHDPath &quot;$vms\$name\$name.vhdx&quot; -Generation 2 -MemoryStartupBytes 1GB -Name $name -Path $vms -SwitchName $switch
+
+# Start the VM.
+Start-VM -Name $name</code></pre>
+      <p>One last thing. To check the cumulative update was successfully installed, establish a PowerShell session with the new Nano Server, and run the following command. The name of the update should be listed.</p>
+      <pre><code>$ci = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName MSFT_WUOperationsSession
+$result = $ci | Invoke-CimMethod -MethodName ScanForUpdates -Arguments @{SearchCriteria=&quot;IsInstalled=1&quot;;OnlineScan=$true}
+$result.Updates | select -expandproperty Title</code></pre>
+      <footer>
+        <p><span>Published: 2017-04-17</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

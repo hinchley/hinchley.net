@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Error Codes for Software Update Point Failover</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Error Codes for Software Update Point Failover</h1>
+    </header>
+    <main class="archive">
+      <p>I recently noticed several SCCM clients were permanently pointing at an inaccessible Software Update Point (which was located behind a firewall in a gateway zone). The <em>WUAHandler.log</em> on each client reported an error code of <em>0x80072ee2</em>, indicating a network timeout. Unfortunately, this error isn't included in the list of WSUS scan retry error codes, and a failover event wasn't triggered, leaving the client stranded.</p>
+      <p>Let's start by confirming 0x80072ee2 isn't already included in the standard list of error codes, by running the following PowerShell commands on the Primary Site Server (replace <em>LAB</em> with your site code):</p>
+      <pre><code>$site = 'LAB'
+$code = '2147954402' # 0x80072ee2 in decimal.
+
+$c = gwmi -namespace root\sms\site_$site -query 'select * from sms_sci_component where componentname=&quot;sms_wsus_configuration_manager&quot;'
+($p = $c.props | ? propertyname -eq 'wsus scan retry error codes').value2 -match $code</code></pre>
+      <p>Assuming the result is <em>False</em>, let's add the error code:</p>
+      <pre><code>$component = gwmi -namespace root\sms\site_$site -query 'select * from sms_sci_component where componentname=&quot;sms_wsus_configuration_manager&quot;'
+$properties = $component.props
+
+foreach ($property in $properties) {
+  if ($property.propertyname -like 'wsus scan retry error codes') {
+    if ($property.value2 -notmatch $code) {
+      $property.value2 = $property.value2.insert($property.value2.length - 1, &quot;, $code&quot;)
+      $component.props = $properties
+      $component.put()
+    }
+  }
+}</code></pre>
+      <p>Now switch to one of the affected clients. Once again, let's confirm the error code isn't defined:</p>
+      <pre><code>$c = gwmi -namespace root\ccm\policy\machine\actualconfig -class ccm_updatesource
+$c.scanfailureretryerrorcodes -contains 2147954402</code></pre>
+      <p>Again, if the result is <em>False</em>, we can add the value using the following commands:</p>
+      <pre><code>$c = gwmi -namespace root\ccm\policy\machine\actualconfig -class ccm_updatesource
+$c.scanfailureretryerrorcodes += 2147954402
+$c.put()</code></pre>
+      <p>Note: You must update the Site Server before updating clients, otherwise the value assigned to the clients will be automatically removed.</p>
+      <footer>
+        <p><span>Published: 2016-05-29</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

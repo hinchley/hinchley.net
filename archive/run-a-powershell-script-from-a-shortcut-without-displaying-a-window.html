@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Run a PowerShell Script from a Shortcut Without Displaying a Window</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Run a PowerShell Script from a Shortcut Without Displaying a Window</h1>
+    </header>
+    <main class="archive">
+      <p>You've written a PowerShell script and you want to run it using a shortcut on the desktop. But when you do, a console window is briefly displayed. How do you hide it?</p>
+      <p>It's not enough to invoke <em>PowerShell.exe</em> using <code>-windowstyle hidden</code>, as a console window is displayed before PowerShell can process the parameter. The trick is to invoke PowerShell using the Windows Scripting Host (<em>wscript.exe</em>).</p>
+      <p>Let's start by creating a file named <code>C:\Windows\System32\Hidden.vbs</code> with the following content:</p>
+      <pre><code>CreateObject(&quot;WScript.Shell&quot;).Run &quot;&quot; &amp; WScript.Arguments(0) &amp; &quot;&quot;, 0, False</code></pre>
+      <p>Assuming your PowerShell script is named <code>C:\Windows\System32\Task.ps1</code>, create a shortcut with the following <em>Target</em>:</p>
+      <pre><code>C:\Windows\System32\wscript.exe C:\Windows\System32\Hidden.vbs &quot;C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy bypass -windowstyle hidden -noninteractive -file C:\Windows\System32\Task.ps1&quot;</code></pre>
+      <p>Now when you double click the shortcut, the PowerShell script will be invoked without displaying a console window.</p>
+      <footer>
+        <p><span>Published: 2016-02-07</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: How to Install Microsoft Edge Chromium without Creating a Desktop Shortcut</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: How to Install Microsoft Edge Chromium without Creating a Desktop Shortcut</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">This is an old post. Microsoft now provide out-of-the-box mechanisms for achieving this outcome.</p>
+      <p>Microsoft recently released the Chromium-based version of Microsoft Edge. Although various properties of the browser can be configured via group policy, it wasn’t obvious how I could prevent the creation of a desktop shortcut during installation.</p>
+      <p>I decided to look into the MSI (<em>MicrosoftEdgeEnterpriseX64.msi</em>) by cracking it open with <a href="https://docs.microsoft.com/en-us/windows/win32/msi/orca-exe">Orca</a>. This revealed a <em>BuildInstallCommand</em> action in the <em>CustomAction table</em>. This action specified the command line used during the installation of the browser. The command is shown below:</p>
+      <pre><code>/silent /install &quot;[ProductTag]&quot; /installsource enterprisemsi[OptOmahaArgs] /appargs &quot;appguid={56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}&amp;installerdata=%7B%22distribution%22%3A%7B%22msi%22%3Atrue%2C%22system_level%22%3Atrue%2C%22verbose_logging%22%3Atrue%2C%22msi_product_id%22%3A%228061116E-DD27-34F8-A5C9-3361222BD2C8%22%2C%22allow_downgrade%22%3Afalse%7D%7D&quot;</code></pre>
+      <p>If you look carefully, you will notice that the <em>installerdata</em> property is set to a URL encoded JSON document. When decoded it looks like this:</p>
+      <pre><code>{
+  &quot;distribution&quot;: {
+    &quot;msi&quot;: true,
+    &quot;system_level&quot;: true,
+    &quot;verbose_logging&quot;: true,
+    &quot;msi_product_id&quot;: &quot;8061116E-DD27-34F8-A5C9-3361222BD2C8&quot;,
+    &quot;allow_downgrade&quot;: false
+  }
+}</code></pre>
+      <p>This corresponds with the file that gets created at the following location during installation: <em>C:\Program Files (x86)\Microsoft\Edge\Application\master_preferences</em></p>
+      <p>I already knew that the <em>do_not_create_desktop_shortcut</em> property could be added to the <em>master_preferences</em> file to prevent the creation of the desktop shortcut, but now it became clear how to easily update this configuration file during the installation of the browser.</p>
+      <p>The first step was to update the JSON configuration to include the <em>do_not_create_desktop_shortcut</em> property:</p>
+      <pre><code>{
+  &quot;distribution&quot;: {
+    &quot;msi&quot;: true,
+    &quot;system_level&quot;: true,
+    &quot;verbose_logging&quot;: true,
+    &quot;msi_product_id&quot;: &quot;8061116E-DD27-34F8-A5C9-3361222BD2C8&quot;,
+    &quot;allow_downgrade&quot;: false,
+    &quot;do_not_create_desktop_shortcut&quot;: true
+  }
+}</code></pre>
+      <p>The second step was to remove all spaces from the file, and URL encode the result:</p>
+      <pre><code>%7B%22distribution%22%3A%7B%22msi%22%3Atrue%2C%22system_level%22%3Atrue%2C%22verbose_logging%22%3Atrue%2C%22msi_product_id%22%3A%228061116E-DD27-34F8-A5C9-3361222BD2C8%22%2C%22allow_downgrade%22%3Afalse%2C%22do_not_create_desktop_shortcut%22%3Atrue%7D%7D</code></pre>
+      <p>The third step was to update the <em>BuildInstallCommand</em> string to include the new encoded configuration:</p>
+      <pre><code>/silent /install &quot;[ProductTag]&quot; /installsource enterprisemsi[OptOmahaArgs] /appargs &quot;appguid={56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}&amp;installerdata=%7B%22distribution%22%3A%7B%22msi%22%3Atrue%2C%22system_level%22%3Atrue%2C%22verbose_logging%22%3Atrue%2C%22msi_product_id%22%3A%228061116E-DD27-34F8-A5C9-3361222BD2C8%22%2C%22allow_downgrade%22%3Afalse%7D%7D&quot;</code></pre>
+      <p>And the final step was to create an MSI transform that would add that new command to the installer. To simplify this process, I wrote the following PowerShell script. The script assumes the MSI is located under <em>C:\Temp</em>, and when run, it will generate a transform in the same folder named <em>MicrosoftEdgeEnterpriseX64.mst</em>. It is then possible to install Edgium using the following command:</p>
+      <pre><code>msiexec /i MicrosoftEdgeEnterpriseX64.msi /q TRANSFORMS=MicrosoftEdgeEnterpriseX64.mst</code></pre>
+      <p>The result: no desktop shortcut!!</p>
+      <pre><code>$installer = &quot;C:\Temp\MicrosoftEdgeEnterpriseX64.msi&quot;
+$transform = &quot;C:\Temp\MicrosoftEdgeEnterpriseX64.mst&quot;
+
+if (test-path $transform) { remove-item $transform -force }
+
+$backup = &quot;$installer.bak&quot;
+
+copy-item $installer $backup -force
+
+$cmd = '/silent /install &quot;[ProductTag]&quot; /installsource enterprisemsi[OptOmahaArgs] /appargs &quot;appguid={56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}&amp;installerdata=%7B%22distribution%22%3A%7B%22msi%22%3Atrue%2C%22system_level%22%3Atrue%2C%22verbose_logging%22%3Atrue%2C%22msi_product_id%22%3A%228061116E-DD27-34F8-A5C9-3361222BD2C8%22%2C%22allow_downgrade%22%3Afalse%2C%22do_not_create_desktop_shortcut%22%3Atrue%7D%7D&quot;'
+
+$msi = New-Object -ComObject WindowsInstaller.Installer
+
+$db1 = $msi.OpenDatabase($installer, 0)
+$db2 = $msi.OpenDatabase($backup, 1)
+
+$view = $db2.OpenView(&quot;UPDATE CustomAction SET Target = '$cmd' WHERE Action = 'BuildInstallCommand'&quot;)
+$view.Execute()
+$view.Close()
+$view = $null
+
+$db2.Commit()
+
+$db2.GenerateTransform($db1, $transform) | out-null
+
+$db2.CreateTransformSummaryInfo($db1, $transform, 0, 0)
+
+$db1 = $null
+$db2 = $null
+$msi = $null
+
+[GC]::Collect()
+
+start-sleep -seconds 2
+
+remove-item $backup -force</code></pre>
+      <footer>
+        <p><span>Published: 2020-02-06</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

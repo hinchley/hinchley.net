@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: List the Content Assigned to an SCCM Distribution Point Group</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: List the Content Assigned to an SCCM Distribution Point Group</h1>
+    </header>
+    <main class="archive">
+      <p>A short PowerShell code snippet for listing the names of the content (packages and applications) assigned to an SCCM 2012 distribution point.</p>
+      <pre><code>$sitecode  = 'LAB'
+$provider  = 'SCCM'
+$groupname = 'All DPs'
+$namespace = &quot;root\sms\site_$sitecode&quot;
+
+$id = (gwmi -n $namespace -query &quot;select * from sms_distributionpointgroup where name='$groupname'&quot; -comp $provider).groupid
+gwmi -n $namespace -query &quot;select * from sms_dpgroupcontentinfo where groupid='$id'&quot; -comp $provider | sort name | select -expand name</code></pre>
+      <p>The <em>$provider</em> variable is the name of the server hosting the SMS Provider, and the <em>$groupname</em> variable identifies the name of the distribution group to be queried.</p>
+      <footer>
+        <p><span>Published: 2016-06-17</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

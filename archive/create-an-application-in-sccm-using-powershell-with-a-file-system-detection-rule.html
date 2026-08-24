@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create an Application in SCCM using PowerShell with a File-System Detection Rule</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create an Application in SCCM using PowerShell with a File-System Detection Rule</h1>
+    </header>
+    <main class="archive">
+      <p>Although you can create an application in SCCM using the native Configuration Manager cmdlets (e.g. <em>New-CMApplication</em> and <em>Add-CMDeploymentType</em>), you cannot create a script-based deployment that uses a file system (or registry) detection rule. Hence the reason for the following PowerShell script.</p>
+      <p>The script will create a new application in SCCM 2012 (or later) with the following details: Publisher of <em>Acme</em>, Name of <em>Foobar</em> and Version of <em>1.0</em>. The content source is <code>\\lab.hinchley.net\software\Acme\Foobar 1.0</code>, the installation command is <code>setup.exe /q</code>, and the file system detection rule looks for a file named <em>foobar.exe</em>, under <code>C:\Windows\System32</code>, with a file version of <em>1.0.0</em>.</p>
+      <p>Assuming the script is named <em>CreateApplication.ps1</em>, it should should be executed on the primary site server (by a suitably privileged user) as follows:</p>
+      <pre><code>powershell -file CreateApplication.ps1</code></pre>
+      <p>Remember to modify the variables at the top of the script to values suitable for your environment.</p>
+      <pre><code># load required libraries.
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.dll&quot;
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.MsiInstaller.dll&quot;
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ManagementProvider.dll&quot;
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.Extender.dll&quot;
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\DcmObjectModel.dll&quot;
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\AdminUI.WqlQueryEngine.dll&quot;
+Add-Type -Path &quot;C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin\AdminUI.AppManFoundation.dll&quot;
+
+# name of vendor.
+$publisher = &quot;Acme&quot;
+
+# name of application.
+$name = &quot;Foobar&quot;
+
+# version of application.
+$release = &quot;1.0&quot;
+
+# installation command.
+$install = &quot;setup.exe /q&quot;
+
+# path to source.
+$source  = &quot;\\lab.hinchley.net\software\Acme\Foobar 1.0&quot;
+
+# path to file when installed. used by detection method.
+$path = &quot;C:\Windows\System32&quot;
+
+# name of installed file. used by detection method.
+$file = &quot;foobar.exe&quot;
+
+# version of installed file. used by detection method.
+$version = &quot;1.0.0&quot;
+
+# connect to server. 
+$connection = New-Object Microsoft.ConfigurationManagement.ManagementProvider.WqlQueryEngine.WqlConnectionManager
+[void]$connection.Connect(&quot;localhost&quot;)
+
+# initialise management scope.
+$factory = New-Object Microsoft.ConfigurationManagement.AdminConsole.AppManFoundation.ApplicationFactory
+$wrapper = [Microsoft.ConfigurationManagement.AdminConsole.AppManFoundation.AppManWrapper]::Create($connection, $factory)
+
+# create the application.
+$app = New-Object Microsoft.ConfigurationManagement.ApplicationManagement.Application
+
+# set the application properties.
+$app.Title = $name
+$app.Publisher = $publisher
+$app.SoftwareVersion = $release
+
+# prepare the localised display info.
+$info = New-Object Microsoft.ConfigurationManagement.ApplicationManagement.AppDisplayInfo
+
+# set the localised application name.
+$info.Title = $name
+$info.Language = &quot;en-AU&quot;
+
+# save the display properties.
+$app.DisplayInfo.Add($info)
+
+# create a script-based installer.
+$installer = New-Object Microsoft.ConfigurationManagement.ApplicationManagement.ScriptInstaller
+$installer.InstallCommandLine = $install
+
+# reference the content source.
+$content = [Microsoft.ConfigurationManagement.ApplicationManagement.ContentImporter]::CreateContentFromFolder($source)
+$installer.Contents.Add($content)
+
+$reference  =  New-Object Microsoft.ConfigurationManagement.ApplicationManagement.ContentRef
+$reference.Id  = $content.Id
+$installer.InstallContent =  $reference
+
+# use an enhanced detection method.
+$installer.DetectionMethod = [Microsoft.ConfigurationManagement.ApplicationManagement.DetectionMethod]::Enhanced
+$detector = New-Object Microsoft.ConfigurationManagement.ApplicationManagement.EnhancedDetectionMethod
+
+# use a file detector.
+$type = [Microsoft.ConfigurationManagement.DesiredConfigurationManagement.ConfigurationItemPartType]::File
+
+# prepare the detection settings.
+$setting = New-Object Microsoft.ConfigurationManagement.DesiredConfigurationManagement.FileOrFolder($type , $null)
+
+# configure the detection settings.
+$setting.FileOrFolderName = $file
+$setting.Path = $path
+$setting.Is64Bit = 1
+$setting.SettingDataType = [Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.DataType]::Version
+
+# save the detection settings.
+$detector.Settings.Add($setting)
+
+# configure the setting reference.
+$reference = New-Object Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.SettingReference($app.Scope, $app.Name, $app.Version, $setting.LogicalName, $setting.SettingDataType, $setting.SourceType, [bool]0)
+$reference.MethodType = [Microsoft.ConfigurationManagement.DesiredConfigurationManagement.ConfigurationItemSettingMethodType]::Value
+$reference.PropertyPath = &quot;Version&quot;
+
+# create the version comparison value.
+$value = New-Object Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.ConstantValue($version, [Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.DataType]::Version)
+
+# configure the comparison operands.
+$operands = New-Object Microsoft.ConfigurationManagement.DesiredConfigurationManagement.CustomCollection``1[[Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.ExpressionBase]]
+$operands.Add($reference)
+$operands.Add($value)
+
+# build the comparison expression.
+$expression = New-Object Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.Expression([Microsoft.ConfigurationManagement.DesiredConfigurationManagement.ExpressionOperators.ExpressionOperator]::IsEquals, $operands)
+
+# save the detection rule.
+$rule = New-Object Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Rules.Rule(&quot;IsInstalledRule&quot;, [Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Rules.NoncomplianceSeverity]::None, $null, $expression)
+
+# associate the detection rule with the detection method.
+$detector.Rule = $rule 
+
+# associate the detector with the installer.
+$installer.EnhancedDetectionMethod = $detector
+
+# create the deployment type.
+$deployment = New-Object Microsoft.ConfigurationManagement.ApplicationManagement.DeploymentType($installer, [Microsoft.ConfigurationManagement.ApplicationManagement.ScriptInstaller]::TechnologyId, [Microsoft.ConfigurationManagement.ApplicationManagement.NativeHostingTechnology]::TechnologyId)
+
+# name the deployment type after the application.
+$deployment.Title = $name
+
+# associate the deployment type with the application.
+$app.DeploymentTypes.Add($deployment)
+
+# save the application.
+$wrapper.InnerAppManObject = $app
+$factory.PrepareResultObject($wrapper)
+$wrapper.InnerResultObject.Put()</code></pre>
+      <footer>
+        <p><span>Published: 2016-01-19</span> <span>Last Updated: 2016-03-06</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

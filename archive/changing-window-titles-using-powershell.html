@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Changing Window Titles using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Changing Window Titles using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>Toward the end of my previous post on using <em>SetWindowsHookEx</em> to <a href="creating-a-key-logger-via-a-global-system-hook-using-powershell.html">create global system hooks</a>, I alluded to my failed attempt at changing window titles with PowerShell by hooking <em>WM_SETTEXT</em> messages. There is, however, another way to achieve this goal, albeit, far less elegant.</p>
+      <p>Instead of proactively intercepting the messages used to set window titles, we can retrospectively modify the existing titles of all windows on a timed schedule.</p>
+      <p>The following PowerShell code uses a system timer, which fires every second, to call the Win32 function <em>SetWindowsText</em>. The function adds the text "Top Secret" to the start of every window title that does not already include the prefix.</p>
+      <pre><code># Prefix to add to window titles.
+$prefix = &quot;Top Secret&quot;
+
+# How often to update window titles (in milliseconds).
+$interval = 1000
+
+Add-Type -TypeDefinition @&quot;
+using System;
+using System.Runtime.InteropServices;
+
+public static class Win32 {
+  [DllImport(&quot;User32.dll&quot;, EntryPoint=&quot;SetWindowText&quot;)]
+  public static extern int SetWindowText(IntPtr hWnd, string strTitle);
+}
+&quot;@
+
+$timer = New-Object System.Timers.Timer
+
+$timer.Enabled = $true
+$timer.Interval = $interval
+$timer.AutoReset = $true
+
+function Change-Window-Titles($prefix) {
+  Get-Process | ? {$_.mainWindowTitle -and $_.mainWindowTitle -notlike &quot;$($prefix)*&quot;} | %{
+    [Win32]::SetWindowText($_.mainWindowHandle, &quot;$prefix - $($_.mainWindowTitle)&quot;)
+  }
+}
+
+Register-ObjectEvent -InputObject $timer -EventName Elapsed -Action {
+  Change-Window-Titles $prefix
+}
+</code></pre>
+      <p>To test the program, save the code to <code>ChangeWindowTitles.ps1</code>, open a command prompt, and run:</p>
+      <pre><code>powershell.exe -noexit -file ChangeWindowTitles.ps1
+</code></pre>
+      <p>The <em>noexit</em> argument is necessary to ensure the program stays active.</p>
+      <p>Run the code, open some windows, and after a short delay, watch the "Top Secret" prefix magically appear on all windows with visible titles.</p>
+      <p>Note: Due to the way I have chosen to enumerate application windows, this code will not correctly adjust the titles of MDI (multiple document interface) applications - like Microsoft Word.</p>
+      <footer>
+        <p><span>Published: 2013-11-03</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

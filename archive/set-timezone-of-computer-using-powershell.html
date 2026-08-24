@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Set the Time Zone of a Computer Using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Set the Time Zone of a Computer Using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>I recently reworked this <a href="https://blogs.technet.microsoft.com/deploymentguys/2009/06/07/setting-the-time-zone-using-windows-powershell/">awesome code</a> from Michael Murgolo to set the time zone of a Windows computer using PowerShell.</p>
+      <p>To use the script, just pass the name of a valid time zone as listed in the registry under <code>HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones</code>.</p>
+      <p>For example, to change the time zone to &quot;Central America Standard Time&quot;:</p>
+      <pre><code>powershell.exe -file timezone.ps1 &quot;Central America Standard Time&quot;</code></pre>
+      <p>Here is the code:</p>
+      <pre><code>param($TimeZone)
+
+Add-Type -TypeDefinition @'
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
+
+namespace NSPrivileges {
+  public class TokenPrivileges {
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int OpenProcessToken(int ProcessHandle, int DesiredAccess, ref int tokenhandle);
+
+    [DllImport(&quot;kernel32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int GetCurrentProcess();
+
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int LookupPrivilegeValue(string lpsystemname, string lpname, [MarshalAs(UnmanagedType.Struct)] ref LUID lpLuid);
+
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int AdjustTokenPrivileges(int tokenhandle, int disableprivs, [MarshalAs(UnmanagedType.Struct)] ref TOKEN_PRIVILEGE Newstate, int bufferlength, int PreivousState, int Returnlength);
+
+    public const int TOKEN_ASSIGN_PRIMARY = 0x00000001;
+    public const int TOKEN_DUPLICATE = 0x00000002;
+    public const int TOKEN_IMPERSONATE = 0x00000004;
+    public const int TOKEN_QUERY = 0x00000008;
+    public const int TOKEN_QUERY_SOURCE = 0x00000010;
+    public const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
+    public const int TOKEN_ADJUST_GROUPS = 0x00000040;
+    public const int TOKEN_ADJUST_DEFAULT = 0x00000080;
+
+    public const UInt32 SE_PRIVILEGE_ENABLED_BY_DEFAULT = 0x00000001;
+    public const UInt32 SE_PRIVILEGE_ENABLED = 0x00000002;
+    public const UInt32 SE_PRIVILEGE_REMOVED = 0x00000004;
+    public const UInt32 SE_PRIVILEGE_USED_FOR_ACCESS = 0x80000000;
+
+    public static void EnablePrivilege(string privilege) {
+      var token = 0;
+
+      var TP = new TOKEN_PRIVILEGE();
+      var LD = new LUID();
+
+      OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, ref token);
+      LookupPrivilegeValue(null, privilege, ref LD);
+      TP.PrivilegeCount = 1;
+
+      var luidAndAtt = new LUID_AND_ATTRIBUTES {Attributes = SE_PRIVILEGE_ENABLED, Luid = LD};
+      TP.Privilege = luidAndAtt;
+
+      AdjustTokenPrivileges(token, 0, ref TP, 1024, 0, 0);
+    }
+
+    public static void DisablePrivilege(string privilege) {
+      var token = 0;
+
+      var TP = new TOKEN_PRIVILEGE();
+      var LD = new LUID();
+
+      OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, ref token);
+      LookupPrivilegeValue(null, privilege, ref LD);
+      TP.PrivilegeCount = 1;
+
+      var luidAndAtt = new LUID_AND_ATTRIBUTES {Luid = LD};
+      TP.Privilege = luidAndAtt;
+
+      AdjustTokenPrivileges(token, 0, ref TP, 1024, 0, 0);
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct LUID {
+      internal uint LowPart;
+      internal uint HighPart;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct LUID_AND_ATTRIBUTES {
+      internal LUID Luid;
+      internal uint Attributes;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct TOKEN_PRIVILEGE {
+      internal uint PrivilegeCount;
+      internal LUID_AND_ATTRIBUTES Privilege;
+    }
+  }
+}
+
+namespace NSTimeZone {
+  public class TimeZoneControl {
+    [DllImport(&quot;kernel32.dll&quot;, CharSet = CharSet.Auto)]
+    private static extern bool SetDynamicTimeZoneInformation([In] ref DYNAMIC_TIME_ZONE_INFORMATION lpTimeZoneInformation);
+
+    public static void SetDynamicTimeZone(DYNAMIC_TIME_ZONE_INFORMATION dtzi) {
+      SetDynamicTimeZoneInformation(ref dtzi);
+    }
+
+    public static REG_TZI_FORMAT GetRegTziFormat(byte[] tziRegValue) {
+      REG_TZI_FORMAT rtzi;
+
+      object varValue = tziRegValue;
+      byte[] baData = varValue as byte[];
+      int iSize = baData.Length;
+      IntPtr buffer = Marshal.AllocHGlobal(iSize);
+      Marshal.Copy(baData, 0, buffer, iSize);
+      rtzi = (REG_TZI_FORMAT)Marshal.PtrToStructure(buffer,typeof(REG_TZI_FORMAT));
+      Marshal.FreeHGlobal(buffer);
+
+      return rtzi;
+    }
+  }
+
+  [StructLayoutAttribute(LayoutKind.Sequential)]
+  public struct SYSTEM_TIME {
+    public short year;
+    public short month;
+    public short dayOfWeek;
+    public short day;
+    public short hour;
+    public short minute;
+    public short second;
+    public short milliseconds;
+  }
+
+  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+  public struct DYNAMIC_TIME_ZONE_INFORMATION {
+    public int bias;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+    public string standardName;
+    public SYSTEM_TIME standardDate;
+    public int standardBias;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+    public string daylightName;
+    public SYSTEM_TIME daylightDate;
+    public int daylightBias;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+    public string timeZoneKeyName;
+    public bool dynamicDaylightTimeDisabled;
+  }
+
+  [StructLayout(LayoutKind.Sequential)]
+  public struct REG_TZI_FORMAT {
+    public int bias;
+    public int standardBias;
+    public int daylightBias;
+    public SYSTEM_TIME standardDate;
+    public SYSTEM_TIME daylightDate;
+  }
+}
+'@
+
+$TimeZonesPath = &quot;SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones&quot;
+$TimeZonePath  = &quot;$TimeZonesPath\$TimeZone&quot;
+$TimeZoneInfoPath = &quot;SYSTEM\CurrentControlSet\Control\TimeZoneInformation&quot;
+
+# Exit if the requested time zone is invalid.
+if (! (Test-Path HKLM:$TimeZonePath)) {
+  Write-Host &quot;The time zone $TimeZone does not exist.&quot;; return
+}
+
+$ExistingTimeZone =  (Get-ItemProperty -Path HKLM:$TimeZoneInfoPath -Name TimeZoneKeyName).TimeZoneKeyName
+
+# Exit if the time zone does not need to be changed.
+if ($TimeZone -eq $ExistingTimeZone) {
+  Write-Host &quot;The time zone is already set to $TimeZone.&quot;; return
+}
+
+# Get the time zone properties from the registry.
+$TimeZoneProperties = @{}
+Get-Item HKLM:$TimeZonePath | Select-Object -ExpandProperty property | %{
+  $TimeZoneProperties.Add($_, (Get-ItemProperty HKLM:$TimeZonePath -Name $_).$_)
+}
+
+# Interpret the time zone information.
+$TimeZoneInfo = [NSTimeZone.TimeZoneControl]::GetRegTziFormat($TimeZoneProperties.TZI)
+
+$DynamicTimeZoneInfo = New-Object NSTimeZone.DYNAMIC_TIME_ZONE_INFORMATION
+$DynamicTimeZoneInfo.bias = $TimeZoneInfo.Bias
+$DynamicTimeZoneInfo.standardBias = $TimeZoneInfo.standardBias
+$DynamicTimeZoneInfo.daylightBias = $TimeZoneInfo.daylightBias
+
+$DynamicTimeZoneInfo.standardName = @($TimeZoneProperties.MUI_Std, $TimeZoneProperties.Std)[$TimeZoneProperties.MUI_Std -eq &quot;&quot;]
+$DynamicTimeZoneInfo.daylightName = @($TimeZoneProperties.MUI_Dlt, $TimeZoneProperties.Dlt)[$TimeZoneProperties.MUI_Dlt -eq &quot;&quot;]
+
+$DynamicTimeZoneInfo.timeZoneKeyName = $TimeZone
+$DynamicTimeZoneInfo.standardDate = $TimeZoneInfo.standardDate
+$DynamicTimeZoneInfo.daylightDate = $TimeZoneInfo.daylightDate
+$DynamicTimeZoneInfo.dynamicDaylightTimeDisabled = $false
+
+# Enable the privilege required to set the time zone.
+[NSPrivileges.TokenPrivileges]::EnablePrivilege('SeTimeZonePrivilege') | Out-Null
+
+# Set the time zone.
+[NSTimeZone.TimeZoneControl]::SetDynamicTimeZone($DynamicTimeZoneInfo)
+
+# Disable the privilege required to set the time zone.
+[NSPrivileges.TokenPrivileges]::DisablePrivilege('SeTimeZonePrivilege') | Out-Null</code></pre>
+      <footer>
+        <p><span>Published: 2016-03-25</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Install Windows Server 2012 R2 on a Mac Mini</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Install Windows Server 2012 R2 on a Mac Mini</h1>
+    </header>
+    <main class="archive">
+      <p>The Mac Mini can be used as a small, sleek and silent virtualisation host. I use a late 2012 edition for running Windows Server 2012 R2 with the Hyper-V role enabled. The system has the following specifications:</p>
+      <ul>
+        <li>2.6GHz Quad-Core Intel Core i7</li>
+        <li>2 x 8GB 1600MHz DDR3 SDRAM</li>
+        <li>2 x 256GB Solid State Drive</li>
+      </ul>
+      <p>This article will take you through the process I used to install Windows Server 2012 R2 onto a Mac Mini. This is what you will need:</p>
+      <ul>
+        <li>Apple Mac Mini (late 2012 model)</li>
+        <li>Windows Server 2012 R2 ISO (and product key)</li>
+        <li><a href="../static/netxtreme.zip">NetXtreme Broadcom Driver</a></li>
+        <li>USB stick (8GB or larger)</li>
+        <li>Computer running an x64 version of Windows 8.1/2012 R2 or later (for preparing the USB stick)</li>
+      </ul>
+      <p>I have written the following PowerShell script to simplify the preparation of the USB stick. The script creates a UEFI bootable USB stick suitable for installing Windows Server 2012 R2. The script should be run from an elevated PowerShell prompt on an x64 version of Windows 7 or later.</p>
+      <pre><code># Path to the Windows Server 2012 R2 ISO.
+$iso = &quot;C:\Temp\en_windows_server_2012_r2_with_update_x64.iso&quot;
+
+# Path to the NetXtreme Broadcom Driver.
+$nic = &quot;C:\Temp\nic&quot;
+
+# Drive letter of USB media.
+$usb = &quot;X:&quot;
+
+# Disk number of USB media.
+$num = (Get-Disk)[-1].Number
+
+# Format USB media.
+Get-Disk $num | Clear-Disk -RemoveData -Confirm:$false
+New-Partition -DiskNumber $num -UseMaximumSize -IsActive -DriveLetter $usb[0] | Format-Volume -FileSystem FAT32 -NewFileSystemLabel USB -AllocationUnitSize 16KB -Confirm:$false
+
+# Mount the Windows Server 2012 R2 ISO.
+$mount = Mount-DiskImage -ImagePath $iso -PassThru
+$drive = ($mount | Get-Volume).DriveLetter + &quot;:&quot;
+
+# Copy the files from the mounted ISO to the USB media.
+Get-ChildItem $drive\ -Recurse | ? name -notmatch install.wim |
+  Copy-Item -Destination {Join-Path $usb $_.FullName.Substring($drive.length)}
+
+# Split WIM if necessary.
+if ((Get-Item $drive\sources\install.wim).Length -gt 4GB) {
+  &amp; dism.exe /Split-Image /ImageFile:$drive\sources\install.wim /SWMFile:$usb\sources\install.swm /FileSize:3500 | Out-Null
+} else {
+   Copy-Item $drive\sources\install.wim $usb\sources\install.wim
+}
+
+# Apply the master boot code to the USB media.
+&amp; $drive\BOOT\BOOTSECT.EXE /NT60 $usb | Out-Null
+
+# Prepare EFI on the USB media.
+Copy-Item C:\Windows\Boot\EFI\bootmgfw.efi $usb\efi\boot\bootx64.efi -Force
+Copy-Item $usb\efi\microsoft\boot\* $usb\efi\boot
+
+# Copy the NetXtreme Broadcom Driver to the USB media.
+Copy-Item $nic\* $usb
+
+# Unmount the Windows Server 2012 R2 ISO.
+Dismount-DiskImage -ImagePath $iso
+</code></pre>
+      <p>Prior to running the script:</p>
+      <ul>
+        <li>Modify the path to the Windows Server 2012 R2 ISO.</li>
+        <li>Modify the path to the extracted NetXtreme Broadcom driver files.</li>
+        <li>Connect a USB stick to the computer (it will be erased; you have been warned).</li>
+      </ul>
+      <p>The script may take up to 5 or 10 minutes to complete.</p>
+      <p>A couple of points:</p>
+      <ul>
+        <li>The script creates a FAT32 volume on the USB stick. This is a requirement for UEFI.</li>
+        <li>As the maximum file size on a FAT32 volume is 4GB, the script uses DISM to split install.wim into multiple files when necessary.</li>
+      </ul>
+      <p>When the script completes, eject the USB stick, connect it to your Mac Mini. Now follow these steps to install Windows Server 2012 R2. Note: I have elected to install Windows in <em>Server Core</em> mode with Australian regional settings.</p>
+      <ul>
+        <li>Power-on the system whilst holding down the <em>Option</em> key (or the <em>ALT</em> key on a Windows keyboard).</li>
+        <li>Select the orange <em>EFI Boot</em> icon (the image is of a removable USB stick), and press <em>Enter</em>.</li>
+        <li>When the <em>Windows Setup</em> dialog is displayed, press <em>Shift+F10</em> to open a command prompt.</li>
+        <li>
+          Run the following commands to erase the (first) hard drive, and configure the disk with a GUID partition table (GPT):
+          <pre><code>diskpart
+select disk 0
+clean
+convert gpt
+exit</code></pre>
+        </li>
+        <li>Type <code>exit</code> to close the command prompt.</li>
+        <li>At the Windows Setup dialog, set the <em>Language to install</em> to <em>English (United States)</em>, the <em>Time and currency format</em> to <em>English (Australia)</em> and <em>Keyboard or input method</em> to <em>US</em> and click <em>Next</em>.</li>
+        <li>At the next screen, select <em>Install now</em>.</li>
+        <li>Enter a product key when prompted, and click <em>Next</em>.</li>
+        <li>Select <em>Windows Server 2012 R2 Standard (Server Core Installation)</em> and click <em>Next</em>.</li>
+        <li>Select <em>I accept the license terms</em> and click <em>Next</em>.</li>
+        <li>When asked <em>What type of installation do you want</em>, select <em>Custom: Install Windows only (advanced)</em> and press <em>Enter</em>.</li>
+        <li>Select <em>Drive 0 Unallocated Space</em> and click <em>Next</em>.</li>
+        <li>Windows will install (and the Mac Mini will reboot multiple times).</li>
+        <li>When prompted, set the Administrator password.</li>
+        <li>You will now be logged in. From the command prompt, change to the USB drive (in my case it was D:) and then change into the <em>nic</em> folder.</li>
+        <li>
+          Run the following command to install the NetXtreme Broadcom driver:
+          <pre><code>pnputil -i -a b57nd60a.inf</code></pre>
+        </li>
+        <li>Open a PowerShell prompt and rename the computer (e.g. to name the computer GEORGE): <code>rename-computer GEORGE</code></li>
+        <li>Restart the computer: <code>restart-computer</code></li>
+      </ul>
+      <p>Assuming you have an ethernet cable connected to the Mac Mini, and the cable provides direct access to the internet, perform the following steps to set a static IP address, and to download and install software updates. Note: I have set the IP address to 10.0.0.10/24. You should use whatever address is appropriate for your environment.</p>
+      <ul>
+        <li>
+          To set the IP address of the computer, open a PowerShell prompt and run:
+          <pre><code>New-NetIPAddress –InterfaceIndex (Get-NetAdapter).ifindex –IPAddress 10.0.0.11 –PrefixLength 24 –DefaultGateway 10.0.0.1</code></pre>
+        </li>
+        <li>
+          To assign a DNS server address to the interface:
+          <pre><code>Set-DnsClientServerAddress –InterfaceIndex (Get-NetAdapter).ifindex –ServerAddresses 10.0.0.1</code></pre>
+        </li>
+        <li>
+          To open the firewall to allow inbound Remote Desktop connections:
+          <pre><code>Enable-NetFirewallRule -DisplayGroup &quot;Remote Desktop&quot; -confirm:$false</code></pre>
+        </li>
+        <li>Type <code>exit</code> to return to the command prompt.</li>
+        <li>
+          Enable Remote Desktop access with the following command:
+          <pre><code>cscript.exe C:\Windows\System32\SCregEdit.wsf /ar 0</code></pre>
+        </li>
+        <li>
+          Enable the automatic download of Windows Updates (4 = automatic, 1 = manual):
+          <pre><code>cscript C:\Windows\System32\SCregEdit.wsf /AU 4
+net stop wuauserv
+net start wuauserv</code></pre>
+        </li>
+        <li>
+          Initiate the update process:
+          <pre><code>cscript.exe C:\Windows\System32\en-us\WUA_SearchDownloadInstall.vbs</code></pre>
+        </li>
+        <li>When prompted, enter <em>A</em> to search for all applicable updates. This may take several minutes to complete.</li>
+        <li>When prompted, enter <em>A</em> to download and install all identified updates. Again, this may take several minutes to complete.</li>
+        <li>When prompted to restart the computer, select <em>Yes</em>.</li>
+      </ul>
+      <p>That's it. You have successfully installed Windows Server 2012 R2 on a Mac Mini, configured the network stack, enabled remote desktop connections, and deployed all available software updates.</p>
+      <footer>
+        <p><span>Published: 2015-09-19</span> <span>Last Updated: 2017-03-26</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

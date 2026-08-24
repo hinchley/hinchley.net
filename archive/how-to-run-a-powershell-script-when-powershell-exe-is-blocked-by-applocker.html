@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: How to Run a PowerShell Script when PowerShell.exe is Blocked by AppLocker</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: How to Run a PowerShell Script when PowerShell.exe is Blocked by AppLocker</h1>
+    </header>
+    <main class="archive">
+      <p>I recently needed to run a PowerShell script in an environment where <em>PowerShell.exe</em> was blocked by an AppLocker policy (it was deemed to be a security risk). In this environment, signing the script with a trusted code signing certificate, or moving the script to a "trusted location", wasn't an option, as the actual PowerShell executable required to run scripts was explicitly blocked.</p>
+      <p>In this particular environment, the AppLocker policy allowed users to execute programs that resided within certain trusted locations, such as <code>c:\windows</code>. I was therefore able to overcome the restriction by creating a custom program capable of running a PowerShell script without invoking <em>PowerShell.exe</em>. I just needed to copy the compiled code, which I named <em>PowerSaw.exe</em> to <code>c:\windows</code>, and from that point forward I was able to execute any PowerShell script.</p>
+      <p>Note: This technique could be thwarted by using AppLocker to specifically block <em>System.Management.Automation.dll</em> (which the custom program uses to invoke PowerShell scripts).</p>
+      <p>Here is the code:</p>
+      <pre><code>using System.Management.Automation;
+using System.Collections.ObjectModel;
+
+namespace PowerSaw {
+  class Program {
+    static void Main(string[] args) {
+      if (args.Length == 0) return;
+      using (PowerShell PowerShellInstance = PowerShell.Create()) {
+        string Script = System.IO.File.ReadAllText(args[0]);
+        PowerShellInstance.AddScript(Script);
+        Collection&lt;PSObject&gt; PSOutput = PowerShellInstance.Invoke();
+      }
+    }
+  }
+}</code></pre>
+      <p>Note: If you intend to create a new Visual Studio project based on this code, you will need to add a project reference to <em>System.Management.Automation.dll</em>. The path to this file can be found by running the following command from a PowerShell console:</p>
+      <pre><code>[PSObject].Assembly.Location</code></pre>
+      <p>In my environment, this yielded:</p>
+      <pre><code>C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</code></pre>
+      <p>To use the compiled executable (<em>PowerSaw.exe</em>) to run a PowerShell script named <code>c:\scripts\foo.ps1</code>, open a command prompt and enter:</p>
+      <pre><code>powersaw.exe c:\scripts\foo.ps1</code></pre>
+      <p>I haven't configured the program to return output from the invoked PowerShell script. This capability could be added, but typically you would just write the script so that output was sent to a log.</p>
+      <p>It's also worth noting that this technique will bypass AppLocker script policies. For example, an AppLocker policy that denies users from running scripts under <code>c:\scripts</code> will not allow:</p>
+      <pre><code>powershell.exe -file c:\scripts\foo.ps1</code></pre>
+      <p>However, the same script could be executed via <em>PowerSaw.exe</em>.</p>
+      <p>Similarly, <em>PowerSaw.exe</em> will bypass PowerShell execution policies. For example, if the machine execution policy is set to <em>Restricted</em>, you won't be able to run any script using <em>PowerShell.exe</em>, but you can using <em>PowerSaw.exe</em>.</p>
+      <footer>
+        <p><span>Published: 2016-04-02</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

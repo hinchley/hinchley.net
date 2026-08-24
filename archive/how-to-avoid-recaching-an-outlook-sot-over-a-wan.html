@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: How to Avoid Re-Caching an Outlook OST Over a WAN</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: How to Avoid Re-Caching an Outlook OST Over a WAN</h1>
+    </header>
+    <main class="archive">
+      <p>Imagine you have a shit-ton of users working out of a remote office on the other side of a high-latency, low-bandwidth WAN link. These hypothetical users are currently using Outlook 2010 in "cached mode" to access an Exchange server hosted out of Head Office. Over the course of several years, each user has accumulated a mail cache with gigabytes of data. And now you've been asked to deploy Windows 10 to every computer, and in the process, upgrade from Outlook 2010 to Outlook 2016.</p>
+      <p>You quickly realise that it isn't possible to migrate existing mail caches (OSTs) to Outlook 2016, and the prospect of every user in the office needing to recache their entire mailbox... well, it scares the shit out of you. The WAN link would grind to a halt for months. It would be hell. So, what to do?</p>
+      <p>Configuring Outlook in "online mode", or suggesting users switch to OWA, isn't going to cut it. The <a href="https://support.office.com/en-us/article/Change-how-much-mail-to-keep-offline-f3a1251c-6dd5-4208-aef9-7c8c9522d633">slider</a> feature in Outlook 2016 could be used to limit the size of each user's cache (e.g. only download the last month's worth of content), but this really just kicks the ball down the road. And besides, there are other issues with this approach, such as not being able to access content older than the configured cut-off period when using a shared mailbox.</p>
+      <p>Someone, somewhere, mentioned something about getting every user to suck the entire content of their mailbox into a PST, and then reversing the process after upgrading to Outlook 2016, but that doesn't really solve the problem. Instead of pulling gigabytes of data from Exchange to Outlook, you are now just pushing it the other way. The end result is the same: a busted WAN.</p>
+      <p>What to do? Well, what if you used an Outlook 2016 client in Head Office to create a new mail cache for each user. You could transfer the pre-generated OST files to the remote office on portable media, and prior to each user launching Outlook after their computer is re-imaged, inject the relevant OST into their profile. Hmmm. Putting aside the crazy-ass logistics of such an approach, the idea has merit. So how to make it work...</p>
+      <p>Before I get into the details, I'll throw one more cat into the bag. Outlook will not allow you to re-use the same OST across multiple computers. You can take an OST from computer 1 and reuse it on computer 2, but if you then try and use the same OST on computer 3, or if you re-open Outlook back on computer 1, the OST will be flagged as corrupt.</p>
+      <p>Now, in the context of our hypothetical scenario, we have several users that roam between computers, and we want to ensure that these users aren't forced to re-download their entire mailbox when they log onto a second or third computer. This means the process we adopt for creating the OST files at Head Office will need to cater for generating multiple files for each user. And you thought this was going to be easy :)</p>
+      <p>To get the ball rolling, you will need a Windows 10 computer at Head Office with Office 2016 installed (and configured to use "cache mode"). You should then:</p>
+      <ul>
+        <li>
+          <p>Create a folder named <code>C:\OSTs</code> for storing the cache files.</p>
+        </li>
+        <li>
+          <p>Take the code shown below, and copy it into a file named <code>C:\Scripts\CacheMail.ps1</code>.</p>
+        </li>
+        <li>
+          <p>Download <a href="../static/profiler.exe">profiler.exe</a> as discussed in the article <a href="create-an-outlook-2016-mapi-profile-with-preconfigured-ost.html">Create an Outlook 2016 MAPI profile with preconfigured OST using C++</a> and copy it to <code>C:\Windows\profiler.exe</code>.</p>
+        </li>
+        <li><p>Create a service account, and grant it full access to all of the mailboxes (including shared mailboxes) that are used at the remote office.</p></li>
+        <li>
+          <p>Create a file named <code>C:\Scripts\Users.txt</code>. Add an entry for every mailbox that is to be cached. Each line should be in the form:</p>
+          <pre><code>email address,number of cache files</code></pre>
+        </li>
+        <li>
+          <p>For example, to create a single OST file for Peter, and two for Megan:</p>
+          <pre><code>peter@lab.hinchley.net,1
+megan@lab.hinchley.net,2</code></pre>
+        </li>
+        <li>
+          <p>Each OST will be named after the corresponding email address with a GUID suffix. For example:</p>
+          <pre><code>peter@lab.hinchley.net-67cc7135-a107-4e5e-ab21-41460bcb4231.ost</code></pre>
+        </li>
+        <li>
+          <p>Now log onto the computer as the service account, open a command prompt, and run:</p>
+          <pre><code>powershell.exe -file c:\scripts\cachemail.ps1</code></pre>
+        </li>
+        <li>
+          <p>Sit back and wait. Depending on the number and size of the mailboxes to cache, it may take hours or days for the script to complete, but when it does, all of the auto-generated OST files should be stored under <code>C:\OSTs</code>.</p>
+        </li>
+      </ul>
+      <p>The script performs the following tasks for each mailbox within the input file (for the requested number of iterations of each mailbox).</p>
+      <ul>
+        <li><p>Purges any existing mail profiles (i.e. the mail profile from the previous iteration).</p></li>
+        <li>
+          <p>Uses the utility <em>profiler.exe</em> to create a new MAPI profile (with a custom OST path). Refer to <a href="http://hinchley.net/2016/03/25/create-an-outlook-2016-mapi-profile-with-preconfigured-ost/">Create an Outlook 2016 MAPI profile with preconfigured OST using C++</a> for more information on this utility.</p>
+        </li>
+        <li><p>Launches Outlook (at which point the cache will begin to populate).</p></li>
+        <li><p>Waits for synchronisation of the cache to complete.</p></li>
+        <li><p>Closes Outlook.</p></li>
+        <li><p>Repeats the above process for each requested OST.</p></li>
+      </ul>
+      <p>In the course of developing the script, I originally intended to use the <a href="https://msdn.microsoft.com/en-us/library/office/ff866270.aspx">SynObject.SyncEnd</a> event (accessed using the "outlook.application" COM object) to detect when Outlook had finished caching a user's mailbox. Unfortunately this event is only triggered following a manual synchronisation. Looking further afield, I decided to use the <a href="https://docs.microsoft.com/en-us/windows/win32/winauto/windows-automation-api-portal">Microsoft Windows Automation API</a>.</p>
+      <p>I use the API to read text from the Outlook status bar, and close the client when the message "All folders are up to date" is detected. This code is encapsulated within the <em>get-syncstatus</em> function.</p>
+      <p>I should point out that the <em>cachemail.ps1</em> script can also be called using a switch of <code>-refresh</code>. In this mode, in addition to creating new OST files, the script will update files from a previous execution of the script. For example, if two OST files were previously created for the mailbox <em>megan@lab.hinchley.net</em>, rerunning the script with the <em>refresh</em> switch will ensure that both files are resynchronised (i.e. new content added). If the input file was modified prior to using the <em>refresh</em> switch, and three instead of two cache files were requested, both existing cache files would be updated, and one new cache added. Similarly, if the input file was updated to only request a single OST, calling the script with the <em>refresh</em> switch would result in only one of the OST files being updated.</p>
+      <p>Anyway, here is the code. Even if you don't need to pre-cache a truck-load of Exchange mailboxes, the script should still demonstrate the power of the Windows Automation API.</p>
+      <pre><code>param([switch]$refresh)
+
+# usage:
+# 1. create new mail cache for users in input file.
+#   powershell -file cachemail.ps1
+# 2. refresh mail cache for users in input file.
+#   powershell -file cachemail.ps1 -refresh
+# notes:
+# - code is dependent on existence of c:\windows\profiler.exe
+#   refer to http://hinchley.net/2016/03/25/create-an-outlook-2016-mapi-profile-with-preconfigured-ost/
+# - input file is in the format: &lt;email address&gt;,&lt;number of cache files to create&gt;
+#   for example:
+#   peter@lab.hinchley.net,1
+#   megan@lab.hinchley.net,2
+
+# initialisation.
+[void][System.Reflection.Assembly]::LoadWithPartialName(&quot;UIAutomationClient&quot;)
+[void][System.Reflection.Assembly]::LoadWithPartialName(&quot;UIAutomationTypes&quot;)
+[void][System.Reflection.Assembly]::LoadWithPartialName(&quot;UIAutomationProvider&quot;)
+[void][System.Reflection.Assembly]::LoadWithPartialName(&quot;UIAutomationClientsideProviders&quot;)
+
+# input file.
+$input = &quot;users.txt&quot;
+
+# output folder.
+$output = &quot;C:\OSTs&quot;
+
+# log file.
+$log = &quot;audit.log&quot;
+
+# polling interval (seconds).
+$poll = 30
+
+# check if input file exists.
+if (! (test-path $input)) { write-host &quot;Input file does not exist.&quot;; return }
+
+# create output folder.
+if (! (test-path $output)) { new-item -type directory $output -ea silentlycontinue }
+if (! (test-path $output)) { write-host &quot;Output folder could not be created.&quot;; return }
+
+# logging.
+function log($message) {
+  &quot;{0}`t{1}&quot; -f (get-date -Format yyyy.MM.dd-HH.mm), $message | out-file -append $log
+}
+
+# get sync status. return true if synchronised, null if not, and false on error.
+function get-syncstatus($id) {
+  $root = [Windows.Automation.AutomationElement]::RootElement
+  $condition = New-Object Windows.Automation.PropertyCondition([Windows.Automation.AutomationElement]::ProcessIdProperty, $id)
+  $element = $root.FindFirst([Windows.Automation.TreeScope]::Children, $condition)
+
+  $condition1 = New-Object Windows.Automation.PropertyCondition([Windows.Automation.AutomationElement]::ClassNameProperty, &quot;NetUInetpane&quot;)
+  $condition2 = New-Object Windows.Automation.PropertyCondition([Windows.Automation.AutomationElement]::NameProperty, &quot;Status Bar&quot;)
+
+  $condition = New-Object Windows.Automation.AndCondition($condition1, $condition2)
+  $statusbar = $element.FindFirst([Windows.Automation.TreeScope]::Descendants, $condition)
+
+  $condition = New-Object Windows.Automation.PropertyCondition([Windows.Automation.AutomationElement]::ClassNameProperty, &quot;NetUISimpleButton&quot;)
+  $elements  = $statusbar.FindAll([Windows.Automation.TreeScope]::Descendants, $condition)
+
+  if ($elements.count -le 0) { return $false }
+
+  $elements | %{ if ($_.current.name -eq 'Progress All folders are up to date.') { return $true } }
+}
+
+function clean-profile() {
+  $local = &quot;{0}\Microsoft\Outlook&quot; -f $env:localappdata
+  $roaming = &quot;{0}\Microsoft\Outlook&quot; -f $env:appdata
+  remove-item $local -recurse -force -ea silentlycontinue
+  remove-item $roaming -recurse -force -ea silentlycontinue
+  remove-item HKCU:SOFTWARE\Microsoft\Office\16.0\Outlook\Profiles\Outlook -recurse -force -ea silentlycontinue
+}
+
+function cache-mail($email, $file) {
+  # get qualified path to ost file.
+  $path = join-path $global:output $file
+
+  # create the empty mapi profile.
+  &amp; C:\Windows\profiler.exe Outlook $email $path | out-null
+
+  # start outlook.
+  $process = [Diagnostics.Process]::Start(&quot;C:\Program Files (x86)\Microsoft Office\Office16\outlook.exe&quot;)
+
+  while ($true) {
+    # check the synchronisation status.
+    start-sleep -seconds $poll
+    $status = get-syncstatus $process.id
+
+    # not finished... will check again.
+    if ($status -eq $null) { continue }
+
+    # finished... log status.
+    switch ($status) {
+      $true  { log &quot;Synchronised mail for $email.&quot; }
+      $false { log &quot;Failed to synchronise mail for $email.&quot; }
+    }
+
+    # attempt to exit cleanly.
+    [void]$process.closemainwindow()
+    start-sleep -seconds 2
+
+    # kill outlook if still running.
+    if (get-process -id $process.id -ea silentlycontinue) { [void]$process.kill() }
+
+    # wait for outlook to release handles.
+    start-sleep -seconds 2
+
+    return
+  }
+}
+
+get-content $input | %{
+  # parse input file.
+  $token = $_.split(',')
+  $email = $token[0].trim()
+  $count = @(1, [int]$token[1])[$token.count -gt 1]
+
+  $files = @()
+
+  # get existing ost file names for the user.
+  if ($refresh) { $files = get-childitem -path $output -filter &quot;$email*.ost&quot; | select -expand name }
+
+  # additional files to create after refresh of existing files.
+  $count -= $files.count
+
+  # create/refresh ost files for the user.
+  while ($count-- -gt 0) { $files += &quot;{0}-{1}.ost&quot; -f $email, [string]([guid]::newguid().guid) }
+
+  # start caching...
+  $files | %{ clean-profile; cache-mail $email $_ }
+}</code></pre>
+      <p>At this point you have a mountain of pre-staged OST files. Now what?</p>
+      <ul>
+        <li>
+          <p>Copy the OST files to a portable storage device, transport them to the remote office, and copy them to a local file share (e.g. <em>\\server\ost</em>). Users will need at least read and delete access to the share (as they will need to move OST files out of the folder).</p>
+        </li>
+        <li><p>Deploy a new desktop image based on Windows 10 and Office 2016 to every computer at the remote office.</p></li>
+        <li>
+          <p>Take the PowerShell script shown below and save it to a file named <em>RestoreCache.ps1</em>. Save it somewhere that can be accessed by users (e.g. you could include the file within the Windows 10 image under <code>C:\Windows</code>).</p>
+        </li>
+        <li>
+          <p>Configure the PowerShell script to run once at first logon for each user. There are several ways to achieve this outcome - such as using the <em>RunOnce</em> key in <em>ntuser.dat</em> of the default user profile in the Windows 10 image.</p>
+        </li>
+      </ul>
+      <p>The script has a few prerequisites. Firstly, you will need to modify the value of the <em>$backup</em> variable to point to the file share containing the OST files. Secondly, the script assumes the <em>profiler.exe</em> utility exists on each computer under <code>C:\Windows</code> (e.g. you've included the utility in the Windows 10 image). Of course, you can reference the program from another location if necessary.</p>
+      <p>So how does it work? When the script executes, it checks to see if the current user has an existing MAPI profile. Assuming a profile doesn't exist (i.e the user hasn't previously logged onto the computer, at least hasn't launched Outlook), the script will then check to see if there are any OST files for the user within the configured network share. If there are, the script will call <em>profiler.exe</em> to create a new MAPI profile for the user, and then move one of the OST files from the network share into the user's local profile. When the user launches Outlook, the profile will be preconfigured to use the OST, and only the content delivered to the mailbox since the mail cache was originally created will need to be synchronised. This process is repeated each time a user logs onto a new computer, at least until all pre-created OST files are exhausted.</p>
+      <p>Anyway, here is the &quot;client-side&quot; code:</p>
+      <pre><code>param([switch]$replace)
+
+# usage:
+# 1. restore a previously created mail cache for the current user.
+#    will do nothing if an existing mail cache exists.
+#   powershell -file restoremail.ps1
+# 2. restore a previously created mail cache for the current user.
+#    will overwrite an existing mail profile.
+#   powershell -file restoremail.ps1 -replace
+
+# path to mapi profile in registry.
+$mapi = &quot;SOFTWARE\Microsoft\Office\16.0\Outlook\Profiles\Outlook&quot;
+
+# path to cache files. change me!
+$backup = &quot;\\server\ost&quot;
+
+# local outlook folder in profile.
+$local = &quot;{0}\Microsoft\Outlook&quot; -f $env:localappdata
+
+# roaming outlook folder in profile.
+$roaming = &quot;{0}\Microsoft\Outlook&quot; -f $env:appdata
+
+function get-email() {
+  try {
+    if ($user = ([adsisearcher]&quot;samaccountname=$($env:username)&quot;).findone().getdirectoryentry()) { return $user.mail }
+  } catch {}
+}
+
+function get-cache($email) {
+  if ($caches = @(get-childitem $global:backup -filter &quot;$email*.ost&quot; -ea silentlycontinue | select-object -expandproperty fullname)) { return $caches[0] }
+}
+
+function clean-profile() {
+  remove-item $global:local -recurse -force -ea silentlycontinue
+  remove-item $global:roaming -recurse -force -ea silentlycontinue
+  remove-item HKCU:$global:mapi -recurse -force -ea silentlycontinue
+}
+
+# get user's email address.
+if (! ($email = get-email)) { return }
+
+# do nothing if there are no existing cache files.
+if (! ($cache = get-cache)) { return }
+
+# clean the existing profile if using &quot;replace&quot; mode.
+if ($replace) { clean-profile }
+
+# path to the new ost.
+$ost = [io.path]::combine($local, $mail, '.ost')
+
+# create the empty mapi profile.
+&amp; C:\Windows\profiler.exe Outlook $email $ost | out-null
+
+# move the cache.
+move-item $cache $ost</code></pre>
+      <footer>
+        <p><span>Published: 2016-03-25</span> <span>Last Updated: 2016-03-26</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

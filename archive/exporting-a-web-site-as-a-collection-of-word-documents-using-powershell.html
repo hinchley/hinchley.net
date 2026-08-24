@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Exporting a Web Site as a Collection of Word Documents using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Exporting a Web Site as a Collection of Word Documents using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>For reasons I can't quite understand, I was recently asked to develop a solution for exporting a web site to a collection of Microsoft Word documents. The content within each page, excluding headers, footers, navigation bars, etc, was to be saved to a separate Word document in a dynamically generated folder structure that mirrored the site hierarchy.</p>
+      <p>Fortunately, I didn't need to crawl the site, as the URL of every page to be processed was to be provided in a text file exported from the web site content management system (with each URL stored as a new line within the file).</p>
+      <p>A few notes on the solution:</p>
+      <ul>
+        <li>The code is written in PowerShell.</li>
+        <li>The list of URLs to be processed were recorded in a text file named <em>urls.txt</em> stored in the same directory as the PowerShell script.</li>
+        <li>The code is designed to extract the content within a block (e.g. div) identified by the <em>id</em> of <em>main</em>. I've also included code that can be uncommented to target an element by class name instead of id. Either way, it is expected that the content to be saved within every page can be isolated using the same naming convention.</li>
+        <li>Microsoft Word is used to save the extracted content in <em>docx</em> format. The content is wrapped in HTML tags (to make it a valid HTML document), saved to a temporary file named <em>scratch.html</em>, opened in the background in Word, and then saved in docx format.</li>
+        <li>Any page with a meta tag of <em>robots</em> with content <em>noindex</em> is ignored.</li>
+        <li>The target folder and file name of the saved Word document is based on the page URL. For example, assuming the script is running from <em>C:\Temp</em>, a web page with a URL of <em>http://example.com/foo/bar/</em> will be saved as <em>C:\Temp\foo\bar.docx</em>. This structure worked well for the site that I needed to process, but other approaches, such as using the web page title as the document name might be more appropriate for other sites.</li>
+        <li>I needed to use the <em>IHTMLDocument3_getElementByID</em> method, rather than <em>getElementById</em> to reference a HTML node by id, as the latter method only worked once per script invocation. I assume this is a bug in the method implementation.</li>
+        <li>A reference is added to the footer of each generated Word document. In the code below, a static text string (site URL) is added, but this could be amended to store the URL of the saved web page.</li>
+        <li>Be aware of maximum path limitations on the Windows platform if processing a site that includes long URI paths. I haven't catered for this in the code shown below, but you may need to truncate either the folder or file name if the URI starts to approach 260 characters.</li>
+      </ul>
+      <p>Here is the code:</p>
+      <pre><code># script root.
+$root = (pwd).path
+if ($psscriptroot -ne '') { $root = $psscriptroot }
+$root = $root.trim('\')
+
+# path to file containing urls to crawl.
+$urls = &quot;$root\urls.txt&quot;
+
+# path to temporary html file.
+$scratch = &quot;$root\scratch.html&quot;
+
+# inserted into the footer of every document.
+$footerReference = 'http://example.com'
+
+# extract content by class name.
+function extract-class($body, $class) {
+  return $body.getElementsByClassName($class) | select -first 1 | select -expand innerhtml
+}
+
+# extract content by id.
+function extract-id($html, $id) {
+  return $html.IHTMLDocument3_getElementByID($id) | select -expand innerhtml
+}
+
+# get meta tag.
+function get-metatag($html, $name) {
+  $head = ($html.childnodes | ? nodename -eq 'HTML').childnodes | ? nodename -eq 'HEAD'
+  return $head.getElementsByTagName('meta') | ? name -eq $name | select -expand content
+}
+
+# save section of web page to a temporary html file.
+function save-webpage($url) {
+  $page = invoke-webrequest $url
+  while($ie.Busy) { Start-Sleep -Milliseconds 100 }
+  $html = $page.parsedhtml
+
+  # skip page with specific meta tag.
+  if ((get-metatag $html 'robots') -eq 'noindex') { return }
+
+  # create folder structure based on uri.
+  $structure = ($url -replace 'https?://[^/]+/?(.*)', '$1') -replace '/', '\'
+
+  $folder = split-path -parent $structure
+  $folder = '{0}\{1}' -f $root, $folder
+  $file   = split-path -leaf $structure
+
+  mkdir $folder -force -ea silent | out-null
+
+  $path = '{0}\{1}.docx' -f $folder, $file
+
+  # i.e. extract &lt;div class=&quot;content&quot;&gt;
+  # $text = extract-class $html.body 'content'
+
+  # i.e. extract &lt;div id=&quot;innercontent&quot;&gt;
+  $text = extract-id $html 'maincontent'
+
+  # microsoft word needs the content to be wrapped in html tags.
+  $text = '&lt;html&gt;{0}&lt;/html&gt;' -f $text
+  $text | out-file $global:scratch
+
+  return $path
+}
+
+# convert temporary html file to word document.
+function convert-webpage($path) {
+  [ref]$format = 'microsoft.office.interop.word.WdSaveFormat' -as [type]
+  $word = new-object -comobject word.application
+  $word.visible = $false
+
+  &quot;Processing $path&quot;
+
+  $doc = $word.documents.open($global:scratch)
+  $footer = $doc.sections.first.footers | ? index -eq 1
+  $footer.range.text = $footerReference
+  $doc.saveas([ref]$path, [ref]$format::wdFormatDocumentDefault)
+
+  $doc.close()
+  $word.quit()
+  $word = $null
+
+  [gc]::collect()
+  [gc]::WaitForPendingFinalizers()
+}
+
+get-content $urls | %{
+  if ($path = save-webpage $_) { convert-webpage $path }
+}
+
+remove-item $scratch -force -ea silent </code></pre>
+      <footer>
+        <p><span>Published: 2018-05-20</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

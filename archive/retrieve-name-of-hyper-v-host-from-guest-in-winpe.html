@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Retrieve Name of Hyper-V Host from Guest in WinPE</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Retrieve Name of Hyper-V Host from Guest in WinPE</h1>
+    </header>
+    <main class="archive">
+      <p>In this post I will explain how you can retrieve information about a Hyper-V host from a guest virtual machine after booting from a WinPE 10 boot WIM.</p>
+      <p>The steps in this post draw from the guidance provided on <a href="https://keithga.wordpress.com/2013/07/23/running-hyper-v-data-exchange-service-in-winpe-4-0-adk/">Keith's Consulting Blog</a>, which in turn was inspired by an article from <a href="http://deploymentresearch.com/Research/EntryId/60/MMS-2012-Running-Hyper-V-Data-Exchange-Service-in-WinPE-3-0">Johan Arwidmark</a>.</p>
+      <p>I will start by assuming you have an existing WinPE 10 boot WIM. This can be generated manually using the Deployment Tools installed via the ADK, or it could be generated via MDT or SCCM.</p>
+      <p>For the sake of simplicity, I will assume the following steps are performed on a server with the ADK installed, and with the boot WIM conveniently located at <code>C:\Temp\winpe.wim</code>. I'll also assume you have access to a Windows Server 2012 R2 server with the Hyper-V role enabled.</p>
+      <ul>
+        <li>Let's start by creating a &quot;mount point&quot; for the boot WIM:</li>
+      </ul>
+      <pre><code>mkdir C:\Mount</code></pre>
+      <ul>
+        <li>We will now mount the boot WIM:</li>
+      </ul>
+      <pre><code>dism /mount-wim /wimfile:C:\Temp\winpe.wim /index:1 /mountdir:C:\Mount</code></pre>
+      <ul>
+        <li>At this point you will need to download and install the <a href="https://msdn.microsoft.com/en-us/windows/hardware/dn913721.aspx">Microsoft Windows 10 Driver Kit</a>, and copy <em>devcon.exe</em> to the %windir% directory of the mounted image. Note: You will need to change the source path for <em>devcon.exe</em> from <em>x64</em> to <em>x86</em> if you are working with a 32-bit boot WIM.</li>
+      </ul>
+      <pre><code>copy &quot;C:\Program Files (x86)\Windows Kits\10\Tools\x64\devcon.exe&quot; C:\Mount\Windows\devcon.exe</code></pre>
+      <ul>
+        <li>Create a file named <code>C:\Mount\Windows\wvmic.vbs</code> with the content shown below. This script performs two primary tasks; firstly, it creates a fake service named <em>TermServ</em>, and secondly, it installs the <em>VmIcKvpExchange</em> driver. As explained by Johan, Hyper-V Data Exchange Services will only start if it can verify the existence of the Terminal Services service (even though it isn't actually required for Data Exchange Service to operate).</li>
+      </ul>
+      <pre><code>Function CreateFakeService(sName, sDisplayName, sPathName)
+  Dim objService
+  Dim objInParam
+
+  ' Obtain the definition of the Win32_Service class.
+  Set objService = GetObject(&quot;winmgmts:root\cimv2&quot;).Get(&quot;Win32_Service&quot;)
+
+  ' Obtain an InParameters object specific to the Win32_Service.Create method.
+  Set objInParam = objService.Methods_(&quot;Create&quot;).inParameters.SpawnInstance_()
+
+  ' Add the input parameters.
+  objInParam.Properties_.item(&quot;Name&quot;) = sName
+  objInParam.Properties_.item(&quot;DisplayName&quot;) = sDisplayName
+  objInParam.Properties_.item(&quot;PathName&quot;) = sPathName
+  objInParam.Properties_.item(&quot;ServiceType&quot;) = 16
+  objInParam.Properties_.item(&quot;ErrorControl&quot;) = 0
+  objInParam.Properties_.item(&quot;StartMode&quot;) = &quot;Manual&quot;
+  objInParam.Properties_.item(&quot;DesktopInteract&quot;) = False
+
+  ' Execute the method and obtain the return status.
+  CreateFakeService = objService.ExecMethod_(&quot;Create&quot;, objInParam).ReturnValue
+End function
+
+CreateFakeService &quot;TermService&quot;, &quot;Remote Desktop Service&quot;, &quot;FakeService.exe&quot;
+
+Set oShell = CreateObject(&quot;Wscript.Shell&quot;)
+oShell.Run &quot;devcon install &quot; &amp; Chr(34) &amp; &quot;X:\Windows\System32\DriverStore\FileRepository\wvmic.inf_amd64_dc7abc857325efe9\wvmic.inf&quot; &amp; Chr(34) &amp; &quot; &quot; &amp; Chr(34) &amp; &quot;vmbus\{242ff919-07db-4180-9c2e-b86cb68c8c55}&quot; &amp; Chr(34), 0, 1
+oShell.Run &quot;cmd /c net start vmickvpexchange&quot;, 0, 1</code></pre>
+      <ul>
+        <li>
+          <p>Copy <code>C:\Windows\vmguest\support\amd64\Windows6.x-HyperVIntegrationServices-x64.cab</code> from an existing Windows Server 2012 R2 server with the Hyper-V role installed to <code>C:\Temp\Windows6.x-HyperVIntegrationServices-x64.cab</code>. Note: You will need to copy the <em>x86</em> version of the cabinet if you are working with a 32-bit boot WIM.</p>
+        </li>
+        <li>
+          <p>Create <code>C:\Temp\Extacted</code>:</p>
+        </li>
+      </ul>
+      <pre><code>mkdir C:\Temp\Extracted</code></pre>
+      <ul>
+        <li>Extract the content of <code>C:\Temp\Windows6.x-HyperVIntegrationServices-x64.cab</code> to <code>C:\Temp\Extracted</code>:</li>
+      </ul>
+      <pre><code>expand C:\Temp\Windows6.x-HyperVIntegrationServices-x64.cab -f:* C:\Temp\Extracted</code></pre>
+      <ul>
+        <li>Add <em>wvmic.inf</em> from the extracted cabinet to the WIM, being sure to reference DISM.exe from the ADK:</li>
+      </ul>
+      <pre><code>&quot;C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\DISM\dism.exe&quot; /image:C:\Mount /add-driver /driver:C:\Temp\Extracted\amd64_wvmic.inf_31bf3856ad364e35_6.3.9600.16385_none_f2a11f2920629934\wvmic.inf</code></pre>
+      <ul>
+        <li>Commit the changes to the WIM:</li>
+      </ul>
+      <pre><code>dism /unmount-wim /mountdir:C:\Mount /commit</code></pre>
+      <p>At the point the boot WIM has been successfully configured, however, to ensure the Hyper-V Data Exchange Services are invoked, you must run <code>C:\Windows\vmvic.vbs</code> after booting the WIM.</p>
+      <p>In my case, the WIM was used as part of an SCCM task sequence, so I added a step at the beginning of the sequence (after restating in WinPE) to invoke the script:</p>
+      <pre><code>cscript.exe X:\Windows\wvmic.vbs</code></pre>
+      <p>To ensure the script was only initiated when the task sequence was run on a Hyper-V guest, I applied two filters (the first evaluates the value of a built-in task sequence variable, and the second is a WMI query against the <code>root\cimv2</code> namespace:</p>
+      <pre><code>_SMSTSInWinPE=TRUE
+SELECT model FROM win32_computersystem WHERE model = 'Virtual Machine'</code></pre>
+      <p>Finally, we can return to our original goal: retrieving information about the Hyper-V host from the guest within WinPE. After running <em>wvmic.vbs</em> to install the Hyper-V Data Exchange Services, we can return the name of the Hyper-V host by reading the following registry value:</p>
+      <pre><code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters\PhysicalHostName</code></pre>
+      <p>For example, the following VBScript could be called from a task sequence to assign the name of the Hyper-V host to a variable named <em>sHostName</em>:</p>
+      <pre><code>Set oShell = CreateObject(&quot;WScript.Shell&quot;)
+sHostName = UCase(oShell.RegRead(&quot;HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters\PhysicalHostName&quot;))</code></pre>
+      <footer>
+        <p><span>Published: 2016-01-01</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

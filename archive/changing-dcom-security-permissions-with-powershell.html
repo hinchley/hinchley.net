@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Changing DCOM Security Permissions with PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Changing DCOM Security Permissions with PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">Do not run this on a modern version of Windows 10. You may do some damage.</p>
+      <p>On a new deployment of Windows 10 LTSB (1607) I noticed the following error in the System event log:</p>
+      <blockquote>
+        <p>The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID and APPID {9CA88EE3-ACB7-47C8-AFC4-AB702511C276} to the user NT AUTHORITY\SYSTEM SID (S-1-5-18) from address LocalHost (Using LRPC) running in the application container Unavailable SID (Unavailable). This security permission can be modified using the Component Services administrative tool.</p>
+      </blockquote>
+      <p>The event message is rather explicit. It states the SYSTEM account does not have the local activation permission to the COM application with CLSID D63B10C5-BB46-4990-A94F-E40B9D520160. The following query shows this GUID refers to the RuntimeBroker:</p>
+      <pre><code>get-itemproperty -path HKLM:&quot;\Software\Classes\CLSID\{D63B10C5-BB46-4990-A94F-E40B9D520160}&quot; -name &quot;(default)&quot; | select -expandproperty &quot;(default)&quot;</code></pre>
+      <p>To resolve the issue, we just need to grant the SYSTEM account the required DCOM permission. Unfortunately, this is rather complicated. Firstly, we need to take ownership of the RuntimeBroker CLSID and APPID keys in the registry (as they are owned by TrustedInstaller). The next step is to grant the local Administrators group Modify permissions to these keys (and child keys). And the final step is to assign the required DCOM permission. In my case, there was another complication; the permissions assigned to the RuntimeBroker were “unrecognized”. This meant that when I attempted to view the permissions via DCOMCNFG, the following (poorly worded) message was displayed: <em>One or more of the permission entries attached to Registry Value has an unrecognized or application-specific (callback) type and can not be displayed.</em></p>
+      <p>For this reason, I was unable to grant the required DCOM permission to the SYSTEM account by appending a new ACE to the existing DACL. Instead, I needed to recreate the DACL from scratch. This meant not only granting the SYSTEM account local activation permissions, but also <em>SELF</em> and <em>ALL APPLICATION PACKAGES</em> (as these two identities were assigned to the original DACL).</p>
+      <p>The complete PowerShell code is shown below:</p>
+      <pre><code>function enable-privilege {
+  param($Privilege)
+  $Definition = @'
+using System;
+using System.Runtime.InteropServices;
+public class AdjPriv {
+  [DllImport(&quot;advapi32.dll&quot;, ExactSpelling = true, SetLastError = true)]
+  internal static extern bool AdjustTokenPrivileges(IntPtr htok, bool disall,
+    ref TokPriv1Luid newst, int len, IntPtr prev, IntPtr rele);
+  [DllImport(&quot;advapi32.dll&quot;, ExactSpelling = true, SetLastError = true)]
+  internal static extern bool OpenProcessToken(IntPtr h, int acc, ref IntPtr phtok);
+  [DllImport(&quot;advapi32.dll&quot;, SetLastError = true)]
+  internal static extern bool LookupPrivilegeValue(string host, string name,
+    ref long pluid);
+  [StructLayout(LayoutKind.Sequential, Pack = 1)]
+  internal struct TokPriv1Luid {
+    public int Count;
+    public long Luid;
+    public int Attr;
+  }
+  internal const int SE_PRIVILEGE_ENABLED = 0x00000002;
+  internal const int TOKEN_QUERY = 0x00000008;
+  internal const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
+  public static bool EnablePrivilege(long processHandle, string privilege) {
+    bool retVal;
+    TokPriv1Luid tp;
+    IntPtr hproc = new IntPtr(processHandle);
+    IntPtr htok = IntPtr.Zero;
+    retVal = OpenProcessToken(hproc, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+      ref htok);
+    tp.Count = 1;
+    tp.Luid = 0;
+    tp.Attr = SE_PRIVILEGE_ENABLED;
+    retVal = LookupPrivilegeValue(null, privilege, ref tp.Luid);
+    retVal = AdjustTokenPrivileges(htok, false, ref tp, 0, IntPtr.Zero,
+      IntPtr.Zero);
+    return retVal;
+  }
+}
+'@
+  $ProcessHandle = (Get-Process -id $pid).Handle
+  $type = Add-Type $definition -PassThru
+  $type[0]::EnablePrivilege($processHandle, $Privilege)
+}
+
+function take-over($path) {
+  $owner = [Security.Principal.NTAccount]'Administrators'
+
+  $key = [Microsoft.Win32.Registry]::ClassesRoot.OpenSubKey($path, 'ReadWriteSubTree', 'TakeOwnership')
+  $acl = $key.GetAccessControl()
+  $acl.SetOwner($owner)
+  $key.SetAccessControl($acl)
+
+  $acl = $key.getaccesscontrol()
+  $rule = New-Object System.Security.AccessControl.RegistryAccessRule &quot;Administrators&quot;, &quot;FullControl&quot;, &quot;ContainerInherit&quot;, &quot;None&quot;, &quot;Allow&quot;
+  $acl.SetAccessRule($rule)
+  $key.SetAccessControl($acl)
+}
+
+function take-back($path) {
+  $owner = [Security.Principal.NTAccount]'NT SERVICE\TrustedInstaller'
+
+  $key = [Microsoft.Win32.Registry]::ClassesRoot.OpenSubKey($path, 'ReadWriteSubTree', 'TakeOwnership')
+  $acl = $key.GetAccessControl()
+  $acl.SetOwner($owner)
+  $key.SetAccessControl($acl)
+}
+
+do {} until (enable-privilege SeTakeOwnershipPrivilege)
+
+# Setup HKCR.
+New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
+
+take-over 'CLSID\{D63B10C5-BB46-4990-A94F-E40B9D520160}'
+take-over 'CLSID\{D63B10C5-BB46-4990-A94F-E40B9D520160}\LocalServer32'
+take-over 'AppID\{9CA88EE3-ACB7-47c8-AFC4-AB702511C276}'
+take-over 'AppID\RuntimeBroker.exe'
+
+$dcom = gwmi -class win32_dcomapplicationsetting -filter 'description=&quot;RuntimeBroker&quot;' -enableallprivileges
+
+function get-ace($dcom, $type, $name) {
+  $trustee = ([wmiclass] 'win32_trustee').createinstance()
+  $trustee.name = $name
+
+  $ace = ([wmiclass] 'win32_ace').createinstance()
+  $ace.accessmask = 11 # local launch / local activate
+  $ace.aceflags = 0
+  $ace.acetype = 0
+  $ace.trustee = $trustee
+
+  return $ace
+}
+
+function add-launchace($dcom, $name) {
+  $ace = get-ace $name
+  $sd = $dcom.getlaunchsecuritydescriptor().descriptor
+  [system.management.managementbaseobject[]] $dacl = $sd.dacl + @($ace)
+  $sd.dacl = $dacl
+  $dcom.setlaunchsecuritydescriptor($sd) | out-null
+}
+
+function add-accessace($dcom, $name) {
+  $ace = get-ace $name
+  $sd = $dcom.getaccesssecuritydescriptor().descriptor
+  [system.management.managementbaseobject[]] $dacl = $sd.dacl + @($ace)
+  $sd.dacl = $dacl
+  $dcom.setaccesssecuritydescriptor($sd) | out-null
+}
+
+add-launchace $dcom 'NT AUTHORITY\SYSTEM'
+add-launchace $dcom 'NT AUTHORITY\SELF'
+add-launchace $dcom 'NT AUTHORITY\ALL APPLICATION PACKAGES'
+
+add-accessace $dcom 'NT AUTHORITY\SYSTEM'
+add-accessace $dcom 'NT AUTHORITY\SELF'
+add-accessace $dcom 'NT AUTHORITY\ALL APPLICATION PACKAGES'
+add-accessace $dcom 'NT AUTHORITY\LOCAL SERVICE'
+add-accessace $dcom 'NT AUTHORITY\NETWORK SERVICE'
+
+take-back 'CLSID\{D63B10C5-BB46-4990-A94F-E40B9D520160}'
+take-back 'CLSID\{D63B10C5-BB46-4990-A94F-E40B9D520160}\LocalServer32'
+take-back 'AppID\{9CA88EE3-ACB7-47c8-AFC4-AB702511C276}'
+take-back 'AppID\RuntimeBroker.exe'</code></pre>
+      <footer>
+        <p><span>Published: 2016-11-14</span> <span>Last Updated: 2016-11-17</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

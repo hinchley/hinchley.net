@@ -1,0 +1,298 @@
+[
+  {
+    "class": "Computer",
+    "name": "Lenovo ThinkPad X1 Carbon Gen 7",
+    "url": "https://www.lenovo.com/au/en/laptops/thinkpad/x1-series/X1-Carbon-Gen-7/p/22TP2TXX17G",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-1"
+  },
+  {
+    "class": "Monitor",
+    "name": "Dell C3422WE",
+    "url": "https://www.dell.com/en-au/shop/dell-34-curved-video-conferencing-monitor-c3422we/apd/210-ayvc/monitors-monitor-accessories",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-2"
+  },
+  {
+    "class": "Keyboard",
+    "name": "NuPhy Halo75 V2",
+    "url": "https://nuphy.com.au/products/nuphy-halo75-v2",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-3"
+  },
+  {
+    "class": "Mouse",
+    "name": "Logitch Anywhere 3S",
+    "url": "https://www.logitech.com/en-au/shop/p/mx-anywhere-3s",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-4"
+  },
+  {
+    "class": "Storage",
+    "name": "Synology Diskstation DS224+",
+    "url": "https://www.synology.com/en-us/products/DS224+",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-5"
+  },
+  {
+    "class": "Router",
+    "name": "Linksys WRT1900ACS",
+    "url": "https://www.tomsguide.com/us/inksys-wrt1900acs,review-3498.html",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-6"
+  },
+  {
+    "class": "Phone",
+    "name": "Apple iPhone 16 Pro Max",
+    "url": "https://www.apple.com/au/iphone-16-pro",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-7"
+  },
+  {
+    "class": "Watch",
+    "name": "Apple Watch Series 10",
+    "url": "https://support.apple.com/en-au/121202",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-8"
+  },
+  {
+    "class": "eReader",
+    "name": "Amazon Kindle Paperwhite 12th Gen",
+    "url": "https://www.amazon.com.au/kindle-paperwhite/s?k=kindle+paperwhite",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-9"
+  },
+  {
+    "class": "Stylus eReader",
+    "name": "Amazon Kindle Scribe 1st Gen",
+    "url": "https://www.amazon.com.au/New-Amazon-Kindle-Scribe-Redesigned/dp/B0CZB5RHWX",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-10"
+  },
+  {
+    "class": "Pocket eReader",
+    "name": "XTEINK 4",
+    "url": "http://xteink.com/products/xteink-x4",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-11"
+  },
+  {
+    "class": "Headphones",
+    "name": "Sony WH-1000XM6",
+    "url": "https://www.sony.com.au/headphones/products/wh-1000xm6",
+    "category": "Hardware",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-12"
+  },
+  {
+    "class": "Operating System",
+    "name": "Arch Linux",
+    "url": "https://archlinux.org",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-13"
+  },
+  {
+    "class": "Window Manager",
+    "name": "Hyprland",
+    "url": "https://hypr.land",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-14"
+  },
+  {
+    "class": "Web Browser",
+    "name": "Chromium",
+    "url": "https://www.chromium.org/Home/",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-15"
+  },
+  {
+    "class": "Code Editor",
+    "name": "Zed",
+    "url": "https://zed.dev",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-16"
+  },
+  {
+    "class": "Shell",
+    "name": "Fish",
+    "url": "https://fishshell.com",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-17"
+  },
+  {
+    "class": "Terminal Emulator",
+    "name": "Foot",
+    "url": "https://codeberg.org/dnkl/foot",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-18"
+  },
+  {
+    "class": "Coding",
+    "name": "C",
+    "url": "https://en.wikipedia.org/wiki/C_(programming_language)",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-19"
+  },
+  {
+    "class": "Source Control",
+    "name": "Git",
+    "url": "https://git-scm.com",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-20"
+  },
+  {
+    "class": "VPN",
+    "name": "Private Internet Access",
+    "url": "https://www.privateinternetaccess.com",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-21"
+  },
+  {
+    "class": "Music Player",
+    "name": "musikcube",
+    "url": "https://github.com/clangen/musikcube",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-22"
+  },
+  {
+    "class": "Video Player",
+    "name": "mpv",
+    "url": "https://mpv.io",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-23"
+  },
+  {
+    "class": "Downloader",
+    "name": "Rqbit",
+    "url": "https://github.com/ikatson/rqbit",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-24"
+  },
+  {
+    "class": "Image Viewer",
+    "name": "feh",
+    "url": "https://feh.finalrewind.org",
+    "category": "Desktop Software",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-25"
+  },
+  {
+    "class": "Email",
+    "name": "Fastmail",
+    "url": "https://fastmail.com",
+    "category": "Web Apps",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-26"
+  },
+  {
+    "class": "Messaging",
+    "name": "Signal",
+    "url": "https://signal.org",
+    "category": "Web Apps",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-27"
+  },
+  {
+    "class": "Password Vault",
+    "name": "Keeper",
+    "url": "https://keepersecurity.com.au",
+    "category": "Web Apps",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-28"
+  },
+  {
+    "class": "Notes",
+    "name": "Standard Notes",
+    "url": "https://standardnotes.com",
+    "category": "Web Apps",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-29"
+  },
+  {
+    "class": "Todo",
+    "name": "Tweek",
+    "url": "https://tweek.so",
+    "category": "Web Apps",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-30"
+  },
+  {
+    "class": "Music",
+    "name": "Spotify",
+    "url": "https://spotify.com",
+    "category": "Web Apps",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-31"
+  },
+  {
+    "class": "Password Manager",
+    "name": "Keeper",
+    "url": "https://chromewebstore.google.com/detail/keeper%C2%AE-password-manager/bfogiafebfohielmmehodmfbbebbbpei",
+    "category": "Chromium Extensions",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-32"
+  },
+  {
+    "class": "News Reader",
+    "name": "Modern for Hacker News",
+    "url": "https://chromewebstore.google.com/detail/modern-for-hacker-news/dabkegjlekdcmefifaolmdhnhdcplklo",
+    "category": "Chromium Extensions",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-33"
+  },
+  {
+    "class": "Ad Blocker",
+    "name": "uBlock Origin Lite",
+    "url": "https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh",
+    "category": "Chromium Extensions",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-34"
+  },
+  {
+    "class": "Desktop Background",
+    "name": "Nier Automata",
+    "url": "https://wallhaven.cc/w/eov3jw",
+    "category": "Other",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-35"
+  },
+  {
+    "class": "Font",
+    "name": "Berkeley Mono",
+    "url": "https://usgraphics.com/products/berkeley-mono",
+    "category": "Other",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-36"
+  },
+  {
+    "class": "Theme",
+    "name": "Tokyo Night Storm",
+    "url": "https://github.com/tokyo-night/tokyo-night-vscode-theme",
+    "category": "Other",
+    "date": "2026-08-01",
+    "id": "use-2026-08-01-37"
+  }
+]

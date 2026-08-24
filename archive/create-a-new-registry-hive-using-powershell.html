@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create a New Registry Hive using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create a New Registry Hive using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>This post assumes you know something about the Windows registry, and in particular, registry hives. If not, I recommend you take up some <a href="https://microsoft.fandom.com/wiki/Windows_Registry">background reading</a>.</p>
+      <p>Earlier this week I found myself thinking about registry hives, and in particular, about creating a new hive using PowerShell. A quick search of the interwebs unveiled a rather novel approach from <a href="https://docs.microsoft.com/en-us/archive/blogs/sergey_babkins_blog/how-to-create-a-brand-new-registry-hive">Sergey Babkin</a>. The technique uses <a href="https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/bcdedit-command-line-options">bcdedit</a> to create a small hive that is then "cleansed" to yield a new empty hive. It's definitely an interesting approach, but after digging further, I discovered that it was possible to explicitly save an existing registry key as a hive using the <a href="https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regsavekeya">RegSaveKey</a> function. I couldn't find any PowerShell-based examples of this technique, probably because calling Win32 functions from PowerShell can be a little tedious, so I decided to write my own script.</p>
+      <p>Here is a summary of the approach:</p>
+      <ol>
+        <li>Create a new registry key. This key will become the root of the new hive.</li>
+        <li>Add any sub-keys and values required in the new hive.</li>
+        <li>Enable the <em>SeBackupPrivilege</em>. This privilege is required to call the <em>RegSaveKey</em> function.</li>
+        <li>Call <em>RegSaveKey</em>, providing the path to the registry key that will become the root of the new hive, and the path to where the hive is to be saved.</li>
+        <li>Delete the temporary registry key used for creating the hive.</li>
+        <li>Remove the <em>SeBackupPrivilege</em>.</li>
+      </ol>
+      <p>I have specifically separated out the code for enabling/disabling privileges. This is a generic .NET class that might prove useful in other PowerShell projects (in fact, I have used the class in a <a href="set-timezone-of-computer-using-powershell.html">previous post</a> to enable the <em>SeTimeZonePrivilege</em>).</p>
+      <p>The script creates a temporary registry key of <code>HKLM\Software\Hive</code>, adds a value under the key named <em>Foo</em> (set to <em>Bar</em>), and then saves the key as a new hive at <code>C:\Temp\Hive.dat</code>.</p>
+      <pre><code>Add-Type -TypeDefinition @'
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
+
+namespace Privileges {
+  public class TokenPrivileges {
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int OpenProcessToken(int ProcessHandle, int DesiredAccess, ref int tokenhandle);
+
+    [DllImport(&quot;kernel32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int GetCurrentProcess();
+
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int LookupPrivilegeValue(string lpsystemname, string lpname, [MarshalAs(UnmanagedType.Struct)] ref LUID lpLuid);
+
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto)]
+    public static extern int AdjustTokenPrivileges(int tokenhandle, int disableprivs, [MarshalAs(UnmanagedType.Struct)] ref TOKEN_PRIVILEGE Newstate, int bufferlength, int PreivousState, int Returnlength);
+
+    public const int TOKEN_ASSIGN_PRIMARY = 0x00000001;
+    public const int TOKEN_DUPLICATE = 0x00000002;
+    public const int TOKEN_IMPERSONATE = 0x00000004;
+    public const int TOKEN_QUERY = 0x00000008;
+    public const int TOKEN_QUERY_SOURCE = 0x00000010;
+    public const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
+    public const int TOKEN_ADJUST_GROUPS = 0x00000040;
+    public const int TOKEN_ADJUST_DEFAULT = 0x00000080;
+
+    public const UInt32 SE_PRIVILEGE_ENABLED_BY_DEFAULT = 0x00000001;
+    public const UInt32 SE_PRIVILEGE_ENABLED = 0x00000002;
+    public const UInt32 SE_PRIVILEGE_REMOVED = 0x00000004;
+    public const UInt32 SE_PRIVILEGE_USED_FOR_ACCESS = 0x80000000;
+
+    public static void EnablePrivilege(string privilege) {
+      var token = 0;
+
+      var TP = new TOKEN_PRIVILEGE();
+      var LD = new LUID();
+
+      OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, ref token);
+      LookupPrivilegeValue(null, privilege, ref LD);
+      TP.PrivilegeCount = 1;
+
+      var luidAndAtt = new LUID_AND_ATTRIBUTES {Attributes = SE_PRIVILEGE_ENABLED, Luid = LD};
+      TP.Privilege = luidAndAtt;
+
+      AdjustTokenPrivileges(token, 0, ref TP, 1024, 0, 0);
+    }
+
+    public static void DisablePrivilege(string privilege) {
+      var token = 0;
+
+      var TP = new TOKEN_PRIVILEGE();
+      var LD = new LUID();
+
+      OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, ref token);
+      LookupPrivilegeValue(null, privilege, ref LD);
+      TP.PrivilegeCount = 1;
+
+      var luidAndAtt = new LUID_AND_ATTRIBUTES {Luid = LD};
+      TP.Privilege = luidAndAtt;
+
+      AdjustTokenPrivileges(token, 0, ref TP, 1024, 0, 0);
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct LUID {
+      internal uint LowPart;
+      internal uint HighPart;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct LUID_AND_ATTRIBUTES {
+      internal LUID Luid;
+      internal uint Attributes;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct TOKEN_PRIVILEGE {
+      internal uint PrivilegeCount;
+      internal LUID_AND_ATTRIBUTES Privilege;
+    }
+  }
+}
+'@
+
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
+
+namespace Registry {
+  public class Utils {
+    [DllImport(&quot;advapi32.dll&quot;, SetLastError = true)]
+    private static extern int RegCloseKey(UIntPtr hKey);
+
+    [DllImport(&quot;advapi32.dll&quot;, SetLastError = true)]
+    private static extern int RegOpenKeyEx(UIntPtr hKey, string subKey, int ulOptions, int samDesired, out UIntPtr hkResult);
+
+    [DllImport(&quot;advapi32.dll&quot;, SetLastError=true, CharSet = CharSet.Unicode)]
+    private static extern uint RegSaveKey(UIntPtr hKey, string lpFile, IntPtr lpSecurityAttributes);
+
+    private static int KEY_READ = 131097;
+    private static UIntPtr HKEY_LOCAL_MACHINE = new UIntPtr(0x80000002u);
+
+    public static uint SaveKey(string key, string path) {
+      UIntPtr hKey = UIntPtr.Zero;
+      RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_READ, out hKey);
+      uint result = RegSaveKey(hKey, path, IntPtr.Zero);
+      RegCloseKey(hKey);
+      return result;
+    }
+  }
+}
+'@
+
+# Enable the privileges required to save the hive.
+[Privileges.TokenPrivileges]::EnablePrivilege('SeBackupPrivilege') | Out-Null
+
+# Build the hive.
+new-item -path HKLM:\Software -name Hive | Out-Null
+new-itemproperty -path HKLM:\Software\Hive -name Foo -value Bar -type string | Out-Null
+
+# Export the hive.
+[Registry.Utils]::SaveKey(&quot;SOFTWARE\\HIVE&quot;, &quot;C:\\TEMP\\HIVE.DAT&quot;)
+
+# Clean up.
+remove-item -path HKLM:\Software\Hive -force
+
+# Disable the privileges required to save the hive.
+[Privileges.TokenPrivileges]::DisablePrivilege('SeBackupPrivilege') | Out-Null</code></pre>
+      <p>As to what you do with the new hive, well that's entirely up to you. If you want the hive to always be available, you will need to load it into the registry (possibly using the <a href="https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regloadkeya">RegLoadKey</a> function) each time the system is started (as loading a hive isn't persistent).</p>
+      <p>As a side note, you can see the list of loaded hives by reviewing the values under <code>HKLM\SYSTEM\CurrentControlSet\Control\hivelist</code>.</p>
+      <footer>
+        <p><span>Published: 2016-12-05</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

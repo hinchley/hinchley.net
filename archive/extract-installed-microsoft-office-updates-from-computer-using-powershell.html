@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Extract Installed Microsoft Office Updates from a Computer using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Extract Installed Microsoft Office Updates from a Computer using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>I've lost count of how many times I have needed to extract the Microsoft Office updates installed on a computer. I install Microsoft Office, connect the computer to the internet, use Windows Update to install all available software updates, and then use the script shown below to extract those updates into a folder. These updates can then be copied into the <em>Updates</em> folder of the Microsoft Office installation media, thereby ensuring that the updates will be automatically installed when the media is next used to install Office. It's a great way of keeping the media up to date when installing Office during a reference image deployment of Microsoft Windows.</p>
+      <pre><code>$updates = &quot;{0}\updates&quot; -f $env:temp
+if (test-path $updates) { ri $updates -r -fo }; md $updates | out-null
+$msi = new-object -comobject windowsinstaller.installer
+$msi.patchesex('', '', 4, 1) | %{
+  $pkg = $_.patchproperty('LocalPackage')
+  $msp = $msi.opendatabase($pkg, 32)
+  if ($msi.summaryinformation($pkg).property(7) -match '000-0000000ff1ce}') {
+    try {$view = $msp.openview(&quot;SELECT `Property`,`Value` FROM MsiPatchMetadata WHERE `Property`='StdPackageName'&quot;)} catch { return }
+    $view.execute()
+    $record = $view.fetch()
+    copy-item $pkg (&quot;{0}\{1}&quot; -f $updates, $record.stringdata(2)) -force
+  }
+}
+start $updates</code></pre>
+      <footer>
+        <p><span>Published: 2016-06-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

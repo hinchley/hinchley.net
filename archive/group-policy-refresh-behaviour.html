@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Group Policy Refresh Behaviour</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Group Policy Refresh Behaviour</h1>
+    </header>
+    <main class="archive">
+      <p>The default refresh interval for group policy is 90 minutes with an additional 0 to 30 minute random offset. You can also manually trigger a policy refresh by running <code>gpupdate</code>. Note: The refresh interval on domain controllers is only 5 minutes (with no offset).</p>
+      <p>The refresh process checks if any of the policies assigned to a computer have changed (each policy has a version number that is incremented when a policy is modified). If no policies have changed, the refresh process completes without applying any updates to the computer. If at least one of the policies has changed, all policies assigned to the computer are reapplied (in priority order from lowest to highest). You can also force all policies to be reapplied by running <code>gpupdate /force</code> (the equivalent process occurs automatically every 16 hours).</p>
+      <p>I used to think that when a group policy was reapplied to a computer, each corresponding registry entry was refreshed via a single <code>RegSetValue</code> operation. I've since learnt that the update process actually requires two operations; the registry value is first deleted via a call to <code>RegDeleteValue</code>, and then set via a call to <code>RegSetValue</code>. Furthermore, if two policies implement the same setting, after the corresponding registry value is deleted, two RegSetValue operations are called; the first sets the value from the lowest priority policy, and the second sets the value from the highest priority policy. This again, is different from what I expected; I had assumed that only the value from the "wining policy" would be applied.</p>
+      <p>The process varies slightly for registry values configured via group policy preferences. If a preference is configured with an action of "update", the registry entry will be updated in-place (via a single RegSetValue operation). If the preference is configured with an action of "replace", it will be deleted and then set. And if a preference is configured with an action of "replace" <em>and</em> with the option to "remove this item when it is no longer required", two RegDeleteValue operations will be requested (obviously, only the first succeeds) prior to calling RegSetValue. I assume the first delete operation is initiated as the policy is effectively removed and reassigned, and the second operation forms part of the "replace" action.</p>
+      <p>Another key difference between traditional group policy settings and group policy preferences is that preferences are always reapplied during a background policy refresh (and by running <code>gpupdate</code>) - even if a policy has not changed.</p>
+      <footer>
+        <p><span>Published: 2013-11-06</span> <span>Last Updated: 2015-10-11</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

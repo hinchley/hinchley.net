@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Sort an Array of Hashes Using Multiple Keys in PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Sort an Array of Hashes Using Multiple Keys in PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>A quick tip on sorting an array of hashes in PowerShell using multiple keys. Let's say you have an array, where each element is a hash containing a person's name and age:</p>
+      <pre><code>$people = @(
+  @{'name' = 'sam'; 'age' = 19},
+  @{'name' = 'bob'; 'age' = 21},
+  @{'name' = 'bob'; 'age' = 19}
+)</code></pre>
+      <p>Now you want to sort the array of people by name. And when multiple people share the same name, you want to perform a secondary sort by age. Try this:</p>
+      <pre><code>$people | sort { $_.name }, { [int]$_.age }</code></pre>
+      <p>The output:</p>
+      <pre><code>@(
+  @{'name' = 'bob'; 'age' = 19},
+  @{'name' = 'bob'; 'age' = 21},
+  @{'name' = 'sam'; 'age' = 19}
+)</code></pre>
+      <p>And for bonus points, if you want to sort by name in ascending order, but by age in descending order, just negate the age:</p>
+      <pre><code>$people | sort { $_.name }, { ! [int]$_.age }</code></pre>
+      <footer>
+        <p><span>Published: 2016-06-29</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

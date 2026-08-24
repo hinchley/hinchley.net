@@ -1,0 +1,19 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Contact: mailto:peter@hinchley.net
+Expires: 2024-12-31T13:00:00.000Z
+Encryption: https://hinchley.net/pgp-key.txt
+Preferred-Languages: en
+Canonical: https://hinchley.net/.well-known/security.txt
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCgAdFiEEpJRhwtg8UAg+Wym5el8Lds6MvrgFAmptkuYACgkQel8Lds6M
+vrgzRggAkeoXNTC473ilHm5J9kBBqbiFt96st0JDZJ4PQF2YEARIvNsQ09Ao4CNH
+/YnmqOxhUWop1zW9CpACiUz/e5w9pgoHLSzIe7Mjz0hIlWngqCOfOoA0at9eVyg6
+zAYDljHvthLnfWjrFpqU/ZUftQnSzRqjxfjhf6A9vNInAQDLJ895B0gIanu4+vQu
+OApMgkh5ILXdEKBmjY2anBwLhSghf12PMcxS4JAtPmG/7sPF9/T+iCbQNk62ge94
+4E2QmpD/Q2gttpSiFLsbDK4ZClkRxbBRmfA3ExWnohpdlvPfgcYHZlH0Ug/VVuvq
+/dQogUYb9g92tIn8OBxPacSTQHl+Zg==
+=6SkC
+-----END PGP SIGNATURE-----

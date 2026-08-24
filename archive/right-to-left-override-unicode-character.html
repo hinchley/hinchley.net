@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Right-to-Left-Override Unicode Character</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Right-to-Left-Override Unicode Character</h1>
+    </header>
+    <main class="archive">
+      <p>Unicode is a character encoding standard that supports most of the world's written languages. To support such a broad character set with a standard US keyboard, individual Unicode characters can be entered on a Windows computer by holding down the Alt key, and then entering the numeric code of the character, for example, <em>Alt+0036</em> for <em>$</em>.</p>
+      <p>Many of the characters in the Unicode set are <em>control characters</em> (non-printing instructions). One such example is the right-to-left-override (RLO) character (Alt+202E) that is used to reverse a character sequence from &quot;left-to-right&quot; to &quot;right-to-left&quot; (as is required for languages like Arabic).</p>
+      <p>Unfortunately, this necessary feature can also be used for nefarious purposes, such as obfuscating the extension of a file. For example, let's take a file named <em>annfdp.exe</em>. By placing the RLO character immediately before the <em>f</em>, we create a file that appears to be a PDF named <em>annexe.pdf</em>, when in fact, it's really an executable (with potentially nasty code).</p>
+      <p>Short of using Software Restriction Policies (SRP), AppLocker, or a technology like Windows File Screening to prevent users from creating files which include the RLO character, this can be a difficult threat to mitigate.</p>
+      <footer>
+        <p><span>Published: 2013-11-04</span> <span>Last Updated: 2015-10-11</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

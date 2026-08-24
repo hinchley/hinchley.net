@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Using PowerShell to Find the Group Membership of the Logged On User and Local Computer</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Using PowerShell to Find the Group Membership of the Logged On User and Local Computer</h1>
+    </header>
+    <main class="archive">
+      <p>Here are two small PowerShell scripts. The first returns the Active Directory group membership of the currently logged on user (i.e. the user running the script). The second returns the Active Directory group membership of the local computer.</p>
+      <p>In both scripts, the group names are added to an array named <em>$groups</em> (with each group recorded in the form <code>domain\group</code>).</p>
+      <p>The code for retrieving the group membership of the logged on user:</p>
+      <pre><code>try {
+  $groups = (([System.Security.Principal.WindowsIdentity]::GetCurrent()).Groups | %{
+    $_.Translate([System.Security.Principal.NTAccount])
+  } | Sort) -join &quot;`r`n&quot;
+} catch { &quot;Groups could not be retrieved.&quot; }
+
+$groups</code></pre>
+      <p>The code for retrieving the group membership of the local computer:</p>
+      <pre><code>$search = New-Object DirectoryServices.DirectorySearcher
+$search.SearchRoot = 'LDAP://DC={0}' -f ($env:USERDNSDOMAIN -replace '\.', ',DC=')
+$search.Filter = &quot;(&amp;(objectcategory=computer)(cn=$($env:COMPUTERNAME)))&quot;
+
+try {
+  $entry = $search.FindOne().GetDirectoryEntry()
+  $entry.psbase.RefreshCache('tokenGroups')
+
+  $groups = @()
+
+  $entry.tokenGroups | %{
+    $sid = New-Object System.Security.Principal.SecurityIdentifier $_, 0
+    $groups += $sid.Translate([System.Security.Principal.NTAccount]).Value
+  }
+} catch {
+  &quot;Groups could not be retrieved.&quot;
+}
+
+$groups</code></pre>
+      <footer>
+        <p><span>Published: 2016-03-25</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

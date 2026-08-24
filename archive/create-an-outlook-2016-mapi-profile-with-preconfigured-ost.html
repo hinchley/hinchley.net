@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create an Outlook 2016 MAPI Profile with Preconfigured OST using C++</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create an Outlook 2016 MAPI Profile with Preconfigured OST using C++</h1>
+    </header>
+    <main class="archive">
+      <p>This <a href="https://blogs.msdn.microsoft.com/dvespa/2015/10/28/how-to-configure-an-outlook-2016-profile-using-mfcmapi/">great article</a> by Dave Vespa explains how to create a new Outlook 2016 profile using <a href="https://stephenegriffin.github.io/mfcmapi/">MFCMAPI</a>. It even includes a C++ code sample that can be used to automate the task. Unfortunately, I had to make a few modifications to the code before it would compile using Visual Studio 2015 (Community Edition).</p>
+      <p>Having altered the code, I decided to add support for pre-configuring the MAPI profile to use a specific OST path. I did this so I could take an existing Outlook 2016 OST (generated on a different computer), and insert it into the new profile - a great way to prevent a user from needing to recache their entire mailbox when moving to a new machine!</p>
+      <p>You can view the <a href="https://gist.github.com/hinchley/ce2db8d1cec3fef87f61">source code</a>, download the entire <a href="../static/profiler.zip">Visual Studio 2015 solution</a> (120KB), or just grab a copy of the <a href="../static/profiler.exe">statically compiled executable</a> (200KB).</p>
+      <p>To run the code, you need to provide three arguments: the name of the profile, the email address of the user, and the path to where a blank OST should be created. For example:</p>
+      <pre><code>profiler.exe Outlook peter@lab.hinchley.net c:\users\peter\appdata\local\microsoft\outlook\peter@lab.hinchley.net.ost</code></pre>
+      <p>After running the code, you should be able to replace the empty OST that was created with the user's OST from an existing computer, and then start Outlook using the newly created profile.</p>
+      <p>Note: To compile the Visual Studio solution you will first need to download the <a href="https://web.archive.org/web/20190127190712/http://www.microsoft.com/en-us/download/details.aspx?id=12905">Outlook 2010 MAPI header files</a>. The solution expects the header files to be located under <code>C:\Office 2010 Developer Resources\Outlook 2010 MAPI Headers</code>. You will also need to grab a copy of <em>EdkGuid.h</em> and <em>EdkMdb.h</em> from the <em>include</em> folder of the <a href="https://github.com/stephenegriffin/mfcmapi">MFCMAPI source</a> and add them to the same <em>Outlook 2010 MAPI Headers</em> folder.</p>
+      <footer>
+        <p><span>Published: 2016-03-25</span> <span>Last Updated: 2016-03-26</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,821 @@
+[
+  {
+    "name": "TechPowerUp",
+    "url": "https://www.techpowerup.com",
+    "category": "IT News",
+    "date": "2026-08-24",
+    "id": "bookmark-2026-08-24-1"
+  },
+  {
+    "name": "Typing",
+    "url": "https://typ.ing",
+    "category": "Tools",
+    "date": "2026-08-24",
+    "id": "bookmark-2026-08-24-2"
+  },
+  {
+    "name": "Bruce Ediger",
+    "url": "https://bruceediger.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-1"
+  },
+  {
+    "name": "Cyrus Lopez",
+    "url": "https://unix.foo",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-2"
+  },
+  {
+    "name": "Dan Heskett",
+    "url": "https://danheskett.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-3"
+  },
+  {
+    "name": "Dan Luu",
+    "url": "https://danluu.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-4"
+  },
+  {
+    "name": "Denis Defreyne",
+    "url": "https://denisdefreyne.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-5"
+  },
+  {
+    "name": "Gwern Branwen",
+    "url": "https://gwern.net",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-6"
+  },
+  {
+    "name": "Julia Evans",
+    "url": "https://jvns.ca",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-7"
+  },
+  {
+    "name": "Kevin Boone",
+    "url": "https://kevinboone.me",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-8"
+  },
+  {
+    "name": "Kognise",
+    "url": "https://kognise.dev",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-9"
+  },
+  {
+    "name": "Kottke",
+    "url": "https://kottke.org",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-10"
+  },
+  {
+    "name": "Linus Lee",
+    "url": "https://thesephist.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-11"
+  },
+  {
+    "name": "mrusme",
+    "url": "https://xn--gckvb8fzb.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-12"
+  },
+  {
+    "name": "Nelson Figueroa",
+    "url": "https://nelson.cloud",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-13"
+  },
+  {
+    "name": "Patrick Boyd",
+    "url": "https://blog.ppb1701.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-14"
+  },
+  {
+    "name": "Shaygan Hooshyari",
+    "url": "https://glyphack.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-15"
+  },
+  {
+    "name": "Simon Wilson",
+    "url": "https://simonwillison.net",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-16"
+  },
+  {
+    "name": "Stratechery",
+    "url": "https://stratechery.com",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-17"
+  },
+  {
+    "name": "Terence Eden",
+    "url": "https://shkspr.mobi/blog/",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-18"
+  },
+  {
+    "name": "Waxy",
+    "url": "https://waxy.org",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-19"
+  },
+  {
+    "name": "XXIIVV",
+    "url": "https://wiki.xxiivv.com/site/home.html",
+    "category": "Blogs",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-20"
+  },
+  {
+    "name": "EXT",
+    "url": "https://ext.to",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-21"
+  },
+  {
+    "name": "FMHY",
+    "url": "https://fmhy.net",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-22"
+  },
+  {
+    "name": "Library Genesis",
+    "url": "https://libgen.im",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-23"
+  },
+  {
+    "name": "LimeTorrents",
+    "url": "https://limetorrents.fun",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-24"
+  },
+  {
+    "name": "Standard eBooks",
+    "url": "https://standardebooks.org",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-25"
+  },
+  {
+    "name": "The Pirate Bay",
+    "url": "https://thepiratebay.org/index.html",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-26"
+  },
+  {
+    "name": "Torrent Downloads",
+    "url": "https://www.torrentdownloads.pro",
+    "category": "Downloads",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-27"
+  },
+  {
+    "name": "Bubbles",
+    "url": "https://bubbles.town",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-28"
+  },
+  {
+    "name": "Hacker News",
+    "url": "https://news.ycombinator.com",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-29"
+  },
+  {
+    "name": "Lobsters",
+    "url": "https://lobste.rs",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-30"
+  },
+  {
+    "name": "Reddit",
+    "url": "https://www.reddit.com",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-31"
+  },
+  {
+    "name": "TextLog",
+    "url": "https://textlog.cc",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-32"
+  },
+  {
+    "name": "Whirlpool Forums",
+    "url": "https://forums.whirlpool.net.au",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-33"
+  },
+  {
+    "name": "X (Cancel)",
+    "url": "https://xcancel.com",
+    "category": "Forums",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-34"
+  },
+  {
+    "name": "Ars Technica",
+    "url": "https://arstechnica.com",
+    "category": "IT News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-35"
+  },
+  {
+    "name": "IT News",
+    "url": "https://www.itnews.com.au",
+    "category": "IT News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-36"
+  },
+  {
+    "name": "The Verge",
+    "url": "https://www.theverge.com",
+    "category": "IT News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-37"
+  },
+  {
+    "name": "Wired",
+    "url": "https://www.wired.com",
+    "category": "IT News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-38"
+  },
+  {
+    "name": "Coder Musings",
+    "url": "https://www.codermusings.com",
+    "category": "Learning",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-39"
+  },
+  {
+    "name": "Making Software",
+    "url": "https://www.makingsoftware.com",
+    "category": "Learning",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-40"
+  },
+  {
+    "name": "Software Construction (MIT)",
+    "url": "https://web.mit.edu/6.031",
+    "category": "Learning",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-41"
+  },
+  {
+    "name": "Ambiphone",
+    "url": "https://ambiph.one",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-42"
+  },
+  {
+    "name": "Five Books",
+    "url": "https://fivebooks.com",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-43"
+  },
+  {
+    "name": "Metacritic: New Albums",
+    "url": "https://www.metacritic.com/browse/albums/release-date/new-releases/date",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-44"
+  },
+  {
+    "name": "My Noise",
+    "url": "https://mynoise.net/noiseMachines.php",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-45"
+  },
+  {
+    "name": "Pitchfork",
+    "url": "https://pitchfork.com",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-46"
+  },
+  {
+    "name": "Spotify",
+    "url": "https://open.spotify.com",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-47"
+  },
+  {
+    "name": "TV Guide",
+    "url": "https://www.yourtv.com.au/guide/canberra/",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-48"
+  },
+  {
+    "name": "Wallhaven",
+    "url": "https://wallhaven.cc",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-49"
+  },
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com",
+    "category": "Media",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-50"
+  },
+  {
+    "name": "BGP Tools",
+    "url": "https://bgp.tools",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-51"
+  },
+  {
+    "name": "DNS Leak Test",
+    "url": "https://dnsleaktest.com",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-52"
+  },
+  {
+    "name": "DNS Lookup",
+    "url": "https://dnslookup.online",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-53"
+  },
+  {
+    "name": "ifconfig",
+    "url": "https://ifconfig.co",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-54"
+  },
+  {
+    "name": "MX Toolbox",
+    "url": "https://mxtoolbox.com/SuperTool.aspx",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-55"
+  },
+  {
+    "name": "Never SSL",
+    "url": "http://neverssl.com",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-56"
+  },
+  {
+    "name": "Port Tester",
+    "url": "http://portquiz.net",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-57"
+  },
+  {
+    "name": "Web Check",
+    "url": "https://web-check.xyz",
+    "category": "Network Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-58"
+  },
+  {
+    "name": "ABC",
+    "url": "https://www.abc.net.au",
+    "category": "News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-59"
+  },
+  {
+    "name": "News as Facts",
+    "url": "https://newsasfacts.com",
+    "category": "News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-60"
+  },
+  {
+    "name": "New York Times",
+    "url": "https://www.nytimes.com",
+    "category": "News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-61"
+  },
+  {
+    "name": "ProPublica",
+    "url": "https://www.propublica.org",
+    "category": "News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-62"
+  },
+  {
+    "name": "Rest of World",
+    "url": "https://restofworld.org",
+    "category": "News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-63"
+  },
+  {
+    "name": "Vox",
+    "url": "https://www.vox.com",
+    "category": "News",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-64"
+  },
+  {
+    "name": "Fastmail",
+    "url": "https://app.fastmail.com",
+    "category": "Productivity",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-65"
+  },
+  {
+    "name": "Keeper",
+    "url": "https://www.keepersecurity.com/?data_region=au",
+    "category": "Productivity",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-66"
+  },
+  {
+    "name": "Standard Notes",
+    "url": "https://app.standardnotes.com",
+    "category": "Productivity",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-67"
+  },
+  {
+    "name": "Tweek",
+    "url": "https://tweek.so",
+    "category": "Productivity",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-68"
+  },
+  {
+    "name": "C Documentation",
+    "url": "https://devdocs.io/c/",
+    "category": "Reference",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-69"
+  },
+  {
+    "name": "Google Maps",
+    "url": "https://www.google.com/maps",
+    "category": "Reference",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-70"
+  },
+  {
+    "name": "Linux man Pages",
+    "url": "https://www.mankier.com",
+    "category": "Reference",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-71"
+  },
+  {
+    "name": "Wikipedia",
+    "url": "https://www.wikipedia.org",
+    "category": "Reference",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-72"
+  },
+  {
+    "name": "Brave",
+    "url": "https://search.brave.com",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-73"
+  },
+  {
+    "name": "Duck Duck Go",
+    "url": "https://duckduckgo.com",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-74"
+  },
+  {
+    "name": "Google",
+    "url": "https://www.google.com",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-75"
+  },
+  {
+    "name": "Google Search (UDM14)",
+    "url": "https://udm14.com",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-76"
+  },
+  {
+    "name": "Marginalia",
+    "url": "https://marginalia-search.com",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-77"
+  },
+  {
+    "name": "Mwmbl",
+    "url": "https://mwmbl.org",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-78"
+  },
+  {
+    "name": "Yandex",
+    "url": "https://yandex.com",
+    "category": "Search",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-79"
+  },
+  {
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-80"
+  },
+  {
+    "name": "Claude",
+    "url": "https://claude.ai",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-81"
+  },
+  {
+    "name": "Copilot",
+    "url": "https://copilot.microsoft.com",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-82"
+  },
+  {
+    "name": "Gemini",
+    "url": "https://gemini.google.com/app",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-83"
+  },
+  {
+    "name": "Grok",
+    "url": "http://grok.com",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-84"
+  },
+  {
+    "name": "Kimi",
+    "url": "https://www.kimi.com",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-85"
+  },
+  {
+    "name": "Meta.ai",
+    "url": "https://meta.ai",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-86"
+  },
+  {
+    "name": "Mistral",
+    "url": "https://chat.mistral.ai/chat",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-87"
+  },
+  {
+    "name": "Perplexity",
+    "url": "https://www.perplexity.ai",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-88"
+  },
+  {
+    "name": "Qwen",
+    "url": "https://chat.qwen.ai",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-89"
+  },
+  {
+    "name": "Sigma",
+    "url": "https://app.sigmabrowser.com/chat",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-90"
+  },
+  {
+    "name": "Tropes",
+    "url": "https://tropes.fyi",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-91"
+  },
+  {
+    "name": "Z.ai",
+    "url": "https://chat.z.ai",
+    "category": "Slop",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-92"
+  },
+  {
+    "name": "ANSI 101",
+    "url": "https://www.ansi101.com",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-93"
+  },
+  {
+    "name": "ASCII Flow",
+    "url": "https://asciiflow.com",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-94"
+  },
+  {
+    "name": "Base64",
+    "url": "https://www.base64.sh",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-95"
+  },
+  {
+    "name": "Compiler Explorer",
+    "url": "https://godbolt.org",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-96"
+  },
+  {
+    "name": "Copy Char",
+    "url": "https://copychar.cc",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-97"
+  },
+  {
+    "name": "C Repl",
+    "url": "https://www.online-cpp.com/online_c_compiler",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-98"
+  },
+  {
+    "name": "Epoch Converter",
+    "url": "https://epoch.vercel.app",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-99"
+  },
+  {
+    "name": "EPUB to AZW",
+    "url": "https://convertio.co/epub-azw3/",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-100"
+  },
+  {
+    "name": "Hemingway",
+    "url": "https://hemingwayapp.com",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-101"
+  },
+  {
+    "name": "Keybr",
+    "url": "https://www.keybr.com",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-102"
+  },
+  {
+    "name": "Send to Kindle",
+    "url": "https://www.amazon.com.au/sendtokindle",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-103"
+  },
+  {
+    "name": "Squoosh",
+    "url": "https://squoosh.app",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-104"
+  },
+  {
+    "name": "Time.fyi",
+    "url": "https://time.fyi",
+    "category": "Tools",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-105"
+  },
+  {
+    "name": "Bolly",
+    "url": "https://brolly.sh/forecast/rug3AbnB",
+    "category": "Weather",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-106"
+  },
+  {
+    "name": "Forecast: BOM",
+    "url": "http://www.bom.gov.au/act/forecasts/canberra.shtml",
+    "category": "Weather",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-107"
+  },
+  {
+    "name": "Forecast: YR",
+    "url": "https://www.yr.no/en/forecast/daily-table/2-2172517/Australia/Australian%20Capital%20Territory/Canberra",
+    "category": "Weather",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-108"
+  },
+  {
+    "name": "Rain Radar",
+    "url": "https://theweatherchaser.com/radar/IDR403-canberra",
+    "category": "Weather",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-109"
+  },
+  {
+    "name": "Wind Map",
+    "url": "https://earth.nullschool.net",
+    "category": "Weather",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-110"
+  },
+  {
+    "name": "Fireship",
+    "url": "https://www.youtube.com/@Fireship",
+    "category": "YouTube",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-111"
+  },
+  {
+    "name": "Never to Small",
+    "url": "https://www.youtube.com/@nevertoosmall",
+    "category": "YouTube",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-112"
+  },
+  {
+    "name": "Nir Lichtman",
+    "url": "https://www.youtube.com/@nirlichtman",
+    "category": "YouTube",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-113"
+  },
+  {
+    "name": "Tsoding",
+    "url": "https://www.youtube.com/@Tsoding",
+    "category": "YouTube",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-114"
+  },
+  {
+    "name": "Tsoding Daily",
+    "url": "https://www.youtube.com/@TsodingDaily",
+    "category": "YouTube",
+    "date": "2026-01-01",
+    "id": "bookmark-2026-01-01-115"
+  }
+]

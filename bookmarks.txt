@@ -1,0 +1,584 @@
+Bruce Ediger
+https://bruceediger.com
+Blogs
+2026-01-01
+
+Cyrus Lopez
+https://unix.foo
+Blogs
+2026-01-01
+
+Dan Heskett
+https://danheskett.com
+Blogs
+2026-01-01
+
+Dan Luu
+https://danluu.com
+Blogs
+2026-01-01
+
+Denis Defreyne
+https://denisdefreyne.com
+Blogs
+2026-01-01
+
+Gwern Branwen
+https://gwern.net
+Blogs
+2026-01-01
+
+Julia Evans
+https://jvns.ca
+Blogs
+2026-01-01
+
+Kevin Boone
+https://kevinboone.me
+Blogs
+2026-01-01
+
+Kognise
+https://kognise.dev
+Blogs
+2026-01-01
+
+Kottke
+https://kottke.org
+Blogs
+2026-01-01
+
+Linus Lee
+https://thesephist.com
+Blogs
+2026-01-01
+
+mrusme
+https://xn--gckvb8fzb.com
+Blogs
+2026-01-01
+
+Nelson Figueroa
+https://nelson.cloud
+Blogs
+2026-01-01
+
+Patrick Boyd
+https://blog.ppb1701.com
+Blogs
+2026-01-01
+
+Shaygan Hooshyari
+https://glyphack.com
+Blogs
+2026-01-01
+
+Simon Wilson
+https://simonwillison.net
+Blogs
+2026-01-01
+
+Stratechery
+https://stratechery.com
+Blogs
+2026-01-01
+
+Terence Eden
+https://shkspr.mobi/blog/
+Blogs
+2026-01-01
+
+Waxy
+https://waxy.org
+Blogs
+2026-01-01
+
+XXIIVV
+https://wiki.xxiivv.com/site/home.html
+Blogs
+2026-01-01
+
+EXT
+https://ext.to
+Downloads
+2026-01-01
+
+FMHY
+https://fmhy.net
+Downloads
+2026-01-01
+
+Library Genesis
+https://libgen.im
+Downloads
+2026-01-01
+
+LimeTorrents
+https://limetorrents.fun
+Downloads
+2026-01-01
+
+Standard eBooks
+https://standardebooks.org
+Downloads
+2026-01-01
+
+The Pirate Bay
+https://thepiratebay.org/index.html
+Downloads
+2026-01-01
+
+Torrent Downloads
+https://www.torrentdownloads.pro
+Downloads
+2026-01-01
+
+Bubbles
+https://bubbles.town
+Forums
+2026-01-01
+
+Hacker News
+https://news.ycombinator.com
+Forums
+2026-01-01
+
+Lobsters
+https://lobste.rs
+Forums
+2026-01-01
+
+Reddit
+https://www.reddit.com
+Forums
+2026-01-01
+
+TextLog
+https://textlog.cc
+Forums
+2026-01-01
+
+Whirlpool Forums
+https://forums.whirlpool.net.au
+Forums
+2026-01-01
+
+X (Cancel)
+https://xcancel.com
+Forums
+2026-01-01
+
+Ars Technica
+https://arstechnica.com
+IT News
+2026-01-01
+
+IT News
+https://www.itnews.com.au
+IT News
+2026-01-01
+
+TechPowerUp
+https://www.techpowerup.com
+IT News
+2026-08-24
+
+The Verge
+https://www.theverge.com
+IT News
+2026-01-01
+
+Wired
+https://www.wired.com
+IT News
+2026-01-01
+
+Coder Musings
+https://www.codermusings.com
+Learning
+2026-01-01
+
+Making Software
+https://www.makingsoftware.com
+Learning
+2026-01-01
+
+Software Construction (MIT)
+https://web.mit.edu/6.031
+Learning
+2026-01-01
+
+Ambiphone
+https://ambiph.one
+Media
+2026-01-01
+
+Five Books
+https://fivebooks.com
+Media
+2026-01-01
+
+Metacritic: New Albums
+https://www.metacritic.com/browse/albums/release-date/new-releases/date
+Media
+2026-01-01
+
+My Noise
+https://mynoise.net/noiseMachines.php
+Media
+2026-01-01
+
+Pitchfork
+https://pitchfork.com
+Media
+2026-01-01
+
+Spotify
+https://open.spotify.com
+Media
+2026-01-01
+
+TV Guide
+https://www.yourtv.com.au/guide/canberra/
+Media
+2026-01-01
+
+Wallhaven
+https://wallhaven.cc
+Media
+2026-01-01
+
+YouTube
+https://www.youtube.com
+Media
+2026-01-01
+
+BGP Tools
+https://bgp.tools
+Network Tools
+2026-01-01
+
+DNS Leak Test
+https://dnsleaktest.com
+Network Tools
+2026-01-01
+
+DNS Lookup
+https://dnslookup.online
+Network Tools
+2026-01-01
+
+ifconfig
+https://ifconfig.co
+Network Tools
+2026-01-01
+
+MX Toolbox
+https://mxtoolbox.com/SuperTool.aspx
+Network Tools
+2026-01-01
+
+Never SSL
+http://neverssl.com
+Network Tools
+2026-01-01
+
+Port Tester
+http://portquiz.net
+Network Tools
+2026-01-01
+
+Web Check
+https://web-check.xyz
+Network Tools
+2026-01-01
+
+ABC
+https://www.abc.net.au
+News
+2026-01-01
+
+News as Facts
+https://newsasfacts.com
+News
+2026-01-01
+
+New York Times
+https://www.nytimes.com
+News
+2026-01-01
+
+ProPublica
+https://www.propublica.org
+News
+2026-01-01
+
+Rest of World
+https://restofworld.org
+News
+2026-01-01
+
+Vox
+https://www.vox.com
+News
+2026-01-01
+
+Fastmail
+https://app.fastmail.com
+Productivity
+2026-01-01
+
+Keeper
+https://www.keepersecurity.com/?data_region=au
+Productivity
+2026-01-01
+
+Standard Notes
+https://app.standardnotes.com
+Productivity
+2026-01-01
+
+Tweek
+https://tweek.so
+Productivity
+2026-01-01
+
+C Documentation
+https://devdocs.io/c/
+Reference
+2026-01-01
+
+Google Maps
+https://www.google.com/maps
+Reference
+2026-01-01
+
+Linux man Pages
+https://www.mankier.com
+Reference
+2026-01-01
+
+Wikipedia
+https://www.wikipedia.org
+Reference
+2026-01-01
+
+Brave
+https://search.brave.com
+Search
+2026-01-01
+
+Duck Duck Go
+https://duckduckgo.com
+Search
+2026-01-01
+
+Google
+https://www.google.com
+Search
+2026-01-01
+
+Google Search (UDM14)
+https://udm14.com
+Search
+2026-01-01
+
+Marginalia
+https://marginalia-search.com
+Search
+2026-01-01
+
+Mwmbl
+https://mwmbl.org
+Search
+2026-01-01
+
+Yandex
+https://yandex.com
+Search
+2026-01-01
+
+ChatGPT
+https://chatgpt.com
+Slop
+2026-01-01
+
+Claude
+https://claude.ai
+Slop
+2026-01-01
+
+Copilot
+https://copilot.microsoft.com
+Slop
+2026-01-01
+
+Gemini
+https://gemini.google.com/app
+Slop
+2026-01-01
+
+Grok
+http://grok.com
+Slop
+2026-01-01
+
+Kimi
+https://www.kimi.com
+Slop
+2026-01-01
+
+Meta.ai
+https://meta.ai
+Slop
+2026-01-01
+
+Mistral
+https://chat.mistral.ai/chat
+Slop
+2026-01-01
+
+Perplexity
+https://www.perplexity.ai
+Slop
+2026-01-01
+
+Qwen
+https://chat.qwen.ai
+Slop
+2026-01-01
+
+Sigma
+https://app.sigmabrowser.com/chat
+Slop
+2026-01-01
+
+Tropes
+https://tropes.fyi
+Slop
+2026-01-01
+
+Z.ai
+https://chat.z.ai
+Slop
+2026-01-01
+
+ANSI 101
+https://www.ansi101.com
+Tools
+2026-01-01
+
+ASCII Flow
+https://asciiflow.com
+Tools
+2026-01-01
+
+Base64
+https://www.base64.sh
+Tools
+2026-01-01
+
+Compiler Explorer
+https://godbolt.org
+Tools
+2026-01-01
+
+Copy Char
+https://copychar.cc
+Tools
+2026-01-01
+
+C Repl
+https://www.online-cpp.com/online_c_compiler
+Tools
+2026-01-01
+
+Epoch Converter
+https://epoch.vercel.app
+Tools
+2026-01-01
+
+EPUB to AZW
+https://convertio.co/epub-azw3/
+Tools
+2026-01-01
+
+Hemingway
+https://hemingwayapp.com
+Tools
+2026-01-01
+
+Keybr
+https://www.keybr.com
+Tools
+2026-01-01
+
+Send to Kindle
+https://www.amazon.com.au/sendtokindle
+Tools
+2026-01-01
+
+Squoosh
+https://squoosh.app
+Tools
+2026-01-01
+
+Time.fyi
+https://time.fyi
+Tools
+2026-01-01
+
+Typing
+https://typ.ing
+Tools
+2026-08-24
+
+Bolly
+https://brolly.sh/forecast/rug3AbnB
+Weather
+2026-01-01
+
+Forecast: BOM
+http://www.bom.gov.au/act/forecasts/canberra.shtml
+Weather
+2026-01-01
+
+Forecast: YR
+https://www.yr.no/en/forecast/daily-table/2-2172517/Australia/Australian%20Capital%20Territory/Canberra
+Weather
+2026-01-01
+
+Rain Radar
+https://theweatherchaser.com/radar/IDR403-canberra
+Weather
+2026-01-01
+
+Wind Map
+https://earth.nullschool.net
+Weather
+2026-01-01
+
+Fireship
+https://www.youtube.com/@Fireship
+YouTube
+2026-01-01
+
+Never to Small
+https://www.youtube.com/@nevertoosmall
+YouTube
+2026-01-01
+
+Nir Lichtman
+https://www.youtube.com/@nirlichtman
+YouTube
+2026-01-01
+
+Tsoding
+https://www.youtube.com/@Tsoding
+YouTube
+2026-01-01
+
+Tsoding Daily
+https://www.youtube.com/@TsodingDaily
+YouTube
+2026-01-01

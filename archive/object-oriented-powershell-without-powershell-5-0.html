@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Object-Oriented PowerShell without PowerShell 5.0</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Object-Oriented PowerShell without PowerShell 5.0</h1>
+    </header>
+    <main class="archive">
+      <p>PowerShell 5.0 introduces support for object-oriented programming, however, we don't always have the luxury of working on systems where PowerShell 5.0 is installed. When I am stuck using an older version of PowerShell, and I feel the need to write object-oriented code, I use the following approach:</p>
+      <pre><code>function builder() {
+  $instance = new-object psobject
+
+  $instance | add-member -membertype scriptmethod -name property -value {
+    param($name, $value)
+    $this | add-member -membertype noteproperty -name $name -value $value -force
+  }
+
+  $instance | add-member -membertype scriptmethod -name method -value {
+    param($name, $block)
+    $this | add-member -membertype scriptmethod -name $name -value $block -force
+  }
+
+  return $instance
+}
+
+function person {
+  param($name)
+
+  $obj = builder
+
+  $obj.property(&quot;name&quot;, $name)
+
+  $obj.method(&quot;greet&quot;, {
+    param($message)
+    return &quot;{0} {1}.&quot; -f $message, $this.name
+  })
+
+  return $obj
+}
+
+$pete = person &quot;Pete&quot;
+$sara = person &quot;Sara&quot;
+
+$pete.greet(&quot;Hi&quot;)
+$sara.greet(&quot;Hello&quot;)</code></pre>
+      <p>The output of the code is:</p>
+      <pre><code>Hi Pete.
+Hello Sara.</code></pre>
+      <p>Even inheritance is simple:</p>
+      <pre><code>function boy {
+  param($name)
+
+  $obj = person $name
+  $obj.property(&quot;gender&quot;, 'male')
+  return $obj
+}
+
+$fred = boy &quot;Fred&quot;
+$fred.gender</code></pre>
+      <p>The output is:</p>
+      <pre><code>male</code></pre>
+      <footer>
+        <p><span>Published: 2016-07-05</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

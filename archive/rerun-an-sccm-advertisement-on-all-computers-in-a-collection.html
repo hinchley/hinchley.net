@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Rerun an SCCM Advertisement on All Computers in a Collection</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Rerun an SCCM Advertisement on All Computers in a Collection</h1>
+    </header>
+    <main class="archive">
+      <p>Here is a PowerShell code snippet to rerun an advertisement on all computers in a collection. It is dependent on access to a DLL from the <a href="https://github.com/rzander/sccmclictr">Client Centre for Configuration Manager</a>.</p>
+      <p>The code should be run from an elevated prompt on the primary site server.</p>
+      <pre><code>$SiteServer   = &quot;BORIS&quot;
+$SiteCode     = &quot;LAB&quot;
+$CollectionId = &quot;LAB02000&quot;
+$AdvertId     = &quot;LAB20000&quot;
+$PackageId    = &quot;LAB00010&quot;
+$ProgramName  = &quot;Install&quot;
+
+Add-Type -Path &quot;C:\Program Files\SCCM Tools\SCCM Client Center\smsclictr.automation.dll&quot;
+
+gwmi -ComputerName $SiteServer `
+  -Namespace &quot;ROOT\SMS\site_$SiteCode&quot; `
+  -Query &quot;SELECT * FROM SMS_FullCollectionMembership WHERE CollectionID='$($id)' ORDER BY Name&quot; |
+  select Name | %{
+    $computer = $_.Name
+    if (Test-Connection $computer) {
+      (New-Object -TypeName smsclictr.automation.SMSClient($computer)).SoftwareDistribution.RerunAdv($AdvertId, $PackageId, $ProgramName)
+    }
+  }</code></pre>
+      <footer>
+        <p><span>Published: 2016-03-25</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Show a Message on the Windows Logon Screen using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Show a Message on the Windows Logon Screen using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>I recently needed to show a message on the Windows logon screen when a certain condition was satisfied. The solution I devised was to use a scheduled task that would run a PowerShell script at system startup, and whenever the workstation was locked. The script, which would run under the context of the local system account, would check if the condition was satisfied via a registry lookup, and if so, it would then launch a process in the context of the Windows logon/lock screen (also referred to as the "secure desktop").</p>
+      <p>The source code for the PowerShell script is available at the end of this post. The code <em>must be executed under the context of the local system account</em>. You can do this by running a scheduled task as "NT AUTHORITY\SYSTEM", or alternatively, you can grab a copy of the System Internals tool <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a>, and run <code>psexec.exe -i -s powershell.exe</code> to open a PowerShell prompt in the system context.</p>
+      <p>The fully qualified path of the program that is to be run on the logon screen is set via <em>$process</em>. You can also provide optional program arguments via the <em>$arguments</em> variable.</p>
+      <p>For example, to show a simple message dialog on the logon screen, you could create a VBScript named <code>C:\Temp\Hello.vbs</code> with the following content:</p>
+      <pre><code>MsgBox &quot;Yo Dude!&quot;, 0, &quot;Hello&quot;</code></pre>
+      <p>And then set <em>$process</em> to <code>C:\Windows\System32\wscript.exe</code> and <em>$arguments</em> to <code>C:\Temp\Hello.vbs</code>.</p>
+      <p>The guts of this code was taken from an excellent article written by <a href="http://calebdelnay.com">Caleb Delnay</a>. Unfortunately the page has been retired, but you can still dig it up via the <a href="https://web.archive.org/web/20150205131626/http://calebdelnay.com/blog/2012/01/displaying-a-program-on-the-windows-secure-desktop">Internet Archive</a>.</p>
+      <p>The code is written in C#, wrapped in PowerShell, but the .NET code primarily consists of P/Invoke calls into unmanaged Windows APIs.</p>
+      <p>At a high level, the code performs the following tasks:</p>
+      <ol>
+        <li>Retrieves the token associated with the running process (i.e. that of the Local System account).</li>
+        <li>Duplicates the token.</li>
+        <li>Sets the session ID of the new token to session 1 (the ID of the console session).</li>
+        <li>Starts the requested process using the new token, specifically requesting that the new process be activated on the &quot;secure desktop&quot; (Winsta0\Winlogon).</li>
+      </ol>
+      <pre><code>$process = &quot;C:\\Windows\\System32\\calc.exe&quot;
+$arguments = $null
+
+Add-Type -TypeDefinition @&quot;
+using System;
+using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+namespace SecureDesktopLauncher
+{
+  public static class WinApi
+  {
+    [Flags]
+    public enum ACCESS_MASK : uint
+    {
+      DELETE = 0x00010000,
+      READ_CONTROL = 0x00020000,
+      WRITE_DAC = 0x00040000,
+      WRITE_OWNER = 0x00080000,
+      SYNCHRONIZE = 0x00100000,
+
+      STANDARD_RIGHTS_REQUIRED = 0x000f0000,
+
+      STANDARD_RIGHTS_READ = 0x00020000,
+      STANDARD_RIGHTS_WRITE = 0x00020000,
+      STANDARD_RIGHTS_EXECUTE = 0x00020000,
+
+      STANDARD_RIGHTS_ALL = 0x001f0000,
+
+      SPECIFIC_RIGHTS_ALL = 0x0000ffff,
+
+      ACCESS_SYSTEM_SECURITY = 0x01000000,
+
+      MAXIMUM_ALLOWED = 0x02000000,
+
+      GENERIC_READ = 0x80000000,
+      GENERIC_WRITE = 0x40000000,
+      GENERIC_EXECUTE = 0x20000000,
+      GENERIC_ALL = 0x10000000,
+
+      DESKTOP_READOBJECTS = 0x00000001,
+      DESKTOP_CREATEWINDOW = 0x00000002,
+      DESKTOP_CREATEMENU = 0x00000004,
+      DESKTOP_HOOKCONTROL = 0x00000008,
+      DESKTOP_JOURNALRECORD = 0x00000010,
+      DESKTOP_JOURNALPLAYBACK = 0x00000020,
+      DESKTOP_ENUMERATE = 0x00000040,
+      DESKTOP_WRITEOBJECTS = 0x00000080,
+      DESKTOP_SWITCHDESKTOP = 0x00000100,
+
+      WINSTA_ENUMDESKTOPS = 0x00000001,
+      WINSTA_READATTRIBUTES = 0x00000002,
+      WINSTA_ACCESSCLIPBOARD = 0x00000004,
+      WINSTA_CREATEDESKTOP = 0x00000008,
+      WINSTA_WRITEATTRIBUTES = 0x00000010,
+      WINSTA_ACCESSGLOBALATOMS = 0x00000020,
+      WINSTA_EXITWINDOWS = 0x00000040,
+      WINSTA_ENUMERATE = 0x00000100,
+      WINSTA_READSCREEN = 0x00000200,
+
+      WINSTA_ALL_ACCESS = 0x0000037f
+    }
+
+    [Flags]
+    public enum CreateProcessFlags : uint
+    {
+      DEBUG_PROCESS = 0x00000001,
+      DEBUG_ONLY_THIS_PROCESS = 0x00000002,
+      CREATE_SUSPENDED = 0x00000004,
+      DETACHED_PROCESS = 0x00000008,
+      CREATE_NEW_CONSOLE = 0x00000010,
+      NORMAL_PRIORITY_CLASS = 0x00000020,
+      IDLE_PRIORITY_CLASS = 0x00000040,
+      HIGH_PRIORITY_CLASS = 0x00000080,
+      REALTIME_PRIORITY_CLASS = 0x00000100,
+      CREATE_NEW_PROCESS_GROUP = 0x00000200,
+      CREATE_UNICODE_ENVIRONMENT = 0x00000400,
+      CREATE_SEPARATE_WOW_VDM = 0x00000800,
+      CREATE_SHARED_WOW_VDM = 0x00001000,
+      CREATE_FORCEDOS = 0x00002000,
+      BELOW_NORMAL_PRIORITY_CLASS = 0x00004000,
+      ABOVE_NORMAL_PRIORITY_CLASS = 0x00008000,
+      INHERIT_PARENT_AFFINITY = 0x00010000,
+      INHERIT_CALLER_PRIORITY = 0x00020000,
+      CREATE_PROTECTED_PROCESS = 0x00040000,
+      EXTENDED_STARTUPINFO_PRESENT = 0x00080000,
+      PROCESS_MODE_BACKGROUND_BEGIN = 0x00100000,
+      PROCESS_MODE_BACKGROUND_END = 0x00200000,
+      CREATE_BREAKAWAY_FROM_JOB = 0x01000000,
+      CREATE_PRESERVE_CODE_AUTHZ_LEVEL = 0x02000000,
+      CREATE_DEFAULT_ERROR_MODE = 0x04000000,
+      CREATE_NO_WINDOW = 0x08000000,
+      PROFILE_USER = 0x10000000,
+      PROFILE_KERNEL = 0x20000000,
+      PROFILE_SERVER = 0x40000000,
+      CREATE_IGNORE_SYSTEM_DEFAULT = 0x80000000,
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PROCESS_INFORMATION
+    {
+      public IntPtr hProcess;
+      public IntPtr hThread;
+      public int dwProcessId;
+      public int dwThreadId;
+    }
+
+    public enum SECURITY_IMPERSONATION_LEVEL
+    {
+      SecurityAnonymous,
+      SecurityIdentification,
+      SecurityImpersonation,
+      SecurityDelegation
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct STARTUPINFO
+    {
+      public Int32 cb;
+      public string lpReserved;
+      public string lpDesktop;
+      public string lpTitle;
+      public Int32 dwX;
+      public Int32 dwY;
+      public Int32 dwXSize;
+      public Int32 dwYSize;
+      public Int32 dwXCountChars;
+      public Int32 dwYCountChars;
+      public Int32 dwFillAttribute;
+      public Int32 dwFlags;
+      public Int16 wShowWindow;
+      public Int16 cbReserved2;
+      public IntPtr lpReserved2;
+      public IntPtr hStdInput;
+      public IntPtr hStdOutput;
+      public IntPtr hStdError;
+    }
+
+    public enum TOKEN_TYPE
+    {
+      TokenPrimary = 1,
+      TokenImpersonation
+    }
+
+    public enum TOKEN_INFORMATION_CLASS : int
+    {
+      TokenUser = 1,
+      TokenGroups,
+      TokenPrivileges,
+      TokenOwner,
+      TokenPrimaryGroup,
+      TokenDefaultDacl,
+      TokenSource,
+      TokenType,
+      TokenImpersonationLevel,
+      TokenStatistics,
+      TokenRestrictedSids,
+      TokenSessionId,
+      TokenGroupsAndPrivileges,
+      TokenSessionReference,
+      TokenSandBoxInert,
+      TokenAuditPolicy,
+      TokenOrigin,
+      MaxTokenInfoClass
+    };
+
+    public const int READ_CONTROL = 0x00020000;
+    public const int STANDARD_RIGHTS_REQUIRED = 0x000F0000;
+    public const int STANDARD_RIGHTS_READ = READ_CONTROL;
+    public const int STANDARD_RIGHTS_WRITE = READ_CONTROL;
+    public const int STANDARD_RIGHTS_EXECUTE = READ_CONTROL;
+    public const int STANDARD_RIGHTS_ALL = 0x001F0000;
+    public const int SPECIFIC_RIGHTS_ALL = 0x0000FFFF;
+    public const int TOKEN_ASSIGN_PRIMARY = 0x0001;
+    public const int TOKEN_DUPLICATE = 0x0002;
+    public const int TOKEN_IMPERSONATE = 0x0004;
+    public const int TOKEN_QUERY = 0x0008;
+    public const int TOKEN_QUERY_SOURCE = 0x0010;
+    public const int TOKEN_ADJUST_PRIVILEGES = 0x0020;
+    public const int TOKEN_ADJUST_GROUPS = 0x0040;
+    public const int TOKEN_ADJUST_DEFAULT = 0x0080;
+    public const int TOKEN_ADJUST_SESSIONID = 0x0100;
+
+    public const int TOKEN_ALL_ACCESS_P =
+      STANDARD_RIGHTS_REQUIRED |
+      TOKEN_ASSIGN_PRIMARY |
+      TOKEN_DUPLICATE |
+      TOKEN_IMPERSONATE |
+      TOKEN_QUERY |
+      TOKEN_QUERY_SOURCE |
+      TOKEN_ADJUST_PRIVILEGES |
+      TOKEN_ADJUST_GROUPS |
+      TOKEN_ADJUST_DEFAULT;
+
+    public const int TOKEN_ALL_ACCESS =
+      TOKEN_ALL_ACCESS_P |
+      TOKEN_ADJUST_SESSIONID;
+
+    public const int TOKEN_READ =
+      STANDARD_RIGHTS_READ |
+      TOKEN_QUERY;
+
+    public const int TOKEN_WRITE =
+      STANDARD_RIGHTS_WRITE |
+      TOKEN_ADJUST_PRIVILEGES |
+      TOKEN_ADJUST_GROUPS |
+      TOKEN_ADJUST_DEFAULT;
+
+    public const int TOKEN_EXECUTE = STANDARD_RIGHTS_EXECUTE;
+
+    [DllImport(&quot;advapi32.dll&quot;, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool OpenProcessToken(
+      IntPtr ProcessHandle,
+      UInt32 DesiredAccess,
+      out IntPtr TokenHandle);
+
+    [DllImport(&quot;advapi32.dll&quot;, SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern bool CreateProcessAsUser(
+      IntPtr hToken,
+      string lpApplicationName,
+      string lpCommandLine,
+      IntPtr lpProcessAttributes,
+      IntPtr lpThreadAttributes,
+      bool bInheritHandles,
+      uint dwCreationFlags,
+      IntPtr lpEnvironment,
+      string lpCurrentDirectory,
+      ref STARTUPINFO lpStartupInfo,
+      out PROCESS_INFORMATION lpProcessInformation);
+
+    [DllImport(&quot;advapi32.dll&quot;, CharSet = CharSet.Auto, SetLastError = true)]
+    public extern static bool DuplicateTokenEx(
+      IntPtr hExistingToken,
+      uint dwDesiredAccess,
+      IntPtr lpTokenAttributes,
+      SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
+      TOKEN_TYPE TokenType,
+      out IntPtr phNewToken);
+
+    [DllImport(&quot;advapi32.dll&quot;, SetLastError = true)]
+    public static extern bool SetTokenInformation(
+      IntPtr TokenHandle,
+      TOKEN_INFORMATION_CLASS TokenInformationClass,
+      ref UInt32 TokenInformation,
+      UInt32 TokenInformationLength);
+
+    [DllImport(&quot;user32.dll&quot;, SetLastError = true)]
+    public static extern bool LockWorkStation();
+
+    [DllImport(&quot;wtsapi32.dll&quot;, SetLastError = true)]
+    public static extern bool WTSQueryUserToken(
+      UInt32 sessionId,
+      out IntPtr Token);
+
+    [DllImport(&quot;kernel32.dll&quot;)]
+    public static extern uint WTSGetActiveConsoleSessionId();
+  }
+
+  public static class Program
+  {
+    public static void Launch(string process, string arguments = &quot;&quot;)
+    {
+      string currentDirectory = Path.GetDirectoryName(process);
+
+      IntPtr currentToken = IntPtr.Zero;
+      IntPtr newToken = IntPtr.Zero;
+      IntPtr interactiveUserToken = IntPtr.Zero;
+
+      UInt32 dwSessionId = WinApi.WTSGetActiveConsoleSessionId();
+
+      WinApi.OpenProcessToken(
+        Process.GetCurrentProcess().Handle,
+        WinApi.TOKEN_DUPLICATE,
+        out currentToken);
+
+      WinApi.DuplicateTokenEx(
+        currentToken,
+        (uint)WinApi.ACCESS_MASK.GENERIC_ALL,
+        IntPtr.Zero,
+        WinApi.SECURITY_IMPERSONATION_LEVEL.SecurityImpersonation,
+        WinApi.TOKEN_TYPE.TokenImpersonation,
+        out newToken);
+
+      WinApi.SetTokenInformation(
+        newToken,
+        WinApi.TOKEN_INFORMATION_CLASS.TokenSessionId,
+        ref dwSessionId,
+        sizeof(UInt32));
+
+      if (WinApi.WTSQueryUserToken(
+        WinApi.WTSGetActiveConsoleSessionId(),
+        out interactiveUserToken))
+      {
+        WinApi.STARTUPINFO siInteractive = new WinApi.STARTUPINFO();
+
+        siInteractive.cb = Marshal.SizeOf(siInteractive);
+        siInteractive.lpDesktop = @&quot;Winsta0\default&quot;;
+
+        WinApi.PROCESS_INFORMATION piInteractive =
+          new WinApi.PROCESS_INFORMATION();
+
+        WinApi.CreateProcessAsUser(
+          interactiveUserToken,
+          null,
+          &quot;rundll32.exe user32.dll,LockWorkStation&quot;,
+          IntPtr.Zero,
+          IntPtr.Zero,
+          false,
+          (uint)WinApi.CreateProcessFlags.CREATE_NEW_CONSOLE |
+            (uint)WinApi.CreateProcessFlags.INHERIT_CALLER_PRIORITY,
+          IntPtr.Zero,
+          currentDirectory,
+          ref siInteractive,
+          out piInteractive);
+      }
+      else
+      {
+        WinApi.LockWorkStation();
+      }
+
+      System.Threading.Thread.Sleep(1000);
+
+      WinApi.STARTUPINFO si = new WinApi.STARTUPINFO();
+
+      si.cb = Marshal.SizeOf(si);
+      si.lpDesktop = @&quot;Winsta0\Winlogon&quot;;
+
+      WinApi.PROCESS_INFORMATION pi = new WinApi.PROCESS_INFORMATION();
+
+      string commandline = &quot;\&quot;&quot; + process + &quot;\&quot; &quot; + arguments;
+
+      WinApi.CreateProcessAsUser(
+        newToken,
+        null,
+        commandline,
+        IntPtr.Zero,
+        IntPtr.Zero,
+        true,
+        (uint)WinApi.CreateProcessFlags.CREATE_NEW_CONSOLE |
+          (uint)WinApi.CreateProcessFlags.INHERIT_CALLER_PRIORITY,
+        IntPtr.Zero,
+        currentDirectory,
+        ref si,
+        out pi);
+    }
+  }
+}
+&quot;@
+
+[SecureDesktopLauncher.Program]::Launch($process, $arguments)</code></pre>
+      <footer>
+        <p><span>Published: 2016-07-09</span> <span>Last Updated: 2016-07-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

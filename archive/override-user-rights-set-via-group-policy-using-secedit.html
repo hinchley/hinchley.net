@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Override User Rights set via Group Policy using SecEdit</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Override User Rights set via Group Policy using SecEdit</h1>
+    </header>
+    <main class="archive">
+      <p>You are a local administrator on a server, and you are about to install an application. The installation package requires a specific user right, and guess what, you don't have it. To make matters worse, the required user right is managed via group policy, and you don't have the permissions needed to change it. Wouldn't it be great if you could define a local override for the user right set via group policy? Unfortunately, this isn't possible using the Local Security Policy editor (secpol.msc). Fear not. There is a quick solution. Open an elevated command prompt and run the following command to export the currently configured user rights:</p>
+      <pre><code>secedit /export /cfg policy.inf /areas USER_RIGHTS</code></pre>
+      <p>Now edit <em>policy.inf</em> and grant yourself the required rights. For example, let's say the <em>Debug Programs</em> user right is cleared via group policy (i.e. not assigned to anyone). To grant the right to the local administrators group, add the following line to the policy file:</p>
+      <pre><code>SeDebugPrivilege = *S-1-5-32-544</code></pre>
+      <p>Where <em>SeDebugPrivilege</em> is the identifier for the <em>Debug Programs</em> user right, and <em>S-1-5-32-544</em> is the SID of the local administrators group.</p>
+      <p>After you have made the required changes, you can use the following command to apply the new user rights:</p>
+      <pre><code>secedit /configure /db secedit.sdb /cfg policy.inf /overwrite /areas USER_RIGHTS</code></pre>
+      <p>And that's it. If you now run <em>secpol.msc</em> you will see the <em>Debug Programs</em> user right has been assigned to the local administrators group.</p>
+      <p>Note: While this approach is useful for temporarily overriding the user rights set via group policy, the changes made via <em>secedit</em> will not be permanent; the user rights will be restored to their previous values during the next group policy refresh cycle.</p>
+      <footer>
+        <p><span>Published: 2015-10-27</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

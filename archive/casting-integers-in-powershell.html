@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Casting Integers in PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Casting Integers in PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>I recently got caught out by a difference in behaviour between .NET and PowerShell when casting integers.</p>
+      <p>Take the following C# code sample; it initialises an unsigned 16 bit integer with the maximum possible value of 65,535, adds 1, and casts the result as another unsigned 16 bit integer. The result is 0 (the overflow is discarded).</p>
+      <pre><code>UInt16 max = UInt16.MaxValue;
+(UInt16)(max + 1);</code></pre>
+      <p>Here is the equivalent code in PowerShell:</p>
+      <pre><code>[uint16]$max = [uint16]::maxvalue
+[uint16]($max + 1)</code></pre>
+      <p>However, in this case, the result is not 0. Instead, the following error is returned: <em>Cannot convert value "65536" to type "System.UInt16". Error: "Value was either too large or too small for a UInt16."</em></p>
+      <p>To mirror the C# behaviour in PowerShell, you could try this instead:</p>
+      <pre><code>[uint16]$max = [uint16]::maxvalue
+[uint16]($max + 1 -band 0xffff)</code></pre>
+      <p>The "binary AND" operation truncates the value to 2 bytes, discarding the overflow before attempting to cast the result, and thereby avoiding the previous error.</p>
+      <footer>
+        <p><span>Published: 2016-07-09</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

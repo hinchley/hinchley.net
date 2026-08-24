@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Using a Signed PowerShell Script within a Configuration Item in SCCM</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Using a Signed PowerShell Script within a Configuration Item in SCCM</h1>
+    </header>
+    <main class="archive">
+      <p>If you are trying to create a configuration item in SCCM that uses PowerShell scripts for discovery and remediation, you might encounter an issue if your environment requires all scripts to be digitally signed. You could try configuring the PowerShell execution policy within the <em>Computer Agent</em> section of a <em>Client Settings</em> policy, but this approach won't work if the requirement for PowerShell scripts to be signed is enforced via group policy (as SCCM won't be able to override the group policy configuration).</p>
+      <p>Creating a discovery script is reasonably straight forward. You write the code, sign it, and then add it to the configuration item. The only catch is that you cannot paste the content of the signed script into the <em>Edit Discovery Script</em> dialog; instead, you must add the script using the <em>Open</em> button.</p>
+      <p>This is necessary, as the PowerShell script will be stored in the Configuration Manager database inside an XML document. According to the <a href="http://www.w3.org/TR/REC-xml/#sec-line-ends">XML standard</a>, new lines within an XML element must not contain carriage returns (i.e. Windows line-endings are not supported). Unfortunately, the signature block of a signed PowerShell script must contain Windows line-endings. Microsoft appear to have gotten around this limitation by storing a Base-64 encoded blob of the discovery script (along with the raw script) within the XML document. By encoding the script, the Windows line-endings can be retained.</p>
+      <p>When you use the “Open” button to add a discovery script to a configuration item in Configuration Manger, the Base-64 encoded blob is automatically generated. Unfortunately, this doesn’t work for the remediation script (this appears to be a bug in the current release of Configuration Manager - I've only tested on 1602). Fortunately, you can work around this issue by manually amending the remediation script to include a Base-64 encoded blob of itself.</p>
+      <p>Let's say you have created a signed remediation script named <code>C:\Scripts\Remediate.ps1</code>. You can append a Base-64 encoded copy of the script to itself using the following PowerShell code:</p>
+      <pre><code>$script = &quot;c:\scripts\remediate.ps1&quot;
+
+$starttag = &quot;
+
+# ENCODEDSCRIPT # Begin Configuration Manager encoded script block # &quot;
+
+$endtag = &quot; # ENCODEDSCRIPT# End Configuration Manager encoded script block
+&quot;
+
+$code = get-content -path $script -raw
+$bytes = get-content -path $script -encoding byte -raw
+
+$builder = new-object system.text.stringbuilder
+$builder.append($code)
+$builder.append($starttag)
+$builder.append([convert]::tobase64string($bytes))
+$builder.append($endtag)
+
+$builder.tostring() | set-content $script</code></pre>
+      <p>Having modified the remediation script, you can now paste it directly into the <em>Edit Remediation Script</em> dialog (or use the <em>Open</em> button if you prefer).</p>
+      <p>As a side note, you can inspect how the scripts are stored in the Configuration Manager database by using the <em>Get-CMConfigurationItem</em> cmdlet. For example, if the configuration item is named "Test Item", you can use the following code to dump the XML document containing the discovery script:</p>
+      <pre><code>$name = &quot;Test Item&quot;
+$xml = [xml](get-cmconfigurationitem -name $name).SDMPackageXML
+
+$ns = new-object system.xml.xmlnamespacemanager($xml.nametable)
+$ns.addnamespace(&quot;ns&quot;, $xml.documentelement.namespaceuri)
+$node = $xml.desiredconfigurationdigest.selectsinglenode(&quot;//ns:DiscoveryScriptBody&quot;, $ns)
+
+$node.innerxml</code></pre>
+      <p>To extract the remediation script, just update the code to search for the <em>RemediationScriptBody</em> tag.</p>
+      <footer>
+        <p><span>Published: 2016-08-15</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

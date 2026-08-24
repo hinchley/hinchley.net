@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create a Web Server Certificate from the Command Line</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create a Web Server Certificate from the Command Line</h1>
+    </header>
+    <main class="archive">
+      <p>A quick guide on creating a web server certificate from the command line using an enterprise root certificate authority. This example creates a cert named <em>web.lab.hinchley.net</em> with a SAN of <em>code.lab.hinchley.net</em>. The certificate authority is hosted on <em>ca.lab.hinchley.net</em> and is named <em>Lab Enterprise Certificate Authority</em>.</p>
+      <p>Start by creating a file named <em>cert.inf</em> with the following content:</p>
+      <pre><code>[Version]
+Signature = &quot;$Windows NT$&quot;
+[NewRequest]
+Subject = &quot;CN=web.lab.hinchley.net&quot;
+Exportable = TRUE
+KeyLength = 4096
+KeySpec = 1 ; required for encryption
+KeyUsage = 0xA0 ; digital signature, key encipherment
+MachineKeySet = TRUE ; key belongs to the local computer account
+ProviderName = &quot;Microsoft RSA SChannel Cryptographic Provider&quot;
+ProviderType = 12
+RequestType = CMC
+[RequestAttributes]
+CertificateTemplate = &quot;WebServer&quot;
+[Extensions]
+2.5.29.17 = &quot;{text}dns=web.lab.hinchley.net&amp;code.lab.hinchley.net&quot;
+[EnhancedKeyUsageExtension]
+OID=1.3.6.1.5.5.7.3.1 ; server authentication</code></pre>
+      <p>Next, run the following commands to generate the cert request, submit it to the CA, and install the certificate:</p>
+      <pre><code>certreq -new cert.inf cert.req
+certreq -submit -config &quot;ca.lab.hinchley.net\Lab Enterprise Certificate Authority&quot; cert.req cert.cer
+certreq –accept cert.cer</code></pre>
+      <footer>
+        <p><span>Published: 2017-04-11</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

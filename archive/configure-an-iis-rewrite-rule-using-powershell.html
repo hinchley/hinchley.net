@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Configure an IIS Rewrite Rule using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Configure an IIS Rewrite Rule using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>In this short post I will demonstrate how you can rewrite requests to resources hosted on an IIS web server.</p>
+      <p>Firstly, you need to download and install the <a href="https://www.iis.net/downloads/microsoft/url-rewrite">IIS rewrite module</a> from Microsoft. To install the x64 version of the module, run:</p>
+      <pre><code>msiexec.exe /i rewrite_amd64.msi /qb</code></pre>
+      <p>The next step is to create a rewrite rule. As an example, the following PowerShell script will create a rule named <em>XXXX</em> that will rewrite any request for "foo.txt", from any client with an IP address in the range 100.0.0.1 - 100.0.0.254, to "bar.txt":</p>
+      <pre><code>$name = 'XXXX'
+$inbound = 'foo\.txt'
+$outbound = 'bar.txt'
+$range = '100\.0\.0\.\d+'
+$site = 'IIS:\Sites\Default Web Site'
+$root = 'system.webServer/rewrite/rules'
+$filter = &quot;{0}/rule[@name='{1}']&quot; -f $root, $name
+
+Add-WebConfigurationProperty -PSPath $site -filter $root -name '.' -value @{name=$name; patterSyntax='Regular Expressions'; stopProcessing='False'}
+Set-WebConfigurationProperty -PSPath $site -filter &quot;$filter/match&quot; -name 'url' -value $inbound
+Set-WebConfigurationProperty -PSPath $site -filter &quot;$filter/conditions&quot; -name '.' -value @{input='{REMOTE_ADDR}'; matchType='0'; pattern=$range; ignoreCase='True'; negate='False'}
+Set-WebConfigurationProperty -PSPath $site -filter &quot;$filter/action&quot; -name 'type' -value 'Rewrite'
+Set-WebConfigurationProperty -PSPath $site -filter &quot;$filter/action&quot; -name 'url' -value $outbound</code></pre>
+      <p>This is what the resultant rule should look like in IIS:</p>
+      <img src="../static/IIS.png" alt="Inbound Rewrite Rule" />
+      <footer>
+        <p><span>Published: 2016-11-08</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

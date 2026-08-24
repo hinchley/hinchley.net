@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Delegate Hyper-V Permissions using AzMan with PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Delegate Hyper-V Permissions using AzMan with PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>In the good old days it was possible to delegate access to Hyper-V using AzMan. Unfortunately, support for AzMan was deprecated with the release of Hyper-V 2012, and nuked entirely in 2012 R2. We are now left with two rather unsavoury options: we can grant god-level access via the <em>Hyper-V Administrators</em> group, or we can use the fine-grained authorisation model offered by Virtual Machine Manager (VMM). I don't find either option inspiring.</p>
+      <p>Anyway, if you are still living in the past (i.e. Hyper-V 2012 or earlier), and find the need to configure "read only" access to a host using AzMan, the following PowerShell code will do the trick.</p>
+      <p>The code assumes the existence of an Active Directory group named <em>LAB\hyperv-readers</em>, and should be executed on a Hyper-V host from an elevated PowerShell prompt.</p>
+      <pre><code>[System.Reflection.Assembly]::LoadWithPartialName(&quot;Microsoft.Interop.Security.AzRoles, Version=2.0.0.0, publicKeyToken=31bf3856ad364e35, culture=neutral&quot;)
+
+$store   = &quot;msxml://C:\ProgramData\Microsoft\Windows\Hyper-V\InitialStore.xml&quot;
+$readers = &quot;LAB\hyperv-readers&quot;
+
+$azman = New-Object Microsoft.Interop.Security.AzRoles.AzAuthorizationStoreClass
+$azman.Initialize(0, $store, $null)
+
+$app = $azman.OpenApplication(&quot;Hyper-V Services&quot;, $null)
+
+$task = $app.CreateTask(&quot;Reader&quot;, $null)
+$task.IsRoleDefinition = $true
+$task.AddOperation(&quot;Allow Input to Virtual Machine&quot;, $null)
+$task.AddOperation(&quot;Allow Output from Virtual Machine&quot;, $null)
+$task.AddOperation(&quot;Read Service Configuration&quot;, $null)
+$task.AddOperation(&quot;View External Ethernet Ports&quot;, $null)
+$task.AddOperation(&quot;View Internal Ethernet Ports&quot;, $null)
+$task.AddOperation(&quot;View LAN Endpoints&quot;, $null)
+$task.AddOperation(&quot;View Switch Ports&quot;, $null)
+$task.AddOperation(&quot;View Switches&quot;, $null)
+$task.AddOperation(&quot;View Virtual Machine Configuration&quot;, $null)
+$task.AddOperation(&quot;View Virtual Switch Management Service&quot;, $null)
+$task.AddOperation(&quot;View VLAN Settings&quot;, $null)
+$task.Submit(0, $null)
+
+[System.Runtime.InteropServices.Marshal]::ReleaseComObject($task) | Out-Null
+
+$role = $app.CreateRole(&quot;Reader&quot;, $null)
+$role.AddRoleDefinition(&quot;Reader&quot;, $null)
+$role.AddMemberName($readers, $null)
+$role.Submit(0, $null)
+
+[System.Runtime.InteropServices.Marshal]::ReleaseComObject($role) | Out-Null
+[System.Runtime.InteropServices.Marshal]::ReleaseComObject($app) | Out-Null
+[System.Runtime.InteropServices.Marshal]::ReleaseComObject($azman) | Out-Null</code></pre>
+      <footer>
+        <p><span>Published: 2015-10-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

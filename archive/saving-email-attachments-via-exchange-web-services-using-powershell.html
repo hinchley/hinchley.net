@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Saving Email Attachments via Exchange Web Services using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Saving Email Attachments via Exchange Web Services using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>This is a quick post demonstrating how you can save email attachments from an Exchange mailbox using PowerShell. The code recursively searches all folders under the root of a mailbox for items received from a specific email address, and then saves any associated attachments to a folder on the local file system.</p>
+      <p>The code uses Exchange Web Services (EWS), and must be run under the context of an account with impersonation rights on the target mailbox. Also the code must be run from a computer where the Exchange Management Tools are installed.</p>
+      <pre><code># the target mailbox.
+$mailbox = 'someone@xyz.com'
+
+# only process emails received from this address.
+$sender = 'joe@bloggs.com'
+
+# the exchange web services url.
+$url = 'https://mail/EWS/Exchange.asmx'
+
+# the folder under which the attachments will be saved.
+$path = 'C:\Temp'
+
+# how many items to process in each folder.
+$limit = 999
+
+Import-Module 'C:\Program Files\Microsoft\Exchange Server\V15\Bin\Microsoft.Exchange.WebServices.dll'
+
+$version = [Microsoft.Exchange.WebServices.Data.ExchangeVersion]::Exchange2016
+$service = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService($version)
+
+# create the directory for saving attachments (if it doesn't exist).
+if (! (Test-Path $path)) { New-Item -Type Directory $path -Force }
+
+$service.Url = $url
+
+# prompt for the credentials of an account with impersonation rights to the target mailbox.
+$creds = Get-Credential
+$service.Credentials = New-Object System.Net.NetworkCredential($creds.Username.ToString(), $creds.GetNetworkCredential().Password.ToString())
+
+$service.ImpersonatedUserId = New-Object Microsoft.Exchange.WebServices.Data.ImpersonatedUserId([Microsoft.Exchange.WebServices.Data.ConnectingIdType]::SmtpAddress, $mailbox)
+
+# we will search recursively under the root of the mailbox.
+$root = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::MsgFolderRoot)
+$root = [Microsoft.Exchange.WebServices.Data.Folder]::Bind($service, $root)
+
+$folders = New-Object Microsoft.Exchange.WebServices.Data.FolderView($limit)
+$items = New-Object Microsoft.Exchange.WebServices.Data.ItemView($limit)
+
+# construct the search filter.
+$search = New-Object Microsoft.Exchange.WebServices.Data.SearchFilter+IsEqualTo([Microsoft.Exchange.WebServices.Data.EmailMessageSchema]::Sender, $sender)
+
+foreach ($folder in $root.FindFolders($folders)) {
+  # skip calendars, tasks, etc.
+  if ($folder.FolderClass -ne 'IPF.Note') { continue }
+
+  # also skip folders that match specific names.
+  if ($folder.DisplayName -match 'Foo|Bar') { continue }
+
+  $service.FindItems($folder.id, $search, $items) | %{
+    if ($_.HasAttachments) {
+      $_.Load()
+
+      foreach ($attachment in $_.Attachments) {
+        $attachment.Load()
+
+        # build the path for saving the attachment.
+        $path = Join-Path $savePath $attachment.Name.ToString()
+
+        # finally, save the attachment.
+        $file = New-Object System.IO.FileStream($path, [System.IO.FileMode]::Create)
+        $file.Write($attachment.Content, 0, $attachment.Content.Length)
+        $file.Close()
+      }
+    }
+  }
+}</code></pre>
+      <footer>
+        <p><span>Published: 2018-06-01</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

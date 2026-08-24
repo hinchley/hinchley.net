@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create a Collection in SCCM with a Weekly Refresh Cycle</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create a Collection in SCCM with a Weekly Refresh Cycle</h1>
+    </header>
+    <main class="archive">
+      <p>The following commands will create a new device collection in SCCM 2012 (or later) with the name <em>Foo</em> that is configured for incremental updates, and for a weekly full refresh (on Saturday at 9pm):</p>
+      <pre><code>$Schedule = New-CMSchedule -Start &quot;01/01/2016 9:00 PM&quot; -DayOfWeek Saturday -RecurCount 1
+$Collection = New-CMDeviceCollection -Name Foo -LimitingCollectionName &quot;All Systems&quot; -RefreshType Both -RefreshSchedule $Schedule</code></pre>
+      <p>Similarly, to create a collection with a daily full refresh (at 11pm), and no incremental updates:</p>
+      <pre><code>$Schedule = New-CMSchedule -Start &quot;01/01/2016 11:00 PM&quot; -RecurInterval Days -RecurCount 1
+$Collection = New-CMDeviceCollection -Name Bar -LimitingCollectionName &quot;All Systems&quot; -RefreshType Periodic -RefreshSchedule $Schedule</code></pre>
+      <footer>
+        <p><span>Published: 2016-01-19</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

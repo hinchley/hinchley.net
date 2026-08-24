@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Junctions and Symbolic Links</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Junctions and Symbolic Links</h1>
+    </header>
+    <main class="archive">
+      <p>Junction points and symbolic links are features of <a href="https://en.wikipedia.org/wiki/NTFS">NTFS</a> that permit file system resources to be accessed via alternate paths.</p>
+      <p>Junctions are implemented via reparse points (a collection of custom data elements associated with a file or folder). The feature was introduced in NTFS 3.0 (which shipped with Windows 2000). The simplest way to create a junction in Windows Vista, Windows Server 2003, or earlier, is via a utility within the System Internals suite named <a href="http://technet.microsoft.com/en-us/sysinternals/bb896768" title="Junction.exe at Technet">junction.exe</a>. For example, this command will create a junction point that allows the <code>c:\target</code> directory to be accessed as <code>c:\alias</code>:</p>
+      <pre><code>junction.exe c:\alias c:\target
+</code></pre>
+      <p>A junction point is quite different from a shortcut. A shortcut is a distinct file (with its own unique properties) that links to another file or directory. A junction acts like a pseudonym, and unlike a shortcut, provides transparent access to the target, even via a command prompt.</p>
+      <p>It is possible to create a junction point in Windows 7, Windows 2008, or later, using the builtin utility <em>mklink</em>. For example, to emulate the previous command:</p>
+      <pre><code>mklink /J c:\alias c:\target
+</code></pre>
+      <p>The <em>mklink</em> utility can also be used to create symbolic links. A symbolic link is similar to a junction, but there are some critical differences. A junction can only point to a location on the local system, whereas a symbolic link can reference a remote network path. For example, you could create a symbolic link from <code>c:\alias</code> to <code>\\remote\c$\target</code>.</p>
+      <p>Another difference between a junction point and a symbolic link relates to the way they are resolved. A junction is resolved by the system on which it is defined, whereas a symbolic link is resolved at the client. For example, if <code>c:\alias</code> is a junction point to the directory <code>c:\target</code>, when requested via <code>\\remote\c$\alias</code>, access will be granted to the content within <code>c:\target</code> on the remote computer. However, if <code>c:\alias</code> is created as a symbolic link, a request to <code>\\remote\c$\alias</code> will likely result in an error, as the link will be resolved to <code>c:\target</code> on the <em>local</em> computer (which may not exist).</p>
+      <p>It is possible to list the junction points and symbolic links within a directory by using the following command (the <code>/aL</code> switch asks <em>dir</em> to only display reparse points):</p>
+      <pre><code>dir /aL
+</code></pre>
+      <p>For example, from the <code>c:\users</code> directory on a Windows 8 computer:</p>
+      <pre><code>26/07/2012  &lt;SYMLINKD&gt;  All Users [C:\ProgramData]
+26/07/2012  &lt;DIR&gt;       Default
+26/07/2012  &lt;JUNCTION&gt;  Default User [C:\Users\Default]
+</code></pre>
+      <p>There are two types of symbolic link: a soft-link and a hard-link. Unlike a junction, which can only access a directory, a hard-link can only access a file, and a soft-link can access either a file or directory. Note: Junctions and hard-links can be created without elevated privileges; soft-links require elevation.</p>
+      <p>A junction, like a soft-link, is easily differentiated from its target. For example, a soft-link in Windows Explorer is displayed with a shortcut overlay and a zero byte size. A hard-link, and the file from which it was created, are treated as equivalent links to the same content, and cannot be distinguished.</p>
+      <p>If <em>mklink</em> is run without any switches, it will create a soft-link to a file. For example, the following command will create a new symbolic link named <em>foo.txt</em> that references <em>bar.txt</em>. The file <em>bar.txt</em> does not need to exist prior to running the command, in which case <em>foo.txt</em> will point to an unresolved target.</p>
+      <pre><code>mklink foo.txt bar.txt
+</code></pre>
+      <p>The <code>/D</code> switch can be used to create a soft-link to a directory:</p>
+      <pre><code>mklink /D c:\temp\alias c:\temp\target
+</code></pre>
+      <p>The <code>/H</code> switch can be used to create a hard-link to a file. The command can be executed without elevated privileges, and the target file must already exist (and it must be on the same volume).</p>
+      <pre><code>mklink /H this.txt that.txt
+</code></pre>
+      <p>An interesting aside on hard-links: size and attribute information is only updated on the file through which a change was made. For example, adding content to <em>this.txt</em> will not immediately change the reported size of <em>that.txt</em>. However, upon accessing the properties of <em>that.txt</em> - which can be triggered simply by selecting the file in Explorer - the attribute data is refreshed.</p>
+      <p>In NTFS, the attributes of a file are stored in an <em>inode</em>. When you create a file, you create an inode, and separate from it, a filename that points to the inode. When you create a hard-link, you are effectively creating another filename pointer to the same inode. The inode maintains a counter of inbound references, and when all filename links are deleted, the inode (and the associated file content) are also purged. Hence, the parent-child relationship that exists with junction points and soft-links does not apply to hard-links. If you delete the target of a junction or a soft-link, the data is lost; however, until you delete all filename references (hard-links) to an inode, the data will persist.</p>
+      <footer>
+        <p><span>Published: 2013-10-31</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

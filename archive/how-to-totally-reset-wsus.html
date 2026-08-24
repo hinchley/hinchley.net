@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: How to Totally Reset WSUS</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: How to Totally Reset WSUS</h1>
+    </header>
+    <main class="archive">
+      <p>I recently needed to reset the configuration, metadata, and content of a WSUS server. I wanted to wipe the entire slate clean, and start again. This is the process I followed:</p>
+      <p>Stopped the WSUS service using the following PowerShell command:</p>
+      <pre><code>stop-service WsusService</code></pre>
+      <p>Uninstalled WSUS:</p>
+      <pre><code>Uninstall-WindowsFeature -Name UpdateServices-Services, UpdateServices-DB -IncludeManagementTools</code></pre>
+      <p>Rebooted the server.</p>
+      <p>Deleted the WSUS content folder:</p>
+      <pre><code>rmdir /s C:\WSUS\WSUSContent</code></pre>
+      <p>Deleted the WSUS binaries:</p>
+      <pre><code>mdir /s C:\Program Files\Update Services</code></pre>
+      <p>Connected to the local SQL Express 2008 instance:</p>
+      <pre><code>sqlcmd -E -S localhost\WSUS</code></pre>
+      <p>Listed the databases:</p>
+      <pre><code>exec sp_databases; go</code></pre>
+      <p>Dropped the WSUS database:</p>
+      <pre><code>drop database [SUSDB]; go</code></pre>
+      <p>Listed the databases again to confirm <em>SUSDB</em> was removed, then switched back to PowerShell and reinstalled WSUS:</p>
+      <pre><code>Add-WindowsFeature -Name UpdateServices-Services, UpdateServices-DB -IncludeManagementTools</code></pre>
+      <p>At this point, the <code>C:\Program Files\Update Services\Tools</code> folder was missing. Strange. Ran the system file checker to scan the server for errors:</p>
+      <pre><code>sfc /scannow</code></pre>
+      <p>Following the completion of the scan, the <em>Tools</em> directory was present.</p>
+      <p>Ran the following PowerShell commands to complete the configuration of WSUS:</p>
+      <pre><code>$WSUSContentFolder = &quot;C:\WSUS&quot;
+$WSUSUtil = &quot;$Env:ProgramFiles\Update Services\Tools\WsusUtil.exe&quot;
+$WSUSUtilArgs = &quot;POSTINSTALL CONTENT_DIR=$WSUSContentFolder SQL_INSTANCE_NAME=`&quot;$env:computername\WSUS`&quot;&quot;
+Start-Process -FilePath $WSUSUtil -ArgumentList $WSUSUtilArgs -NoNewWindow -Wait</code></pre>
+      <p>At this point I was able to launch the WSUS Administration Console and commence the configuration of WSUS.</p>
+      <footer>
+        <p><span>Published: 2015-12-07</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

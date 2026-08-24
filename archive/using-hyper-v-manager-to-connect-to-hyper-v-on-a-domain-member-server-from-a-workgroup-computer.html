@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Using Hyper-V Manager to Connect to Hyper-V on a Domain Member Server from a Workgroup Computer</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Using Hyper-V Manager to Connect to Hyper-V on a Domain Member Server from a Workgroup Computer</h1>
+    </header>
+    <main class="archive">
+      <p>Let's say you have a Windows Server 2016 domain member server running Hyper-V, and you want to connect to the server via the Hyper-V management console from a workgroup computer. Assuming you've already installed the Hyper-V management tools on the client, this is what you need to do.</p>
+      <p>Firstly, on the server run: <em>Enable-WSManCredSSP -Role server</em></p>
+      <p>And now, on the client:</p>
+      <ul>
+        <li>Run <em>dcomcnfg.exe</em>, and under <em>Component Services / Computers</em>, get the properties of <em>My Computer</em>, and from the <em>COM Security</em> tab, under <em>Access Limits</em>, click <em>Edit Limits</em> and grant <em>ANONYMOUS LOGON</em> both <em>Local Access</em> and <em>Remote Access</em>.</li>
+        <li>Ensure the network location is <em>Private</em> (and not <em>Public</em>). If it is <em>Public</em>, open <em>Control Panel / Network and Internet / HomeGroup</em> and click <em>Change network location</em> (and click <em>Yes</em> when prompted).</li>
+        <li>Open an elevated command prompt and run (entering <em>Y</em> when prompted): <em>winrm quickconfig</em></li>
+        <li>Add an entry to the hosts file for the target server (using the server's unqualified name).</li>
+        <li>Run <em>gpedit.msc</em>, and under <em>Computer Configuration, Administrative Templates, System, Credentials Delegation</em>, edit <em>Allow delegating fresh credentials with NTLM-only server authentication</em>, and add: <em>wsman/server</em> (where <em>server</em> should be replaced with the unqualified name of the Hyper-V server).</li>
+        <li>Now open the Hyper-V management console, and connect to the Hyper-V server, making sure to enter the credentials of a domain account with access to Hyper-V.</li>
+        <li>When prompted to <em>Enable delegation of user credentials</em>, click <em>Yes</em>.</li>
+        <li>You should be successfully connected.</li>
+      </ul>
+      <footer>
+        <p><span>Published: 2017-04-02</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

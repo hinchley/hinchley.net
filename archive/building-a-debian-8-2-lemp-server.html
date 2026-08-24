@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Building a Debian 8.2 LEMP Server</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Building a Debian 8.2 LEMP Server</h1>
+    </header>
+    <main class="archive">
+      <p>This article briefly captures the steps I used to build a Debian 8.2 (Jessie) server with nginx 1.6.2, MySQL 5.5 and PHP 7.0.1.</p>
+      <p>Firstly, I downloaded the first 64-bit (amd64) Debian 8.2.0 ISO (approx. 4GB). I mounted and then booted the ISO from a generation 1 Hyper-V virtual machine with the following configuration: 1GB start-up memory (2GB max, and 512MB min); 2 processors; and 60GB hard disk.</p>
+      <p>From the installation boot menu, I selected <em>Install</em> (non-graphical), then selected <em>English</em> as the installation language, <em>Australia</em> as the location, and <em>American English</em> as the keyboard layout.</p>
+      <p>I set the hostname of the server to <em>Dennis</em>, and the domain name to <em>lab.hinchley.net</em>. I also set the root password, and used <em>Peter Hinchley</em> as the full name of a new non-root user with a username of <em>hinchley</em>. I also set the password of the new user.</p>
+      <p>I configured the timezone based on the location of <em>Australian Capital Territory</em>.</p>
+      <p>I opted to use the <em>Guided - Entire Disk</em> partitioning method, storing all files in a single partition.</p>
+      <p>I elected to use an online package mirror from Australia, specifically <em>ftp.au.debian.org</em> (with no proxy). And when prompted to select the software that should be installed, I only chose <em>SSH server</em> and <em>Standard system utilities</em>.</p>
+      <p>After the software was installed, I agreed to install the GRUB boot loader to the master boot record (MBR) on <code>/dev/sda</code>. I then restarted the server and logged in as <em>root</em>.</p>
+      <p>I modified the package repository list (<code>/etc/apt/sources.list</code>) to comment-out all lines beginning with <em>deb cdrom</em> (as I always intend to use a network mirror), and then updated the list of available packages:</p>
+      <pre><code>apt-get update</code></pre>
+      <p>I then configured the server with a static IP address (DHCP was used during installation). To do this I modified <code>/etc/network/interfaces</code> and replaced:</p>
+      <pre><code>iface eth0 inet dhcp</code></pre>
+      <p>With:</p>
+      <pre><code>auto eth0
+iface eth0 inet static
+  address 10.0.0.50
+  netmask 255.255.255.0
+  broadcast 10.0.0.255
+  network 10.0.0.0
+  gateway 10.0.0.1</code></pre>
+      <p>I then modified <code>/etc/resolv.conf</code> and set <em>nameserver</em> to the IP address of my DNS server (10.0.0.10).</p>
+      <p>The next step isn't recommended in production, but since this is only a home lab, I permitted <em>root</em> to SSH to the server using a password by modifying <code>/etc/ssh/sshd_config</code>. In particular, I changed:</p>
+      <pre><code>PermitRootLogin without-password</code></pre>
+      <p>To:</p>
+      <pre><code>PermitRootLogin yes</code></pre>
+      <p>To restart SSH after the change:</p>
+      <pre><code>/etc/init.d/ssh restart</code></pre>
+      <p>And to reboot the server:</p>
+      <pre><code>shutdown -r now</code></pre>
+      <p>At this point I was able to connect to the server from a terminal window on my Mac using the following command:</p>
+      <pre><code>ssh root@10.0.0.50</code></pre>
+      <p>Next up, I installed MySQL 5.5:</p>
+      <pre><code>apt-get install mysql-server
+mysql_install_db
+/usr/bin/mysql_secure_installation</code></pre>
+      <p>In response to the last command, I provided the following inputs:</p>
+      <ul>
+        <li>Do not reset root password</li>
+        <li>Remove anonymous users</li>
+        <li>Disallow root login remotely</li>
+        <li>Remove test database (and access to it)</li>
+        <li>Reload privilege tables</li>
+      </ul>
+      <p>I then installed nginx 1.6.2:</p>
+      <pre><code>apt-get install nginx</code></pre>
+      <p>Next up, I installed git and sudo:</p>
+      <pre><code>apt-get install git
+apt-get install sudo</code></pre>
+      <p>I then cloned the <a href="https://github.com/kasparsd/php-7-debian">php-7-debian</a> repository from <a href="https://github.com/kasparsd">kasparsd</a>:</p>
+      <pre><code>git clone https://github.com/kasparsd/php-7-debian.git</code></pre>
+      <p>I then ran the following commands to install PHP 7.0.1 (the build step will take quite a while):</p>
+      <pre><code>cd php-7-debian
+./build.sh
+./install.sh</code></pre>
+      <p>After the installation completed, I modified <code>/etc/nginx/sites-available/default</code>, adding <em>index.php</em> as the first default document (insert before <em>index.html</em> on the line that begins with <em>index</em>). I also replaced the block starting with <code>location ~ \.php$</code> with the following:</p>
+      <pre><code>location ~ \.php$ {
+  include snippets/fastcgi-php.conf;
+  fastcgi_pass 127.0.0.1:9007;
+}</code></pre>
+      <p>Finally, I created a new file under <code>/var/www/html</code> named <code>index.php</code> with the following content:</p>
+      <pre><code>&lt;?php
+phpinfo();</code></pre>
+      <p>I then started PHP-FPM and restarted nginx:</p>
+      <pre><code>/etc/init.d/php7-fpm start
+service nginx restart</code></pre>
+      <p>At this point I was able to open a browser on my Mac and request: <code>http://10.0.0.50/</code></p>
+      <p>The PHP Version 7.0.1 information page was displayed.</p>
+      <footer>
+        <p><span>Published: 2015-12-30</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

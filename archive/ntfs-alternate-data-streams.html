@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: NTFS Alternate Data Streams</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: NTFS Alternate Data Streams</h1>
+    </header>
+    <main class="archive">
+      <p>The data within a file on an NTFS partition is stored in an element called a stream. Each file has a mandatory &quot;unnamed&quot; stream, but alternate streams may also be created.</p>
+      <p>Let's create a simple text file:</p>
+      <pre><code>echo Hello &gt; hello.txt
+</code></pre>
+      <p>A quick check - <code>dir hello.txt</code> - will confirm the file size is 8 bytes.</p>
+      <p>Now, let's attach a hidden alternate stream to <em>hello.txt</em> named <em>secret</em> containing the text <em>password</em>:</p>
+      <pre><code>echo password &gt; hello.txt:secret
+</code></pre>
+      <p>If you open the file in Notepad, you will not see the content within the alternate stream. The following command will also just display <em>Hello</em>:</p>
+      <pre><code>more &lt; hello.txt
+</code></pre>
+      <p>You will also get the same result if you explicitly reference the unnamed stream:</p>
+      <pre><code>more &lt; hello.txt::$DATA
+</code></pre>
+      <p>However, if you explicitly request access to the alternate stream, you will see <em>password</em>:</p>
+      <pre><code>more &lt; hello.txt:secret
+</code></pre>
+      <p>If you once again check the size of <em>hello.txt</em>, you will notice that the content we added to the alternate stream has not changed the file size. However, by using <code>dir /R</code> we can confirm the existence of the additional stream and its size:</p>
+      <pre><code>26/11/2012   8 hello.txt
+            11 hello.txt:secret:$DATA
+</code></pre>
+      <p>Note: Only <em>notepad.exe</em> and console commands used with redirection operators (such as the examples shown above), allow you to work with alternate streams. For example, the following command will not work:</p>
+      <pre><code>type hello.txt:secret
+</code></pre>
+      <p>Alternate streams open up some interesting possibilities. For example, you could hide the presence of an executable by embedding it into an alternate stream:</p>
+      <pre><code>type nasty.exe &gt; empty.txt:nasty.exe
+</code></pre>
+      <p>Prior to Windows 7, you could easily execute the hidden file:</p>
+      <pre><code>start .\empty.txt:nasty.exe
+</code></pre>
+      <p>However, as a security measure, from Windows 7 onwards, this approach can no longer be used to execute code from an alternate stream. Although you can circumvent this limitation using a <a href="junctions-and-symbolic-links.html">symbolic link</a>. For example, the following command (if executed under a privileged account) will provide an entry point to the executable:</p>
+      <pre><code>mklink safe.txt empty.txt:nasty.exe
+</code></pre>
+      <p>Now you can launch <em>nasty.exe</em> (stored within a hidden alternate stream) by running <em>safe.txt</em>.</p>
+      <p>A common use of streams is for storing web browser security zone data. For example, if you download a file named <em>foo.exe</em> from a web site in the internet zone, the file will include a stream named <em>foo.exe:Zone.Identifer</em> with the following data:</p>
+      <pre><code>[ZoneTransfer]
+ZoneId=3
+</code></pre>
+      <p>When you try and execute <em>foo.exe</em>, Windows will use the <em>Zone.Identifier</em> stream to determine that the file was not downloaded from a trusted source. As such, you will be presented with a security warning dialog. As a popup dialog can be problematic when attempting the silent installation of a program, you could remove it by deleting the alternate stream:</p>
+      <pre><code>type NUL &gt; foo.exe:Zone.Identifer
+</code></pre>
+      <p>You can also use the System Internals tool <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/streams">streams.exe</a> to delete the stream:</p>
+      <pre><code>streams.exe -d foo.exe
+</code></pre>
+      <p>In addition to working with files, you can also attach an alternate data stream to a directory. To add a stream named <em>description</em> to <code>c:\temp</code> containing the text <em>&quot;temporary stuff&quot;</em>, change into <code>c:\temp</code>, and then use the following command:</p>
+      <pre><code>echo temporary stuff &gt; :description
+</code></pre>
+      <p>To access the content use:</p>
+      <pre><code>more &lt; :description
+</code></pre>
+      <p>Keep in mind that streams are a function of NTFS, and as soon as you copy a file to a FAT/FAT32 partition, the stream data will be lost.</p>
+      <footer>
+        <p><span>Published: 2013-11-01</span> <span>Last Updated: 2015-10-14</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: A Macro to Export Multiple Emails and their Attachments from Microsoft Outlook to a Single PDF</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: A Macro to Export Multiple Emails and their Attachments from Microsoft Outlook to a Single PDF</h1>
+    </header>
+    <main class="archive">
+      <p>I recently developed a VBA macro for Microsoft Outlook 2016 that would allow a user to export one or more emails, and their attachments, to a single consolidated PDF document.</p>
+      <p>I wrote the macro because no third-party offering appeared to provide this capability. Adobe Acrobat provides similar functionality, but attachments, instead of being “expanded”, are embedded as links within the generated PDF.</p>
+      <p>There are two core components to the solution:</p>
+      <ul>
+        <li>A module named <em>Export</em>. This code is responsible for exporting and merging emails and attachments.</li>
+        <li>A user form named <em>ProgressBox</em>. This code provides a standalone progress dialog that is utilised by the <em>Export</em> module.</li>
+      </ul>
+      <p>Note: If you intend to recreate this solution using the code shown below, the <em>ProgressBox</em> user form requires the <em>ShowModal</em> property to be set to <em>False</em>. You will also need to add the following VBA references to the macro:</p>
+      <ul>
+        <li>Microsoft Office 16.0 Object Library</li>
+        <li>Microsoft Word 16.0 Object Library</li>
+        <li>Microsoft Excel 16.0 Object Library</li>
+        <li>Microsoft Scripting Runtime</li>
+        <li>Microsoft VBScript Regular Expressions 5.5</li>
+        <li>Microsoft Forms 2.0 Object Library</li>
+        <li>Adobe Acrobat 10.0 Type Library</li>
+      </ul>
+      <p>The operation of the macro is relatively straightforward. The macro entry point is a method named <em>ExportToPdf</em>. This method performs the following high-level tasks:</p>
+      <ul>
+        <li>Checks that a user has selected one or more emails. The macro exits with a warning message if no email has been selected.</li>
+        <li>Prompts the user to set the path to where the generated PDF is to be saved. The macro will exit if no path is selected.</li>
+        <li>Iterates through each selected email, saving the email, and each of the email’s attachments to the file system. Each email is saved as a Microsoft Word document, while each attachment is saved in its native format.</li>
+        <li>Note: Only whitelisted attachments are processed (all non-approved file attachment types are ignored).</li>
+        <li>If an attachment is an Excel workbook, each of the worksheets within the workbook are copied and pasted into a new Word document, which is then saved as a PDF.</li>
+        <li>If an attachment is an Outlook message, the attachment is processed recursively (i.e. attachments within the attached email are also processed).</li>
+        <li>The code then iterates through each of the saved documents, converting each to PDF format using Word. Note: If the document is an image, the image is pasted into a new Word document as an inline image, dynamically resized to avoid border-clipping, and then saved as a PDF.</li>
+        <li>Finally, each of the PDF documents are merged into a single consolidated PDF using Adobe Acrobat DC.</li>
+        <li>Each document is deleted after it is processed.</li>
+      </ul>
+      <p>The following attachment file types are supported:</p>
+      <ul>
+        <li>Word documents: doc, docx, docm, dot, dotm, dotx</li>
+        <li>Excel documents: xls, xlsx, xlsm, xlt, xltm, xltx</li>
+        <li>Images: jpg, jpeg, png, gif, bmp, tif, tiff</li>
+        <li>Outlook emails: msg</li>
+        <li>Other: txt, pdf</li>
+      </ul>
+      <p>The code is dependent on the installation of Microsoft Office 2016 and Adobe Acrobat DC. Earlier versions of Office would also work, but the library references would need to be changed accordingly.</p>
+      <p>The first iteration of this solution did not have a dependency on Adobe Acrobat DC, as the document merging process was managed in Word, and the resultant document was saved as a PDF. However, after further testing, it was discovered that this process did not always work, as some PDF documents could not be opened by Word. Hence, the code was rewritten to save all documents as PDFs using Word, with Acrobat used to merge the documents into a consolidated PDF. This process is more complicated to implement, and adds a dependency on Acrobat, but in theory, it is a better solution, as under the original solution, PDF attachments were double-handled (converted to Word, and then back to PDF).</p>
+      <p>This is the code for the <em>Export</em> module:</p>
+      <pre><code>' Purpose: Save selected emails, and their attachments, to a PDF.
+
+Private Declare Sub Sleep Lib &quot;kernel32&quot; (ByVal dwMilliseconds As Long)
+Private Declare Function CoAllowSetForegroundWindow Lib &quot;ole32.dll&quot; (ByVal pUnk As Object, ByVal lpvReserved As Long) As Long
+
+Dim Namespace As Namespace
+Dim FileSystemObject As FileSystemObject
+Dim SelectedEmails As Selection
+Dim SavedFiles As Collection
+Dim FilesToMerge As Collection
+Dim WordApp As Word.Application
+Dim ExcelApp As Excel.Application
+
+' Regular expressions defining the attachments that will be processed.
+' All other attachments will be ignored.
+Const ExcelExtensionsRegExp = &quot;^(xl(s|sx|sm|t|tm|tx))$&quot;
+Const ImageExtensionsRegExp = &quot;^(jpg|jepg|png|gif|bmp|tiff?)$&quot;
+Const OtherExtensionsRegExp = &quot;^(do(c|cx|cm|t|tm|tx)|pdf|txt)$&quot;
+Const MessageExtensionsRegExp = &quot;^(msg)$&quot;
+
+Sub ExportToPdf()
+  ' Exit if the user has not selected at least one email.
+  If (Outlook.ActiveExplorer.Selection.Count = 0) Then
+    MsgBox &quot;Please select one or more emails.&quot;, vbInformation + vbOKOnly
+    Exit Sub
+  End If
+
+  Set Namespace = Application.GetNamespace(&quot;MAPI&quot;)
+  Set FileSystemObject = CreateObject(&quot;Scripting.FileSystemObject&quot;)
+  Set SelectedEmails = Outlook.ActiveExplorer.Selection
+
+  Set SavedFiles = New Collection
+  Set FilesToMerge = New Collection
+
+  Set WordApp = New Word.Application
+  WordApp.Visible = False
+
+  ' Allow Word to take focus. Required to ensure the Save As dialog comes to the foreground.
+  CoAllowSetForegroundWindow WordApp, 0
+
+  ' Backup the &quot;warn before saving&quot; option.
+  WarnBeforeSaveOption = WordApp.Options.WarnBeforeSavingPrintingSendingMarkup
+
+  ' Disable the option.
+  WordApp.Options.WarnBeforeSavingPrintingSendingMarkup = False
+
+  Set ExcelApp = Nothing
+
+  ' The path where the generated PDF will be saved.
+  PdfPath = GetPdfPath
+
+  ' Exit if no path is specified for saving the PDF.
+  ' This will occur if the user closes the 'File Save As' dialog without providing a valid path.
+  If PdfPath = &quot;&quot; Then
+    ' Word is used to display the 'File Save As' dialog.
+    ' Close Word before exiting.
+    WordApp.Quit
+    Exit Sub
+  End If
+
+  ' The path to the folder where all temporary documents, and the final PDF, will be saved.
+  SavePath = Left(PdfPath, InStrRev(PdfPath, &quot;\&quot;))
+
+  ' Initialise the progress bar component.
+  ProgressBox.Show
+  ProgressBox.Increment 0, &quot;Exporting...&quot;
+
+  ' Save the selected emails, and their attachments, to the file system.
+  SaveEmails SelectedEmails, SavePath
+
+  ' Convert each of the saved files to PDF documents.
+  ConvertDocumentsToPdf
+
+  ' Merge the PDF documents into a single PDF document.
+  MergePdfDocuments PdfPath
+
+  ' Indicate the export is complete.
+  ProgressBox.Increment 100, &quot;Complete!&quot;
+
+  ' Show the completion dialog for 1 second.
+  Sleep 1000
+  ProgressBox.Hide
+
+  ' Reinstate the old &quot;warn before save&quot; option.
+  WordApp.Options.WarnBeforeSavingPrintingSendingMarkup = WarnBeforeSaveOption
+
+  ' Close Word (and Excel, if it was used to process attachments).
+  WordApp.Quit
+  If Not (ExcelApp Is Nothing) Then
+    ExcelApp.DisplayAlerts = True
+    ExcelApp.Quit
+  End If
+
+  ' Clean up.
+  Set SavedFiles = Nothing
+  Set FilesToMerge = Nothing
+  Set SelectedEmails = Nothing
+  Set FileSystemObject = Nothing
+  Set Namespace = Nothing
+End Sub
+
+Function GetPdfPath()
+  ' The easiest way to retrieve a file save path is via the GetSaveAsFilename method in Excel.
+  ' Unfortunately, this method isn't available in Word.
+  ' As this macro always requires Word, but only requires Excel when exporting an Excel attachment,
+  ' it makes sense to avoid using Excel to retrieve the file save path.
+  ' Hence we use the (slightly more convoluted) FileDialog method.
+  Set Dialog = WordApp.FileDialog(msoFileDialogSaveAs)
+  With Dialog
+    .InitialFileName = Environ(&quot;USERPROFILE&quot;) &amp; &quot;\&quot;
+    .FilterIndex = 7 ' *.pdf - the 7th option in the drop down list box of file formats.
+    .Title = &quot;Save As&quot;
+    If .Show &lt;&gt; 0 Then
+      GetPdfPath = .SelectedItems(1)
+    Else
+      GetPdfPath = &quot;&quot;
+    End If
+  End With
+End Function
+
+Private Sub SaveEmails(SelectedEmails, SavePath)
+  ' Used to update the progress bar.
+  Counter = 0
+
+  ' Iterate through each of the selected emails.
+  For Each SelectedEmail In SelectedEmails
+    ' Update the progress indicator (pausing each time for 250ms to ensure the progression is noticeable).
+    ProgressBox.Increment (Counter / SelectedEmails.Count) * 100, &quot;Exporting...&quot;
+    Sleep 250
+
+    ' Retrieve the details of the current email.
+    EntryID = SelectedEmail.EntryID
+    Set Email = Namespace.GetItemFromID(EntryID)
+
+    SaveEmail Email, SavePath
+
+    ' Increment the counter that is used to update the progress indicator.
+    Counter = Counter + 1
+
+    Set Email = Nothing
+  Next SelectedEmail
+End Sub
+
+Private Sub SaveEmail(Email, SavePath)
+  ' The full path used for saving the email to the file system.
+  ' The document name is based on the time the email was received.
+  Path = SavePath &amp; (Int(Rnd * 100000)) &amp; Format(Email.CreationTime, &quot;yyyyMMddhhmmss&quot;) &amp; &quot;.doc&quot;
+
+  ' Delete any previous copy of the email from the file system.
+  ' This is only necessary if the email was previously exported, but not properly cleaned up (e.g. the previous export failed).
+  If FileSystemObject.FileExists(Path) Then
+    FileSystemObject.DeleteFile Path
+  End If
+
+  ' Record (in a collection named SaveFiles) the path to the saved email.
+  ' This collection will be subsequently used to retrieve a list of the files that need to be merged.
+  SavedFiles.Add Path
+
+  ' Save the email to the file system.
+  Email.SaveAs Path, olDoc
+
+  ' Resize images in the email.
+  Set Document = WordApp.Documents.Open(FileName:=Path, Visible:=False)
+  If Document.InlineShapes.Count &gt; 0 Then
+    ResizeImages Document
+  End If
+  Document.SaveAs2 Path, wdFormatXMLDocument
+  Document.Close wdDoNotSaveChanges, wdOriginalDocumentFormat, False
+
+  ' The following block is only executed if the email includes attachments.
+  If Email.Attachments.Count &gt; 0 Then
+    ' Iterate through all attachments.
+    For Each Attachment In Email.Attachments
+      ' Extract the extension of each attachment.
+      Extension = GetFileExtension(Attachment.FileName)
+
+      ' Inline images are saved with the email, and do not need to be processed as separate attachments.
+      If IsEmbeddedAttachment(Attachment) And IsImage(Extension) Then
+        GoTo NextIteration
+      End If
+
+      ' Only attachments matching the whitelist of approved types are processed.
+      If IsValidAttachment(Extension) Then
+        ' The attachment is saved to the file system (using the attachment file name).
+        AttachmentPath = Truncate(SavePath &amp; (Int(Rnd * 100000)) &amp; Attachment.FileName)
+        Attachment.SaveAsFile AttachmentPath
+
+        ' Additional processing is applied to Excel attachments.
+        If IsExcelDocument(Extension) Then
+          ' Start Excel if it isn't already running (i.e. this is the first Excel attachment).
+          If ExcelApp Is Nothing Then
+            Set ExcelApp = New Excel.Application
+            ExcelApp.Visible = False
+            ExcelApp.DisplayAlerts = False
+          End If
+
+          ' The path to the new Word document that will be used for storing the content within the Excel document.
+          FilePath = Truncate(GetBaseFilePath(AttachmentPath) &amp; (Int(Rnd * 100000)) &amp; &quot;.docx&quot;)
+
+          ' Create a new blank Word document.
+          Set TempDocument = WordApp.Documents.Add(&quot;Normal&quot;, False, wdNewBlankDocument, False)
+
+          ' Open the Excel document.
+          Set Workbook = ExcelApp.Workbooks.Open(AttachmentPath)
+
+          ' Iterate through all worksheets in the Excel document.
+          For Each Worksheet In Workbook.Worksheets
+            ' Copy the content within the worksheet.
+            Worksheet.UsedRange.Copy
+
+            ' Add a new section to the target Word document.
+            Set Section = TempDocument.Sections.Add
+
+            ' Paste the copied content into the Word document.
+            Section.Range.PasteAndFormat wdFormatOriginalFormatting
+          Next Worksheet
+
+          ' Delete the first section of the temporary Word document.
+          ' This removes the blank page that is created at the beginning of the document when the first section is added.
+          TempDocument.Sections.Item(1).Range.Delete wdCharacter, 1
+
+          ' Save the temporary Word document.
+          TempDocument.SaveAs2 FilePath, wdFormatXMLDocument
+          TempDocument.Close wdDoNotSaveChanges, wdOriginalDocumentFormat, False
+
+          ' Close and then delete the Excel document.
+          Workbook.Close False
+          Kill AttachmentPath
+
+          ' The attachment path is no longer the path to the saved Excel document;
+          ' it's now the path to the Word document into which the Excel content was copied.
+          AttachmentPath = FilePath
+        ElseIf IsEmailMsg(Extension) Then
+          ' Attachment is an Msg.
+          Set Msg = Application.CreateItemFromTemplate(AttachmentPath)
+          SaveEmail Msg, SavePath
+          Kill AttachmentPath
+
+          GoTo NextIteration
+        End If
+
+        ' Record the path to the saved attachment.
+        SavedFiles.Add AttachmentPath
+      End If
+
+NextIteration:
+    Next Attachment
+  End If
+End Sub
+
+'Helper function to ensure path lengths are unique and don't exceed 250 characters.
+Function Truncate(Path)
+  ' Maximum number of characters in a file path.
+  MaxPathLength = 250
+
+  ' Length of current path.
+  PathLength = Len(Path)
+
+  If PathLength &gt; MaxPathLength Then
+    Extension = GetFileExtension(Path)
+    ' Truncate base file path such that when the extension is re-added, the max path length is not exceeded.
+    Truncate = Left(GetBaseFilePath(Path), MaxPathLength - Len(Extension) + 1) &amp; &quot;.&quot; &amp; Extension
+  Else
+    Truncate = Path
+  End If
+End Function
+
+' Helper function to retrieve the extension of a file. e.g. FooBar.pdf = pdf
+Function GetFileExtension(FileName)
+  GetFileExtension = LCase(FileSystemObject.GetExtensionName(FileName))
+End Function
+
+' Helper function to check if an attachment is embedded (OLE) within an email.
+' We typically want to ignore embedded attachments as they are automatically included when an email is saved.
+Function IsEmbeddedAttachment(Attachment)
+  Set PropertyAccessor = Attachment.PropertyAccessor
+  Property = PropertyAccessor.GetProperty(&quot;http://schemas.microsoft.com/mapi/proptag/0x3712001E&quot;)
+  IsEmbeddedAttachment = InStr(1, Property, &quot;@&quot;)
+End Function
+
+' Helper function to check if a string (subject) matches a regular expression pattern.
+Function TestRegExp(Subject, Pattern)
+  Set RegExp = New RegExp
+  With RegExp
+    .Global = True
+    .IgnoreCase = True
+    .Pattern = Pattern
+  End With
+  TestRegExp = RegExp.Test(Subject)
+End Function
+
+' Helper function to check if an attachment is an image (based on file extension).
+Function IsImage(Extension)
+  IsImage = TestRegExp(Extension, ImageExtensionsRegExp)
+End Function
+
+' Helper function to check if an attachment is an Excel document (based on file extension).
+Function IsExcelDocument(Extension)
+  IsExcelDocument = TestRegExp(Extension, ExcelExtensionsRegExp)
+End Function
+
+' Helper function to check if an attachment is an Outlook email (based on file extension).
+Function IsEmailMsg(Extension)
+  IsEmailMsg = TestRegExp(Extension, MessageExtensionsRegExp)
+End Function
+
+' Helper function to check if an attachment, other than an image or Excel document, is whitelisted (based on file extension).
+Function IsOtherValidDocument(Extension)
+  IsOtherValidDocument = TestRegExp(Extension, OtherExtensionsRegExp)
+End Function
+
+' Helper function to check if an attachment is a PDF (based on file extension).
+Function IsPdfDocument(Path)
+  IsPdfDocument = TestRegExp(Path, &quot;\.pdf$&quot;)
+End Function
+
+' Helper function to check if an attachment is whitelisted (based on file extension).
+Function IsValidAttachment(Extension)
+  IsValidAttachment = IsImage(Extension) Or IsExcelDocument(Extension) Or IsEmailMsg(Extension) Or IsOtherValidDocument(Extension)
+End Function
+
+' Helper function to get the path to a file without the file's extension.
+Function GetBaseFilePath(Path)
+  Extension = &quot;.&quot; &amp; GetFileExtension(Path)
+  GetBaseFilePath = Replace(Path, Extension, &quot;&quot;)
+End Function
+
+' Used to convert all emails and their associated attachments to PDF documents.
+Private Sub ConvertDocumentsToPdf()
+  ' Initialise the progress bar component.
+  ' This resets the progress bar after saving emails and attachments to the file system.
+  ProgressBox.Increment 0, &quot;Converting...&quot;
+  Counter = 0
+
+  ' Iterate through the emails and attachments that were saved to the file system.
+  For Each SavedFile In SavedFiles
+    ProgressBox.Increment (Counter / SavedFiles.Count) * 100, &quot;Converting...&quot;
+    Sleep 250
+
+    ' No processing required for native PDF document.
+    If IsPdfDocument(SavedFile) Then
+      FilesToMerge.Add SavedFile
+    Else
+      NewPdfPath = GetBaseFilePath(SavedFile) &amp; &quot;.pdf&quot;
+
+      ' Check if the saved document is an image.
+      If IsImage(GetFileExtension(SavedFile)) Then
+        ' Create a new blank Word document.
+        Set Document = WordApp.Documents.Add(&quot;Normal&quot;, False, wdNewBlankDocument, False)
+
+        ' Insert the image as a shape into the new consolidated document.
+        InsertImage SavedFile, Document
+      Else
+        ' Open the document in Word.
+        Set Document = WordApp.Documents.Open(FileName:=SavedFile, Visible:=False)
+      End If
+
+      ' Save the Word document as a PDF.
+      Document.SaveAs2 NewPdfPath, wdFormatPDF
+
+      ' Close Word.
+      Document.Close wdDoNotSaveChanges, wdOriginalDocumentFormat, False
+
+      ' Store the path to the collection of PDF documents to be merged.
+      FilesToMerge.Add NewPdfPath
+
+      ' Delete the saved document after it has been converted to a PDF.
+      Kill SavedFile
+    End If
+
+    Counter = Counter + 1
+  Next SavedFile
+End Sub
+
+' Resize inline images so that they don't extend beyond the borders of the page.
+Sub ResizeImages(Document)
+  ' Get page dimensions. Give some wiggle room.
+  PageHeight = Document.PageSetup.PageHeight - (Document.PageSetup.TopMargin + Document.PageSetup.BottomMargin + 50)
+  PageWidth = Document.PageSetup.PageWidth - (Document.PageSetup.LeftMargin + Document.PageSetup.RightMargin + Document.PageSetup.Gutter + 50)
+
+  For i = 1 To Document.InlineShapes.Count
+    ' Check if the current shape is a picture.
+    If Document.InlineShapes.Item(i).Type = wdInlineShapePicture Or Document.InlineShapes.Item(i).Type = wdInlineShapeLinkedPicture Then
+      Set Shape = Document.InlineShapes.Item(i)
+      Shape.Range.Select
+      Shape.LockAspectRatio = msoFalse
+
+      ' Constrain the shape dimensions to fit within the page.
+      If (Shape.Width &gt; PageWidth) Then
+        If ((PageWidth / Shape.Width) * Shape.Height &gt; PageHeight) Then
+          Shape.Width = PageHeight / Shape.Height * PageWidth
+          Shape.Height = PageHeight
+        Else
+          Shape.Width = PageWidth
+          Shape.Height = (PageWidth / Shape.Width) * Shape.Height
+        End If
+      ElseIf (Shape.Height &gt; PageHeight) Then
+        Shape.Width = PageHeight / Shape.Height * Shape.Width
+        Shape.Height = PageHeight
+      End If
+
+      Shape.LockAspectRatio = msoTrue
+    End If
+  Next i
+End Sub
+
+' Helper function to insert an image into a document.
+Private Sub InsertImage(FileName, Document)
+  ' Ensure the target document is active.
+  Document.Activate
+
+  ' Insert the source image into the target document as an inline shape.
+  Set Shape = Document.Range.InlineShapes.AddPicture(FileName, LinkToFile:=False, SaveWithDocument:=True)
+End Sub
+
+' Merge multiple PDF documents into a single PDF.
+Private Sub MergePdfDocuments(PdfPath)
+  'Set AcrobatApp = CreateObject(&quot;AcroExch.App&quot;)
+
+  Set DestinationPdf = CreateObject(&quot;AcroExch.PDDoc&quot;)
+  Set SourcePdf = CreateObject(&quot;AcroExch.PDDoc&quot;)
+
+  ' Initialise the progress bar component.
+  ' This resets the progress bar after converting documents to PDF.
+  ProgressBox.Increment 0, &quot;Merging...&quot;
+  Counter = 0
+
+  ' We will merge PDFs into the first PDF.
+  DestinationPdfPath = FilesToMerge.Item(1)
+  DestinationPdf.Open DestinationPdfPath
+  FilesToMerge.Remove (1)
+
+  ' Iterate through the emails and attachments that were saved to the file system.
+  For Each FileToMerge In FilesToMerge
+    ProgressBox.Increment (Counter / FilesToMerge.Count) * 100, &quot;Merging...&quot;
+    Sleep 250
+
+    ' Open the source PDF.
+    SourcePdf.Open FileToMerge
+
+    ' The page number within the destination PDF where content will be inserted.
+    LastPage = DestinationPdf.GetNumPages - 1
+
+    ' The number of pages to insert.
+    NumberOfPagesToInsert = SourcePdf.GetNumPages
+
+    ' Insert the content into the destination PDF.
+    DestinationPdf.InsertPages LastPage, SourcePdf, 0, NumberOfPagesToInsert, False
+
+    ' Close and then delete the source PDF.
+    SourcePdf.Close
+    Kill FileToMerge
+
+    Counter = Counter + 1
+  Next FileToMerge
+
+  ' Save the merged PDF and delete the original.
+  DestinationPdf.Save 1, PdfPath
+  Kill DestinationPdfPath
+
+  ' Close the PDF document.
+  DestinationPdf.Close
+End Sub</code></pre>
+      <p>This next block of code is for the user form named <em>Progress</em>. Note: This code, with only minor modification, was copied from the following <a href="http://www.vbaexpress.com/kb/getarticle.php?kb_id=980">article</a>, and was originally written by Zack Barresse.</p>
+      <pre><code>Private Const DefaultTitle = &quot;Progress&quot;
+Private CurrentText As String
+Private CurrentPercent As Single
+
+Public Property Let Text(NewText As String)
+  If NewText &lt;&gt; CurrentText Then
+    CurrentText = NewText
+    Me.Controls(&quot;UserText&quot;).Caption = CurrentText
+    Call SizeToFit
+  End If
+End Property
+
+Public Property Get Text() As String
+  Text = CurrentText
+End Property
+
+Public Property Let Percent(NewPercent As Single)
+  If NewPercent &lt;&gt; CurrentPercent Then
+    CurrentPercent = Min(Max(NewPercent, 0#), 100#)
+    Call UpdateProgress
+  End If
+End Property
+
+Public Property Get Percent() As Single
+  Percent = CurrentPercent
+End Property
+
+Public Sub Increment(ByVal NewPercent As Single, Optional ByVal NewText As String)
+  Me.Percent = NewPercent
+  If NewText &lt;&gt; &quot;&quot; Then Me.Text = NewText
+  Call UpdateTitle
+  Me.Repaint
+End Sub
+
+Private Sub UserForm_Initialize()
+  Call SetupControls
+  Call UpdateTitle
+End Sub
+
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+  If CloseMode = vbFormControlMenu Then End 'Cancel = True
+End Sub
+
+Private Sub SetupControls()
+  Dim i As Integer
+  Dim Control As Object
+
+  For i = Me.Controls.Count To 1 Step -1
+    Me.Controls(i).Remove
+  Next i
+
+  Set Control = Me.Controls.Add(&quot;Forms.Label.1&quot;, &quot;UserText&quot;, True)
+  Control.Caption = &quot;&quot;
+  Control.AutoSize = True
+  Control.WordWrap = True
+  Control.Font.Size = 8
+
+  Set Control = Me.Controls.Add(&quot;Forms.Label.1&quot;, &quot;ProgressFrame&quot;, True)
+  Control.Caption = &quot;&quot;
+  Control.Height = 16
+  Control.SpecialEffect = fmSpecialEffectSunken
+
+  Set Control = Me.Controls.Add(&quot;Forms.Label.1&quot;, &quot;ProgressBar&quot;, True)
+  Control.Caption = &quot;&quot;
+  Control.Height = 14
+  Control.BackStyle = fmBackStyleOpaque
+  Control.BackColor = &amp;HFF0000 ' Blue
+
+  Call SizeToFit
+End Sub
+
+Private Sub SizeToFit()
+  Me.Width = 240
+
+  Me.Controls(&quot;UserText&quot;).Top = 6
+  Me.Controls(&quot;UserText&quot;).Left = 6
+  Me.Controls(&quot;UserText&quot;).AutoSize = False
+  Me.Controls(&quot;UserText&quot;).Font.Size = 8
+  Me.Controls(&quot;UserText&quot;).Width = Me.InsideWidth - 12
+  Me.Controls(&quot;UserText&quot;).AutoSize = True
+
+  Me.Controls(&quot;ProgressFrame&quot;).Top = Int(Me.Controls(&quot;UserText&quot;).Top + Me.Controls(&quot;UserText&quot;).Height) + 6
+  Me.Controls(&quot;ProgressFrame&quot;).Left = 6
+  Me.Controls(&quot;ProgressFrame&quot;).Width = Me.InsideWidth - 12
+  Me.Controls(&quot;ProgressBar&quot;).Top = Me.Controls(&quot;ProgressFrame&quot;).Top + 1
+  Me.Controls(&quot;ProgressBar&quot;).Left = Me.Controls(&quot;ProgressFrame&quot;).Left + 1
+
+  Call UpdateProgress
+  Me.Height = Me.Controls(&quot;ProgressFrame&quot;).Top + Me.Controls(&quot;ProgressFrame&quot;).Height + 6 + (Me.Height - Me.InsideHeight)
+End Sub
+
+Private Sub UpdateTitle()
+  Me.Caption = DefaultTitle &amp; &quot; - &quot; &amp; Format(Int(CurrentPercent), &quot;0&quot;) &amp; &quot;% Complete&quot;
+End Sub
+
+Private Sub UpdateProgress()
+  If CurrentPercent = 0 Then
+    Me.Controls(&quot;ProgressBar&quot;).Visible = False
+  Else
+    Me.Controls(&quot;ProgressBar&quot;).Visible = True
+    Me.Controls(&quot;ProgressBar&quot;).Width = Int((Me.Controls(&quot;ProgressFrame&quot;).Width - 2) * CurrentPercent / 100)
+  End If
+End Sub
+
+Function Min(number1 As Single, number2 As Single) As Single
+  If number1 &lt; number2 Then Min = number1 Else Min = number2
+End Function
+
+Function Max(number1 As Single, number2 As Single) As Single
+  If number1 &gt; number2 Then Max = number1 Else Max = number2
+End Function</code></pre>
+      <p>After recreating the macro in Outlook, I recommend you create a suitably named button in the ribbon that can be used to run the <em>ExportToPdf</em> method.</p>
+      <p>To run the macro:</p>
+      <ol>
+        <li>Navigate to a mailbox folder that contains the emails you would like to export.</li>
+        <li>Select every email you wish to export. The emails will be saved to a PDF document in the order in which they are selected. i.e. If you want the emails to be sorted in reverse chronological order, sort the folder so that the newest emails are at the top, and then select from top to bottom.</li>
+        <li>Once the required emails are selected, click the &quot;Export as PDF&quot; button in the ribbon.</li>
+        <li>
+          <p>A dialog will be displayed asking you to provide the name (and path) to the location where the generated PDF document will be created. Browse to a suitable location and enter a suitable name, then click Save.</p>
+          <img src="../static/saveas.png" alt="Save As Dialog" />
+        </li>
+        <li>
+          <p>The macro will commence exporting and merging the selected emails and their attachments. A status dialog will appear to give an indication of progress. There are three stages to the process; an export phase, a conversion phase, and a merge phase. The progress of all stages will be displayed. When the third stage has finished, the dialog will say 100% Complete, and then close one second later.</p>
+          <img src="../static/progress.png" alt="Progress Dialog" />
+        </li>
+      </ol>
+      <footer>
+        <p><span>Published: 2018-05-20</span> <span>Last Updated: 2024-11-08</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Create an SCCM 2007 Collection Based on Advertisement Status Messages</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Create an SCCM 2007 Collection Based on Advertisement Status Messages</h1>
+    </header>
+    <main class="archive">
+      <p>The following SCCM collection query will retrieve all systems where an advertisement has not completed successfully. In particular, the query identifies the systems where the last status message returned for a specific advertisement (in this case, the advertisement with ID <em>LAB20001</em>) matched a list of known failure codes.</p>
+      <pre><code>select S.ResourceID,S.ResourceType,S.Name,S.SMSUniqueIdentifier,S.ResourceDomainORWorkgroup,S.Client from SMS_R_System AS s INNER JOIN SMS_ClientAdvertisementStatus AS o ON s.ResourceID = o.ResourceID WHERE AdvertisementID = 'COR21237' AND (LastStatusMessageID in (10001, 10003, 10004, 10006, 10007, 10021, 10025, 10030, 10050, 10051, 10053, 10054, 10057, 10058, 10070))</code></pre>
+      <p>You could modify the query to identify all systems where the last status message did not match a list of known success code, but this would almost certainly have unintended consequences, such as including systems where the installation has not yet completed (or even started).</p>
+      <footer>
+        <p><span>Published: 2016-03-25</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

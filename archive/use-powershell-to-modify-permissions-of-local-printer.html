@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Use PowerShell to Modify Permissions of Local Printer</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Use PowerShell to Modify Permissions of Local Printer</h1>
+    </header>
+    <main class="archive">
+      <p>By default, the <em>Everyone</em> group is assigned print permissions to local printers in Windows. This is typically a good thing, but what if you want to limit printing to only a specific group of users? The following PowerShell script can help; it will replace the permissions assigned to the Everyone group with an alternate Active Directory group. To use the script, set <em>$device</em> to the name of the local printer, <em>$domain</em> to the Active Directory domain (in which the group is located), and <em>$group</em> to the name of the group. Here is the code:</p>
+      <pre><code>$device = 'printer name'
+$domain = 'lab'
+$username = 'group name'
+
+$printer = gwmi -enableallprivileges win32_printer | ? name -eq $device
+
+$sd = ($printer.getsecuritydescriptor()).descriptor
+
+$newsd = ([wmiclass]&quot;win32_securitydescriptor&quot;).createinstance()
+$newsd.controlflags = $sd.controlflags
+
+$ace = ([wmiclass]&quot;win32_ace&quot;).createinstance()
+$trustee = ([wmiclass]&quot;win32_trustee&quot;).createinstance()
+$account = new-object system.security.principal.ntaccount($domain, $username)
+$sid = $account.translate([system.security.principal.securityidentifier])
+
+$trustee.domain = $domain
+$trustee.name = $username
+$trustee.sidstring = $sid.value
+$ace.trustee = $trustee
+$ace.accessmask = 131080 # print + read.
+
+$sd.dacl | where-object { $_.trustee.name -ne 'everyone' } | %{
+  $acex = $_
+  $newsd.dacl += @($acex.psobject.baseobject)
+}
+
+$newsd.dacl += $ace
+$printer.setsecuritydescriptor($newsd)</code></pre>
+      <footer>
+        <p><span>Published: 2017-02-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

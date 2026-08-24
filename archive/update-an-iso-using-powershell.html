@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Update an ISO using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Update an ISO using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>This short article demonstrates how to update an ISO using PowerShell. The script is specifically designed to modify the content of an ISO generated using the "offline task sequence media" capability in SCCM.</p>
+      <p>Have you ever waited for what seems like forever for SCCM to generate an ISO, and then you realise you screwed up, and there is an error in one of the software packages? You really don't want to have to regenerate the entire ISO in order to implement a simple fix. It happens to me frequently. Fortunately, you can save a lot of time by using this script to crack open the ISO and make the required change.</p>
+      <p>You should run this script on a computer with the ADK installed. Hopefully the code is self-explanatory.</p>
+      <pre><code># paths to media.
+$media = 'c:\tasksequencemedia'
+$old   = &quot;$media\windows10.iso&quot;
+$new   = &quot;$media\windows10-updated.iso&quot;
+
+# paths to tools.
+$tools    = 'C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\oscdimg'
+$oscdimg  = &quot;$tools\oscdimg.exe&quot;
+$etfsboot = &quot;$tools\etfsboot.com&quot;
+$efisys   = &quot;$tools\efisys.bin&quot;
+
+# mount the existing iso.
+$mount = mount-diskimage -imagepath $old -passthru
+
+# get the drive letter assigned to the iso.
+$drive = ($mount | get-volume).driveletter + ':'
+
+# create a temp folder for extracting the existing iso.
+$workspace = &quot;{0}\{1}&quot; -f $env:temp, [system.guid]::newguid().tostring().split('-')[0]
+new-item -type directory -path $workspace
+
+# extract the existing iso to the temporary folder.
+copy-item $drive\* $workspace -force -recurse
+
+# remove the read-only attribtue from the extracted files.
+get-childitem $workspace -recurse | %{ if (! $_.psiscontainer) { $_.isreadonly = $false } }
+
+# pause here... make manual updates to the extracted iso.
+read-host
+
+# create the updated iso.
+$data = '2#p0,e,b&quot;{0}&quot;#pEF,e,b&quot;{1}&quot;' -f $etfsboot, $efisys
+start-process $oscdimg -args @(&quot;-bootdata:$data&quot;,'-u2','-udfver102', $workspace, $new) -wait -nonewwindow
+
+# remove the extracted content.
+remove-item $workspace -recurse -force
+
+# dismount the iso.
+dismount-diskimage -imagepath $old</code></pre>
+      <footer>
+        <p><span>Published: 2016-06-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

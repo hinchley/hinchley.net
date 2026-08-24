@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Modify the Form Field Shading Setting in Outlook 2010</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Modify the Form Field Shading Setting in Outlook 2010</h1>
+    </header>
+    <main class="archive">
+      <p>There is a setting in Microsoft Outlook 2010 to configure how shading is applied to the form fields of a message. To access this setting via the GUI, start Outlook, click <em>New E-mail</em>, then from the <em>File</em> menu select <em>Options</em>, <em>Editor Options</em>, <em>Advanced</em>, then under the <em>Display</em> section, select the appropriate value from the <em>Field shading</em> drop-down list box. The available options are <em>Never</em>, <em>Always</em>, and the default value, <em>When Selected</em>.</p>
+      <p>Unfortunately, the current value is stored within a large binary blob in the registry. It does not appear to be possible to change this value via group policy (without using a group policy preference to blat the entire blob, which isn't desirable).</p>
+      <p>However, you can programmatically adjust the setting by running the following PowerShell code under the context of the current user (while Outlook is closed). The script modifies the 321st byte of the registry blob from hexadecimal 30 to hexadecimal 20, thereby changing the setting from <em>When Selected</em> to <em>Never</em>.</p>
+      <p>There are several ways to modify this setting across the enterprise, but I think the best approach is to wrap the code into an MSI and leverage Active Setup to apply the change at the next user logon.</p>
+      <pre><code>$settings = (get-itemproperty -path HKCU:Software\Microsoft\Office\14.0\Word\Data -name SettingsWordMail).SettingsWordMail
+$settings[320] = 32
+set-itemproperty -path HKCU:Software\Microsoft\Office\14.0\Word\Data -name SettingsWordMail -value $settings</code></pre>
+      <footer>
+        <p><span>Published: 2015-11-24</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

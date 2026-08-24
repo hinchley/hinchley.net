@@ -1,0 +1,941 @@
+# Scraper
+# https://knownagents.com/agents/008
+User-agent: 008
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/aa
+User-agent: aa
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/adstxtcrawler
+User-agent: AdsTxtCrawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/ahrefs-site-audit
+User-agent: Ahrefs Site Audit
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/ahrefsbot
+User-agent: AhrefsBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/ahrefssiteaudit
+User-agent: AhrefsSiteAudit
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/ai2bot
+User-agent: AI2Bot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/ai2bot-dolma
+User-agent: Ai2Bot-Dolma
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/aiwebindex
+User-agent: AIWebIndex
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/amazonbot
+User-agent: Amazonbot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/apifybot
+User-agent: ApifyBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/apifywebsitecontentcrawler
+User-agent: ApifyWebsiteContentCrawler
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/applebot-extended
+User-agent: Applebot-Extended
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/attracta
+User-agent: Attracta
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/audisto-crawler
+User-agent: Audisto Crawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/barkrowler
+User-agent: Barkrowler
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/bedrockbot
+User-agent: bedrockbot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/blexbot
+User-agent: BLEXBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/botify
+User-agent: botify
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/bravebot
+User-agent: Bravebot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/brightbot
+User-agent: Brightbot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/brightedge-crawler
+User-agent: BrightEdge Crawler
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/bytespider
+User-agent: Bytespider
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/caliberbot
+User-agent: CaliberBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/caliperbot
+User-agent: Caliperbot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/ccbot
+User-agent: CCBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/chatglm-spider
+User-agent: ChatGLM-Spider
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/claritybot
+User-agent: ClarityBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/claudebot
+User-agent: ClaudeBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/clearscopebot
+User-agent: Clearscopebot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudflare-custom-hostname-verification
+User-agent: Cloudflare Custom Hostname Verification
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudflare-stream-webhook
+User-agent: Cloudflare Stream Webhook
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudflare-healthchecks
+User-agent: Cloudflare-Healthchecks
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudflare-prefetch
+User-agent: CloudFlare-Prefetch
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudflare-ssldetector
+User-agent: Cloudflare-SSLDetector
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudflare-traffic-manager
+User-agent: Cloudflare-Traffic-Manager
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cloudtrellis
+User-agent: Cloudtrellis
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/cloudvertexbot
+User-agent: CloudVertexBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cludo-com
+User-agent: cludo.com
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cocolyzebot
+User-agent: Cocolyzebot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cognitiveseo-crawler
+User-agent: cognitiveSEO Crawler
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/cohere-training-data-crawler
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/coherebot
+User-agent: CohereBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/contentking
+User-agent: contentking
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/convermax
+User-agent: Convermax
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/cotoyogi
+User-agent: Cotoyogi
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/cragcrawler
+User-agent: CragCrawler
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/crawlspace
+User-agent: Crawlspace
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/cxense
+User-agent: Cxense
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/dataforseo
+User-agent: DataForSEO
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/dataforseo-bot
+User-agent: DataForSEO Bot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/dataforseobot
+User-agent: DataForSeoBot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/dataprovider-com
+User-agent: Dataprovider.com
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/datenbank-crawler
+User-agent: Datenbank Crawler
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/dcrawl
+User-agent: dcrawl
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/deepcrawl
+User-agent: deepcrawl
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/deepcrawl-com
+User-agent: deepcrawl.com
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/deepseekbot
+User-agent: DeepSeekBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/diffbot
+User-agent: Diffbot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/domainstatsbot
+User-agent: DomainStatsBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/dotbot
+User-agent: DotBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/doubaobot
+User-agent: Doubaobot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/dragonbot
+User-agent: Dragonbot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/erniebot
+User-agent: ERNIEBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/exabot
+User-agent: ExaBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/facebookbot
+User-agent: FacebookBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/firecrawlagent
+User-agent: FirecrawlAgent
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/google-digital-asset-links
+User-agent: Google Digital Asset Links
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/google-storebot
+User-agent: Google StoreBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/google-extended
+User-agent: Google-Extended
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/google-structured-data-testing
+User-agent: Google-Structured-Data-Testing
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/googleother
+User-agent: GoogleOther
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/gptbot
+User-agent: GPTBot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/helloworkjobpostingbot
+User-agent: HelloworkJobPostingBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/henkbot
+User-agent: HenkBot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/httrack
+User-agent: HTTrack
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/httrack-3-0
+User-agent: HTTrack 3.0
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/huckabot
+User-agent: Huckabot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/huckabuy-bot
+User-agent: Huckabuy Bot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/hypestat
+User-agent: hypestat
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/icc-crawler
+User-agent: ICC-Crawler
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/imagespider
+User-agent: imageSpider
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/indeedjobbot
+User-agent: IndeedJobBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/james-bot
+User-agent: James BOT
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/kangaroo-bot
+User-agent: Kangaroo Bot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/kimibot
+User-agent: KimiBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/kimicrawler
+User-agent: KimiCrawler
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/krawlerbot
+User-agent: KrawlerBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/laion-huggingface-processor
+User-agent: laion-huggingface-processor
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/lcc
+User-agent: LCC
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/librecrawl
+User-agent: LibreCrawl
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/linkcheck-by-siteimprove
+User-agent: LinkCheck by Siteimprove
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/linkchecker-bot
+User-agent: LinkChecker Bot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/linkchecker-pro
+User-agent: linkchecker.pro
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/linkcheckerbot
+User-agent: LinkCheckerBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/linkdexbot
+User-agent: linkdexbot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/linksindexerbot
+User-agent: LinksIndexerBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/marketgoo
+User-agent: MarketGoo
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/mbcrawler
+User-agent: MBCrawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/megaindex-ru
+User-agent: MegaIndex.ru
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/meta-externalagent
+User-agent: meta-externalagent
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/metainspector
+User-agent: MetaInspector
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/metajobbot
+User-agent: MetaJobBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/micro-crawl
+User-agent: micro-crawl
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/mistralbot
+User-agent: MistralBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/mj12bot
+User-agent: MJ12bot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/modernizebot
+User-agent: ModernizeBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/moonshotbot
+User-agent: MoonshotBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/moonspider
+User-agent: MoonSpider
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/moz-dotbot
+User-agent: Moz dotbot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/moz-rogerbot
+User-agent: Moz rogerbot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/mozilla-tabstack
+User-agent: Mozilla-Tabstack
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/netestate-imprint-crawler
+User-agent: netEstate Imprint Crawler
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/newspaper
+User-agent: newspaper
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/nitro
+User-agent: Nitro-
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/nitrobot
+User-agent: NitroBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/noorobot
+User-agent: noorobot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/nutch
+User-agent: Nutch
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/nyt-scraping
+User-agent: nyt_scraping
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/offline-explorer
+User-agent: Offline Explorer
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/omgili
+User-agent: omgili
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/oncrawl
+User-agent: OnCrawl
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/oncrawl-mobile
+User-agent: OnCrawl Mobile
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/online-webceo-bot
+User-agent: online-webceo-bot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/openindexspider
+User-agent: OpenindexSpider
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/pangubot
+User-agent: PanguBot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/potions
+User-agent: Potions
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/prerender
+User-agent: Prerender
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/pro-sitemaps
+User-agent: Pro Sitemaps
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/pro-sitemaps-generator
+User-agent: Pro Sitemaps Generator
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/querit-searchbot
+User-agent: Querit-SearchBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/queritbot
+User-agent: QueritBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/qwenbot
+User-agent: QwenBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/rankmath-link-checker
+User-agent: RankMath Link Checker
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/ravencrawler
+User-agent: RavenCrawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/readable
+User-agent: Readable
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/revvimgort
+User-agent: RevvimGort
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/rogerbot-crawler
+User-agent: rogerbot-crawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/rsiteauditor
+User-agent: RSiteAuditor
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/rytebot
+User-agent: RyteBot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/salamandravlm
+User-agent: SalamandraVLM
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/sbintuitionsbot
+User-agent: SBIntuitionsBot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/scrapy
+User-agent: Scrapy
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/screaming-frog-seo-spider
+User-agent: Screaming Frog SEO Spider
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/searchatlas-bot
+User-agent: SearchAtlas Bot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/sebot-wa
+User-agent: SEBot-WA
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbot
+User-agent: SemrushBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbot-ba
+User-agent: SemrushBot-BA
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbot-ct
+User-agent: SemrushBot-CT
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbot-ocob
+User-agent: SemrushBot-OCOB
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbot-sa
+User-agent: SemrushBot-SA
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbot-si
+User-agent: SemrushBot-SI
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/semrushbotbacklinks
+User-agent: SemrushBotBacklinks
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/senutobot
+User-agent: Senutobot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/seo-audit-check-bot
+User-agent: seo-audit-check-bot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/seo4ajax
+User-agent: seo4ajax
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/seo4ajax-com
+User-agent: seo4ajax.com
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/seobilitybot
+User-agent: SeobilityBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/seokicks
+User-agent: SEOkicks
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/seolizer
+User-agent: SEOlizer
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/serankingbacklinksbot
+User-agent: SERankingBacklinksBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/serpminerbot
+User-agent: SerpMinerBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/serpstatbot
+User-agent: serpstatbot
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/serverhunterspider
+User-agent: ServerHunterSpider
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/shapbot
+User-agent: ShapBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/siteauditbot
+User-agent: SiteAuditBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/sitebulb
+User-agent: Sitebulb
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/sitecheck-sitecrawl
+User-agent: SiteCheck-sitecrawl
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/sitecheckerbotcrawler
+User-agent: SiteCheckerBotCrawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/sitegurucrawler
+User-agent: SiteGuruCrawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/siteimprove-crawl
+User-agent: Siteimprove Crawl
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/siteliner
+User-agent: Siteliner
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/spider
+User-agent: Spider
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/statsdronebot
+User-agent: StatsDroneBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/statusnestbacklinkspider
+User-agent: StatusNestBacklinkSpider
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/storebot-google
+User-agent: Storebot-Google
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/tavilybot
+User-agent: TavilyBot
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/terra-cotta
+User-agent: Terra Cotta
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/terracotta
+User-agent: TerraCotta
+Disallow: /
+
+# Scraper
+# https://knownagents.com/agents/thinkbot
+User-agent: Thinkbot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/timpibot
+User-agent: Timpibot
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/velenpublicwebcrawler
+User-agent: VelenPublicWebCrawler
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/w3-validator-services
+User-agent: W3 Validator Services
+Disallow: /
+
+# AI Data Scraper
+# https://knownagents.com/agents/webzio-extended
+User-agent: webzio-extended
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/woorankreview
+User-agent: woorankreview
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/xovionpagecrawler
+User-agent: XoviOnpageCrawler
+Disallow: /
+
+# AI Data Provider
+# https://knownagents.com/agents/youbot
+User-agent: YouBot
+Disallow: /
+
+# SEO Crawler
+# https://knownagents.com/agents/zoombot
+User-agent: Zoombot
+Disallow: /
+
+Sitemap: https://hinchley.net/sitemap.xml

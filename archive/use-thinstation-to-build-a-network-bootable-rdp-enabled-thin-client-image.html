@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Use Thinstation to Build a Network-Bootable RDP-Enabled Thin Client Image</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Use Thinstation to Build a Network-Bootable RDP-Enabled Thin Client Image</h1>
+    </header>
+    <main class="archive">
+      <p>In this post I will provide an overview of the steps required to build a PXE-enabled RDP client using <a href="http://thinstation.github.io/thinstation/">Thinstation</a>.</p>
+      <h2 id="overview">Overview</h2>
+      <p>Thinstation is an open source thin client-solution based on Crux Linux. The framework can be used to build streamlined network-bootable images that support a range of connectivity options, such as Microsoft RDP, Citrix ICA, and VMware View.</p>
+      <p>In this post I will describe how to configure two thin-client images. The first image will allow users to establish a Remote Desktop session to a Windows Server using the FreeRDP client. The second image will allow users to launch individual applications published using <a href="https://technet.microsoft.com/en-au/library/cc755055.aspx">RemoteApp</a> (also served via a FreeRDP client). The applications will be accessed via a Remote Desktop Web Access Portal using Google Chrome running in "kiosk" mode.</p>
+      <h2 id="requirements">Requirements</h2>
+      <p>The scenarios presented in this article require the following:</p>
+      <ul>
+        <li>A server with the <a href="https://technet.microsoft.com/en-us/library/hh831764.aspx">Windows Deployment Services</a> (WDS) and IIS features enabled (where the WDS root folder is <code>C:\RemoteInstall</code> and the IIS document root is <code>C:\Inetpub\wwwroot</code>).</li>
+      </ul>
+      <p>As an alternative to (standalone) WDS, you could also use a PXE-enabled Microsoft SCCM distribution point, a dedicated deployment of <a href="http://www.syslinux.org/wiki/index.php/PXELINUX">PXELINUX</a>, or some other PXE service provider. You can also switch out IIS for another web server if you prefer.</p>
+      <p>Note: If you use a PXE-enabled distribution point, ensure that you don't enable <a href="https://technet.microsoft.com/en-us/library/gg712337.aspx">unknown computer</a> support, as this will prevent SCCM from passing all PXE requests through to WDS (even when using DHCP option 67 to target a specific boot program).</p>
+      <ul>
+        <li><p>A DHCP server (including the ability to create DHCP reservations and configure scope/client options).</p></li>
+        <li>
+          <p>A hypervisor that can be used for running a virtual Linux client (I will use <a href="http://www.vmware.com/au/products/fusion">VMware Fusion</a>).</p>
+        </li>
+        <li><p>A computer that will be used as the thin-client workstation.</p></li>
+        <li><p>A functional Remote Desktop Server farm (required for testing the second thin-client image).</p></li>
+      </ul>
+      <h2 id="windows-deployment-services">Windows Deployment Services</h2>
+      <p>Even though we are using WDS, we still require access to components of PXELINUX to support the network boot of a Linux image. The relevant files can be obtained via <a href="http://www.syslinux.org/wiki/index.php/SYSLINUX">syslinux</a>. We will use <a href="https://www.kernel.org/pub/linux/utils/boot/syslinux/4.xx/syslinux-4.07.zip">version 4.07</a> (as external dependencies are required with later releases).</p>
+      <p>Extract the syslinux package to <code>C:\syslinux-4.07</code> on the WDS server, and perform these steps:</p>
+      <ol>
+        <li>
+          <p>Copy the following files to <code>C:\RemoteInstall\Boot\x64</code>:</p>
+          <ul>
+            <li><code>C:\syslinux-4.07\core\pxelinux.0</code></li>
+            <li><code>C:\syslinux-4.07\com32\menu\vesamenu.c32</code></li>
+            <li><code>C:\syslinux-4.07\com32\chain\chain.c32</code></li>
+            <li><code>C:\syslinux-4.07\memdisk\memdisk</code></li>
+          </ul>
+        </li>
+        <li>Rename <code>C:\RemoteInstall\Boot\x64\pxelinux.0</code> to <code>pxelinux.com</code>.</li>
+        <li>Copy <code>C:\RemoteInstall\Boot\x64\abortpxe.com</code> to <code>abortpxe.0</code>.</li>
+        <li>Copy <code>C:\RemoteInstall\Boot\x64\pxeboot.n12</code> to <code>pxeboot.0</code>.</li>
+        <li>Repeat the above steps, replacing all references to <em>x64</em> with <em>x86</em>.</li>
+        <li>Create a folder named <code>C:\RemoteInstall\Boot\pxelinux.cfg</code> (yes, it is a folder).</li>
+        <li>From an elevated command prompt, change into <code>C:\RemoteInstall\Boot\x64</code> and create a junction: <code>mklink /J pxelinux.cfg C:\RemoteInstall\Boot\pxelinux.cfg</code></li>
+        <li>Repeat the previous step from <code>C:\RemoteInstall\Boot\x86</code>.</li>
+        <li>Create a folder named <code>C:\RemoteInstall\Images\Linux</code>.</li>
+        <li>From an elevated command prompt, change into <code>C:\RemoteInstall\Boot\x64</code> and create a junction: <code>mklink /J Linux C:\RemoteInstall\Images\Linux</code></li>
+        <li>Repeat the previous step from <code>C:\RemoteInstall\Boot\x86</code>.</li>
+        <li>
+          <p>Create a file named <em>default</em> under <code>C:\RemoteInstall\Boot\pxelinux.cfg</code> and add the following content:</p>
+          <pre><code>DEFAULT       RDP
+ PROMPT       0
+ NOESCAPE     1
+ ALLOWOPTIONS 0
+LABEL RDP
+ MENU DEFAULT
+ KERNEL /Linux/vmlinuz
+ APPEND initrd=/Linux/initrd splash=silent,theme:default load_ramdisk=1 ramdisk_blocksize=4096 root=/dev/ram0 ramdisk_size=786432 loglevel=3 console=tty1 vt.global_cursor_default=0 LM=3</code></pre>
+        </li>
+      </ol>
+      <p>To switch the default boot programs used by WDS to PXELINUX, you could run the following commands from an elevated command prompt on the WDS server:</p>
+      <pre><code>wdsutil /set-server /bootprogram:boot\x86\pxelinux.com /architecture:x86
+wdsutil /set-server /N12bootprogram:boot\x86\pxelinux.com /architecture:x86
+wdsutil /set-server /bootprogram:boot\x64\pxelinux.com /architecture:x64
+wdsutil /set-server /N12bootprogram:boot\x64\pxelinux.com /architecture:x64</code></pre>
+      <p>This step isn't required if you are using a PXE-enabled distribution point, as SCCM takes over WDS and ignores the natively configured settings. Nor is the step required if you will use DHCP options 66 and 67 to specifically direct a client to use the PXELINUX boot program (more on this later).</p>
+      <p>Note: The following commands will restore the default WDS boot programs (in case you need to roll back):</p>
+      <pre><code>wdsutil /set-server /bootprogram:boot\x86\pxeboot.com /architecture:x86
+wdsutil /set-server /N12bootprogram:boot\x86\pxeboot.n12 /architecture:x86
+wdsutil /set-server /bootprogram:boot\x64\pxeboot.com /architecture:x64
+wdsutil /set-server /N12bootprogram:boot\x64\pxeboot.n12 /architecture:x64</code></pre>
+      <h2 id="build-environment">Build Environment</h2>
+      <p>The next step is to configure the environment we will use for creating our thin-client image. Fortunately, Thinstation comes with a pre-configured build environment called <a href="http://sourceforge.net/projects/thinstation/files/latest/download">DevStation</a> (direct download of approx. 180MB).</p>
+      <p>Note: The notes in this article were based on DevStation 5.4.2.</p>
+      <p>I created a virtual machine on my Mac using VMware Fusion for hosting DevStation. I used an x64 Linux 2.6.x operating system profile with the following specifications: 2 cores, 2GB RAM, and a 20GB disk. You can of course achieve the same effect with another hypervisor, such as <a href="https://www.virtualbox.org">VirtualBox</a>, <a href="http://www.vmware.com/au/products/workstation">VMware Workstation</a> or Hyper-V.</p>
+      <p>After booting the virtual machine from the downloaded media, follow these steps to install DevStation (internet access is required):</p>
+      <ol>
+        <li>Acknowledge the installation notes.</li>
+        <li>Agree to use disk <code>/dev/sda</code>.</li>
+        <li>Set a timezone. I used <em>Australia/Sydney</em>.</li>
+        <li>Set a locale. I used <em>en_US</em>.</li>
+        <li>Agree to erasing the disk.</li>
+        <li>Wait until the installation is completed (approx. 20 minutes).</li>
+        <li>Acknowledge the post-installation notes.</li>
+      </ol>
+      <p>After rebooting the virtual machine (you will be logged in automatically), double-click the <em>Terminal Chroot</em> shortcut on the desktop and then change into the <code>/build</code> directory.</p>
+      <p>At this point we are ready to create a custom thin-client image.</p>
+      <h2 id="device-drivers">Device Drivers</h2>
+      <p>The first step is to identify the device drivers required by our target platform (i.e. the system that will run the thin-client). In the context of this article, I will assume the client is a Hyper-V virtual machine, but in practice, you would probably use a lightweight desktop or thin-client terminal.</p>
+      <p>To identify the specific drivers required by our client we will:</p>
+      <ol>
+        <li>Build an image that includes all drivers natively supported by Thinstation.</li>
+        <li>Boot the image on our target device and run a script that identifies which of the available drivers are loaded.</li>
+        <li>Use the information collected in the previous step to build a hardware profile within DevStation.</li>
+        <li>Build a new image based on the custom hardware profile.</li>
+      </ol>
+      <p>To start, from our existing Terminal session, run the following two commands to create a clean build configuration:</p>
+      <pre><code>rm build.conf
+cp build.con.example build.conf</code></pre>
+      <p>Edit <em>build.conf</em> (use <em>vi</em> or <em>vim</em>) and uncomment (remove the #) from the line containing <em>package extensions-x</em>. Save the file and use the following command to build an image that includes all available drivers: <code>./build --allmodules</code></p>
+      <p>Note: Enter <em>Y</em> when prompted to install Chrome.</p>
+      <p>Although we intend to use WDS to boot our thin-client image, in this instance we will actually use the PXE server built into DevStation. This is because we need the hardware profile data to be copied to DevStation, and the script we will use to collect the data is preconfigured to post the results back to the PXE server that booted the client.</p>
+      <p>To direct the client to use the PXE server on the DevStation system, create a DHCP reservation for the client and configure DHCP options 66 and 67. Set option 66 to the name or IP address assigned to DevStation, and set option 67 to <code>boot/pxelinux/pxelinux.0</code>.</p>
+      <p>Note: To get the IP address of the DevStation system, run <em>ifconfig</em> from the Terminal.</p>
+      <p>There are a few additional requirements:</p>
+      <ul>
+        <li>The client system must be configured for network boot (may require a change to the boot order in the BIOS).</li>
+        <li>The system must be able to retrieve an IP address from a DHCP server.</li>
+        <li>If using Hyper-V, the guest must be configured with a legacy network adapter.</li>
+      </ul>
+      <p>Now boot the client. If you've configured everything correctly, the system should receive an IP address and immediately commence booting from the network. After a short delay during which the image is downloaded, you should see the default Thinstation desktop.</p>
+      <p>Before we proceed further, switch back to DevStation, and from the Terminal, run the following command to allow write access to the TFTP root directory: <code>chmod 777 /build/boot-images/pxe</code></p>
+      <p>Now, back on the client, assuming it booted as planned, open a Terminal session (from the <em>Applications</em> menu, select <em>Utilities</em> and <em>Terminal Emulator</em>) and run the following command to generate a hardware profile: <code>/bin/hwlister.sh</code></p>
+      <p>The results should be posted back to the TFTP root on the DevStation system. In my case, a file named <em>module.list</em> was created, but you may also see <em>package.list</em> and/or <em>firmware.list</em>.</p>
+      <p>At this point you can shutdown the client (e.g. <code>shutdown -halt</code>).</p>
+      <p>On the DevStation system, run the following commands to create a new hardware profile named <em>Hyper-V</em> based on the collected data (replace <em>Hyper-V</em> with a name representing your target device model):</p>
+      <pre><code>mkdir /build/machine/Hyper-V
+cd /build/machine/Hyper-V
+mv /build/boot-images/pxe/*.list .
+chmod 755 /build/boot-images/pxe</code></pre>
+      <p>We will modify the build to incorporate the new hardware profile in the next section.</p>
+      <h2 id="rdp-client">RDP Client</h2>
+      <p>We will now modify the build to create a minimal RDP-enabled thin-client.</p>
+      <p>Change back to the <code>/build</code> directory and edit <em>build.conf</em>:</p>
+      <ul>
+        <li>Under the <em>#!Hardware</em> section, comment out all lines beginning with <em>machine</em>, and add a new line of <em>machine Hyper-V</em> (replacing <em>Hyper-V</em> with the name of the profile created in the previous section).</li>
+        <li>Under the <em>#!!File System Support</em> section, comment out <em>module usb-storage</em>, <em>isofs</em> and <em>udf</em>.</li>
+        <li>Under <em>#Miscellaneous</em> comment out <em>package network manager</em> and add a new line of <em>package autonet</em>. Also re-comment out <em>package extensions-x</em>.</li>
+        <li>Under <em>#!!X related</em> comment out <em>package xorg7-vmware</em>.</li>
+        <li>Under <em>#!!Locale</em> comment out all locale packages other than <em>package locale-en_US</em>.</li>
+        <li>Under <em>#!Applications</em> comment out <em>package chrome</em> and <em>package open-vm-tools</em>.</li>
+        <li>Under <em>#!!Window Managers</em> comment out <em>package xfwm4</em>, <em>package xfce4-power-manager</em>, <em>package terminal</em> and <em>package thunar</em>.</li>
+        <li>Under <em>#!!Basic</em> uncomment <em>param fastboot</em> and modify the value assigned to <em>param rootpasswd</em>.</li>
+      </ul>
+      <p>The remainder of the configuration will occur in a file named <em>thinstation.conf.buildtime</em>. First, let's take a backup of the original: <code>cp thinstation.conf.buildtime thinstation.conf.buildtime.original</code></p>
+      <p>Now edit <em>thinstation.conf.buildtime</em> and:</p>
+      <ul>
+        <li>Delete the line: <em>SESSION_0_TYPE=xfwm4</em></li>
+        <li>Change <em>TIME_ZONE=America/Los_Angeles</em> to <em>TIME_ZONE=Australia/Sydney</em> (or a value appropriate for your environment).</li>
+        <li>Delete the line: <em>USB_STORAGE_SYNC=on</em></li>
+        <li>Add the following lines:</li>
+      </ul>
+      <pre><code>SESSION_0_TITLE=&quot;RDP&quot;
+SESSION_0_TYPE=freerdp
+SESSION_0_FREERDP_SERVER=&quot;rdp.lab.hinchley.net&quot;
+SESSION_0_FREERDP_OPTIONS=&quot;/d:'lab.hinchley.net' /u:'' /bpp:16 /cert-ignore -sec-nla&quot;
+FASTBOOT_URL=&quot;http://10.0.0.100/&quot;</code></pre>
+      <p>Note: Replace <em>rdp.lab.hinchley.net</em> with the name of the target RDP server, replace <em>lab.hinchley.net</em> with the name of your Active Directory domain (against which users will authenticate), and replace <em>10.0.0.100</em> with the name or IP address of your IIS web server.</p>
+      <p>By default, the FreeRDP client will attempt to automatically connect to the target RDP server. To prevent this behaviour, and to show an X-window logon dialog instead, run the following command: <code>touch /build/packages/freerdp/etc/cmd/freerdp.getuser</code></p>
+      <p>We will now apply some simple branding. Firstly, to use a custom splash screen (shown during boot), replace the file named <em>silent.jpg</em> within every folder under <code>/build/utils/tools/splash/default</code> (i.e. there is a separate folder for every supported resolution). The dimensions of the image should be based upon the name of the folder.</p>
+      <p>Next, to customise the logo displayed on the RDP logon dialog, change the following image: <code>/build/packages/freerdp/lib/icons/hicolor/32x32/apps/freerdp.png</code>. Note: The dimensions of the image must be 32x32 pixels.</p>
+      <p>Finally, to customise the title of the RDP logon dialog (changing from "Preparing to Run FreeRDP"), edit <code>/build/packages/base/etc/dialog.functions</code> and replace <em>Preparing to run '$DIALOG_TITLE'</em> with something appropriate. I used <em>Connect to LAB</em>.</p>
+      <p>We are now ready to build the thin-client image. From the <code>/build</code> directory run: <code>./build</code></p>
+      <p>When the build completes, copy the <em>initrd</em> and <em>vmlinuz</em> files from <code>/thinstation/build/boot-images/pxe/boot/</code> to <code>C:\RemoteInstall\Boot\x64\Linux</code> on the WDS server. The <em>vmlinuz</em> file will be approximately 10MB.</p>
+      <p>Note: If using File Manager on the DevStation system to copy the files, enter a path of <code>smb://wds/c$/RemoteInstall/Boot/x64/Linux</code> (where <em>wds</em> is the address of your WDS server).</p>
+      <h2 id="fast-boot-and-iis">Fast Boot and IIS</h2>
+      <p>In the previous section, we enabled support for <em>fastboot</em> in <em>build.conf</em>. This feature allows us to download a significant portion of the thin-client image via HTTP (instead of TFTP) - thereby reducing boot time. For this to work, there are a few prerequisites:</p>
+      <ul>
+        <li>Firstly, we need a web server. I will assume you are using IIS.</li>
+        <li>Secondly, we need to add support into IIS for the <em>.squash</em> file type. To do this, using IIS Manager, select the Default Web Site, click the option to add a new MIME type, and set the filename extension to <em>.squash</em> and the MIME type to <em>application/octet-stream</em>.</li>
+        <li>Confirm that Anonymous access is enabled (at least on the web site root).</li>
+        <li>Using File Manager on the DevStation system, copy <code>/thinstation/build/boot-images/pxe/boot/lib.squash</code> to <code>C:\Inetpub\wwwroot</code> on the IIS web server (approx. 75MB).</li>
+      </ul>
+      <h2 id="rdp-server">RDP Server</h2>
+      <p>Our thin-client will use the <a href="http://www.freerdp.com">FreeRDP</a> client to connect to our target RDP server. To ensure that users connecting via the client are prompted to change their password when it is expired, we will need to disable <a href="https://en.wikipedia.org/wiki/Network_Level_Authentication">NLA</a> on the RDP server. This setting can be configured by opening <em>Control Panel</em>, <em>System and Security</em>, <em>System</em>, selecting <em>Remote Settings</em>, and then deselecting the option to <em>Allow connections only from computers running Remote Desktop with Network Level Authentication</em>.</p>
+      <h2 id="pxe-configuration">PXE Configuration</h2>
+      <p>We are almost ready to boot the thin-client. If you are using a standard WDS instance, it should be sufficient to just remove DHCP options 66 and 67 from the client reservation previously created. However, if you are using a PXE-enabled distribution point, or you just want to be explicit (and avoid DevStation from responding ahead of WDS), reconfigure DHCP options 66 and 67 so that option 66 references the name or IP address of the WDS server, and option 67 is set to <code>boot/x64/pxelinux.com</code>.</p>
+      <h2 id="testing">Testing</h2>
+      <p>Start the client. Just as before, it should obtain an IP address and then immediately initiate a network boot. Unlike before, the TFTP download will complete in only a few seconds, after which the custom splash screen will be displayed, and then the remainder of the thin-client image will be downloaded from IIS over HTTP.</p>
+      <p>If everything works as expected, the splash screen will be replaced by a single RDP logon dialog. Enter the username and password of a user authorised for access to the configured server, and click OK (the domain should not be entered, as this was configured within <em>thinstation.conf.buildtime</em>). With any luck, you will be seamlessly authenticated to a full-screen session on the server.</p>
+      <h2 id="remote-desktop-web-access">Remote Desktop Web Access</h2>
+      <p>Now that we have a working RDP thin-client solution, let's create another image that can be used to connect to a Microsoft Remote Desktop Server farm.</p>
+      <p>This is a summary of the approach:</p>
+      <ul>
+        <li>We will create a new image that includes the FreeRDP client and Google Chrome.</li>
+        <li>Google Chrome will be configured to run in "kiosk" mode.</li>
+        <li>The browser will be configured to automatically connect to a Remote Desktop Web Access Portal.</li>
+        <li>After the user authenticates to the Portal (typically via forms-based authentication), they will be presented with a list of published applications.</li>
+        <li>Upon clicking the shortcut to an application, an RDP file will be downloaded (it will contain the required connection details).</li>
+        <li>Chrome will be configured to automatically invoke the FreeRDP client when an RDP file is downloaded.</li>
+        <li>The path to the RDP file will be passed to the client (along with other default connection parameters).</li>
+        <li>The client will use the RemoteApp protocol to display the requested application (running as an independent window).</li>
+      </ul>
+      <p>Unfortunately, as of the present time, there are a few shortcomings in this solution:</p>
+      <ol>
+        <li>I wasn't able to enable single sign-on between the Remote Desktop Web Access Portal and a RemoteApp session. Nor was I able to enable single sign-on between RemoteApp sessions. i.e. A user must authenticate to retrieve the list of published applications, and then re-authenticate whenever an application is launched.</li>
+        <li>Due to a bug in the FreeRDP client packaged with Thinstation 5.4.2, the mouse did not work properly within a RemoteApp session. Note: This issue could be addressed by using the most recent version of FreeRDP (i.e. compiling form the latest source).</li>
+      </ol>
+      <p>Note: This article will not describe the steps required to setup or configure a Remote Desktop solution; only the steps required to configure the Thinstation image are presented.</p>
+      <p>Let's start by saving the previously modified <em>build.conf</em> and <em>thinstation.conf.buildtime</em> configuration files:</p>
+      <pre><code>cd /build
+cp build.conf build.conf.rdp
+cp thinstation.conf.buildtime thinstation.conf.buildtime.rdp</code></pre>
+      <p>Now edit <em>build.conf</em> and under <em>#!Applications</em> uncomment <em>#package chrome</em>.</p>
+      <p>Edit <em>thinstation.conf.buildtime</em> and replace the <em>SESSION_0</em> lines previously added with the following:</p>
+      <pre><code>SESSION_0_TITLE=&quot;KIOSK&quot;
+SESSION_0_TYPE=chrome
+SESSION_0_CHROME_HOMEPAGE=&quot;https://rdp.lab.hinchley.net/RDWeb&quot;
+SESSION_0_CHROME_OPTIONS=&quot;--ignore-certificate-errors --kiosk --start-full-screen --test-type&quot;</code></pre>
+      <p>You will also need to replace <code>https://rdp.lab.hinchley.net/RDWeb</code> with the URL of your Remote Desktop Web Access server.</p>
+      <p>The final step is to configure Chrome to automatically invoke the FreeRDP client when an RDP file is downloaded. We can do this by editing <code>/build/packages/gnome-core/bin/xdg-open</code> and adding the following code immediately under the line which executes <em>detectDE</em>:</p>
+      <pre><code>if test ${url##*.} = &quot;rdp&quot;; then
+  /bin/xfreerdp &quot;$url&quot; /cert-ignore /sec:rdp
+  exit 0
+fi</code></pre>
+      <p>We also need to ensure the above association is invoked automatically (to avoid the user from being prompted to open RDP files). This is controlled via a preference in Chrome which can be configured by creating a file named <code>/build/packages/chrome/etc/chrome/Default/Preferences</code> with the following content:</p>
+      <pre><code>{&quot;account_id_migration_state&quot;:2,&quot;account_tracker_service_last_update&quot;:&quot;13097285309636958&quot;,&quot;download&quot;:{&quot;directory_upgrade&quot;:true,&quot;extensions_to_open&quot;:&quot;rdp&quot;}}</code></pre>
+      <p>To build the new image, rerun: <code>./build</code></p>
+      <p>Note: The introduction of Chrome will add approximately 70MB to the image.</p>
+      <h2 id="dual-boot">Dual Boot</h2>
+      <p>At this point we could deploy our new image by copying the updated <em>initrd</em> to the WDS server, and <em>lib.squash</em> to the web server (<em>vmlinuz</em> won't be changed by the rebuild). However, we can also make a few changes to our WDS configuration to allow users to boot either image.</p>
+      <p>Let's start by editing <code>C:\RemoteInstall\Boot\x64\pxelinux.cfg\default</code> on the WDS server and replacing the existing content with the following:</p>
+      <pre><code>DEFAULT       vesamenu.c32
+ PROMPT       0
+ NOESCAPE     1
+ ALLOWOPTIONS 0
+ TIMEOUT 300
+ MENU MARGIN 10
+ MENU ROWS 16
+ MENU TABMSGROW 21
+ MENU TIMEOUTROW 26
+ MENU COLOR BORDER 30;44 #20ffffff #00000000 none
+ MENU COLOR SCROLLBAR 30;44 #20ffffff #00000000 none
+ MENU COLOR TITLE 0 #ffffffff #00000000 none
+ MENU COLOR SEL 30;47 #40000000 #20ffffff
+ MENU TITLE Boot Menu
+ #---
+ LABEL RDP
+ MENU DEFAULT
+ KERNEL /Linux/vmlinuz
+ APPEND initrd=/Linux/initrd splash=silent,theme:default load_ramdisk=1 ramdisk_blocksize=4096 root=/dev/ram0 ramdisk_size=786432 loglevel=3 console=tty1 vt.global_cursor_default=0 LM=3
+ #---
+ LABEL KIOSK
+ MENU LABEL Kiosk
+ KERNEL /Linux/vmlinuz
+ APPEND initrd=/Linux/initrdk splash=silent,theme:default load_ramdisk=1 ramdisk_blocksize=4096 root=/dev/ram0 ramdisk_size=786432 loglevel=3 console=tty1 vt.global_cursor_default=0 LM=3</code></pre>
+      <p>Now, go back to DevStation and edit <em>thinstation.conf.build</em> and update <em>FASTBOOT_URL</em> to end in <em>kiosk</em> (for example: <code>http://10.0.0.100/kiosk</code>), and then rebuild the solution.</p>
+      <p>After the build completes, rename <code>/thinstation/build/boot-images/pxe/boot/initrd</code> to <em>initrdk</em> and copy it to the following folder on the WDS server: <code>C:\RemoteInstall\Boot\x64\Linux</code></p>
+      <p>Also copy <em>lib.squash</em> to a new folder named <code>C:\inetpub\wwwroot\kiosk</code> on the web server.</p>
+      <p>Now when you boot the client you should see a boot menu with two options. The first, named <em>RDP</em>, will initiate the boot of our first image, and the second, name <em>Kiosk</em>, will initiate the build of the image with Chrome. The first option is configured as the default, and will be automatically invoked after 30 seconds.</p>
+      <p>Try booting the client, select <em>Kiosk</em> from the boot menu, and cross your fingers. If all goes well, Chrome should open fullscreen at the logon page of your Remote Desktop Web Access Portal. Log in, and open an application. Assuming you have disabled NLA on your farm, after you (re)authenticate, the requested application will be displayed.</p>
+      <h2 id="extend-boot-menu">Extend Boot Menu</h2>
+      <p>It's possible to extend the boot menu (by modifying <code>C:\RemoteInstall\Boot\x64\pxelinux.cfg\default</code>) to include additional options, such as booting an ISO, or a binary image, passing through to WDS (if your PXE server is using WDS), or cancelling the PXE request and booting off the local hard drive. The following example configuration includes all of these options:</p>
+      <pre><code>DEFAULT       vesamenu.c32
+ PROMPT       0
+ NOESCAPE     1
+ ALLOWOPTIONS 0
+ TIMEOUT 300
+ MENU MARGIN 10
+ MENU ROWS 16
+ MENU TABMSGROW 21
+ MENU TIMEOUTROW 26
+ MENU COLOR BORDER 30;44  #20ffffff #00000000 none
+ MENU COLOR SCROLLBAR 30;44 #20ffffff #00000000 none
+ MENU COLOR TITLE 0     #ffffffff #00000000 none
+ MENU COLOR SEL   30;47   #40000000 #20ffffff
+ #MENU BACKGROUND MyMenuBackgroundPicture640x480.jpg
+ MENU TITLE Boot Menu
+ #---
+ LABEL RDP
+ MENU DEFAULT
+ KERNEL /Linux/vmlinuz
+ APPEND initrd=/Linux/initrd splash=silent,theme:default load_ramdisk=1 ramdisk_blocksize=4096 root=/dev/ram0 ramdisk_size=786432 loglevel=3 console=tty1 vt.global_cursor_default=0 LM=3
+ #---
+ LABEL KIOSK
+ MENU LABEL Kiosk
+ KERNEL /Linux/vmlinuz
+ APPEND initrd=/Linux/initrdk splash=silent,theme:default load_ramdisk=1 ramdisk_blocksize=4096 root=/dev/ram0 ramdisk_size=786432 loglevel=3 console=tty1 vt.global_cursor_default=0 LM=3
+ #---
+ LABEL wds
+ MENU LABEL Windows Deployment Services
+ KERNEL pxeboot.0
+ #---
+ LABEL memtest86+bin
+ MENU LABEL Memtest86+ Binary
+ KERNEL /Linux/memtest86+
+ #---
+ LABEL memtest86+iso
+ MENU LABEL Memtest86+ ISO
+ KERNEL /Linux/memtest86+.iso
+ #---
+ LABEL Abort
+ MENU LABEL AbortPXE
+ Kernel abortpxe.0
+ #---
+ LABEL local
+ MENU DEFAULT
+ MENU LABEL Boot from Harddisk
+ LOCALBOOT 0
+ Type 0x80</code></pre>
+      <p>That will do for today. Drop me an email if you have any questions.</p>
+      <h2 id="addendum">Addendum</h2>
+      <p>A few random dot points regarding enhancements implemented to enable network-based dynamic configuration (including the use of multiple monitors and low resolution displays):</p>
+      <ul>
+        <li>Create a folder on an IIS web server named <code>C:\Inetpub\wwwroot\TS5.4</code> and add three files: <em>thinstation.conf.network</em>, <em>thinstation.hosts</em>, and <em>thinstation.conf.group-blind</em>.</li>
+        <li>The file <em>thinstation.conf.network</em> supplements <em>thinstation.conf.buildtime</em> and contains configuration commands for all hosts.</li>
+        <li>The file <em>thinstation.hosts</em> is used to map specific hosts to groups (via MAC address).</li>
+        <li>The file <em>thinstation.conf.group-blind</em> is a configuration file for computers in the group named "blind" (as determined from <em>thinstation.hosts</em>).</li>
+        <li>To support multiple monitors (both connected to a computer using Display Port) and to configure FreeRDP, I added the following commands to <em>thinstation.conf.network</em> (and removed the <code>SESSION_0_*</code> elements from <em>thinstation.conf.buildtime</em>):</li>
+      </ul>
+      <pre><code>USE_XRANDR=TRUE
+XRANDR_OPTIONS=&quot;--output DisplayPort-0 --output DisplayPort-1 --left-of DisplayPort-0&quot;
+SESSION_0_TITLE=&quot;RDP&quot;
+SESSION_0_TYPE=freerdp
+SESSION_0_FREERDP_SERVER=&quot;rdp.lab.hinchley.net&quot;
+SESSION_0_FREERDP_OPTIONS=&quot;/d:'lab.hinchley.net' /u:'' /cert-ignore /sec:tls /multimon&quot;</code></pre>
+      <ul>
+        <li>To get the names of the monitors (if using something other than Display Port), boot up a thinstation system, and from the Terminal, run <em>xrandr</em>.</li>
+        <li>For testing, I added the following to <em>thinstation.hosts</em> (which adds the host with the specified MAC address to the group named <em>BLIND</em>):</li>
+      </ul>
+      <pre><code># HOST  MAC             GROUPS  COMMENTS
+Ts1     7cd30a1da71f    BLIND   # Force low resolution display.</code></pre>
+      <ul>
+        <li>I then specified a resolution in <em>thinstation.conf.group-blind</em> via the following:</li>
+      </ul>
+      <pre><code>SCREEN_RESOLUTION=&quot;800x600&quot;</code></pre>
+      <ul>
+        <li>If using IIS, don't forget to add MIME-type entries for each of the file extensions added above (i.e. <em>.network</em>, <em>.hosts</em> and <em>.group-blind</em> should all be mapped to <em>text/plain</em>).</li>
+        <li>To enable network based configuration I enabled <code>package ts-classic</code> in <em>build.conf</em> and set <code>param baseurl</code> to <code>http://pxe.lab.hinchley.net</code> (where <code>pxe.lab.hinchley.net</code> maps to the IIS web server identified above).</li>
+        <li>I also added <code>NET_FILE_ENABLED=On</code> and <code>NET_FILE_METHOD=wget</code> to <em>thinstation.conf.buildtime</em>.</li>
+        <li>It isn't possible to use a DNS entry for resolving <code>FASTBOOT_URL</code>. Therefore, if you want to avoid tying the variable to a specific IP address (i.e. allowing you to scale the solution to include multiple PXE servers across multiple subnets), you can set a specific address per PXE server by modifying <code>pxelinux.cfg/default</code>. In particular, modify the kernel startup parameters by appending the <code>FASTBOOT_URL</code> parameter. For example:</li>
+      </ul>
+      <pre><code>LABEL RDP
+MENU DEFAULT
+KERNEL /Linux/vmlinuz
+APPEND initrd=/Linux/initrd splash=silent,theme:default load_ramdisk=1 ramdisk_blocksize=4096 root=/dev/ram0 ramdisk_size=786432 loglevel=3 console=tty1
+vt.global_cursor_default=0 LM=3 FASTBOOT_URL=http://10.0.0.10/</code></pre>
+      <h2 id="troubleshooting">Troubleshooting</h2>
+      <p>In a "real world" deployment of the Thinstation solution I've described in this post, I encountered a couple of issues when using a monitor connected to the terminal via a KVM switch box with a DisplayPort connector:</p>
+      <ol>
+        <li>When the KVM was used to switch between the terminal and another system, and then back again, the monitor would enter a disconnected state.</li>
+        <li>(After resolving issue 1) When the KVM was used to switch between the terminal and another system, and then back again, the mouse cursor would disappear. The mouse was active (the system would respond to mouse movement and button clicks), but the cursor was invisible. This issue did not occur when using dual monitors.</li>
+      </ol>
+      <p>The solution to both issues was to run a custom script when the terminal detected a change to the status of the DisplayPort (i.e. after the monitor(s) were reconnected when the KVM was switched back to the terminal).</p>
+      <p>Within DevStation, under <code>/build/packages/automount/etc/udev/rules.d</code> I created a file named <em>70-monitor.rules</em> with the following content:</p>
+      <pre><code>KERNEL==&quot;card0&quot;, SUBSYSTEM==&quot;drm&quot;, ENV{DISPLAY}=&quot;:0&quot;, ENV{XAUTHORITY}=&quot;/root/.Xauthority&quot;, RUN+=&quot;/etc/udev/scripts/monitor.sh&quot;</code></pre>
+      <p>Then, under <code>/build/packages/automount/etc/udev/scripts</code> I created a file named <em>monitor.sh</em> with the following content:</p>
+      <pre><code>#! /bin/sh
+xrandr --auto
+xrandr --output DisplayPort-0 --output DisplayPort-1 --left-of DisplayPort-0
+chvt 1 &amp;&amp; chvt 5</code></pre>
+      <p>Note: Use <code>chmod 755 monitor.sh</code> to make the script executable.</p>
+      <p>This script uses <em>xrandr</em> with the <code>--auto</code> switch to detect (and activate) the monitor(s) connected to the terminal via the KVM. It then reconfigures the dual screen layout previously configured at boot (this works when using either one or two monitors). Finally, the script uses <em>chvt</em> to swtich between TTY1 and 5, which was sufficient to force the cursor to reappear. The <em>udev</em> rule, and corresponding script, execute in real-time, and are unnoticed by the user.</p>
+      <footer>
+        <p><span>Published: 2016-01-17</span> <span>Last Updated: 2016-07-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

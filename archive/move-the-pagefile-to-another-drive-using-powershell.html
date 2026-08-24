@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Move the PageFile to Another Drive using PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Move the PageFile to Another Drive using PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p>To use PowerShell to move the pagefile from <code>c:\pagefile.sys</code> to another drive, such as <code>d:\pagefile.sys</code>, use the following PowerShell command:</p>
+      <pre><code>Set-WMIInstance -Class Win32_PageFileSetting -Arguments @{ Name = &quot;D:\pagefile.sys&quot;; InitialSize = 0; MaximumSize = 0; }</code></pre>
+      <footer>
+        <p><span>Published: 2015-09-26</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

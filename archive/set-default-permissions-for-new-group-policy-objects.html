@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Set Default Permissions for New Group Policy Objects</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Set Default Permissions for New Group Policy Objects</h1>
+    </header>
+    <main class="archive">
+      <p>I highly recommend assigning two Active Directory security groups to every new group policy object; one group granting read access, and the other group granting modify access. These groups can be assigned automatically by modifying the security descriptor applied to all new group policies.</p>
+      <p>To grant the <em>gp-read</em> group <em>read</em> access, and the <em>gp-modify</em> group <em>modify</em> access to all new group policy objects, perform the following steps from an elevated command prompt on a system with the Active Directory PowerShell module installed.</p>
+      <p>Note: You must be a member of the Schema Admins group to perform this task.</p>
+      <p>Ideally the process would be performed prior to creating any group policy objects.</p>
+      <pre><code># Get NetBIOS domain name.
+$domain  = Get-ADDomain
+
+# Get SID of &quot;gp-read&quot;.
+$reader = New-Object System.Security.Principal.NTAccount($domain.NetBIOSName, &quot;gp-read&quot;)
+$reader = $reader.Translate([System.Security.Principal.SecurityIdentifier]).value
+
+# Get SID of &quot;gp-modify&quot;.
+$modifier = New-Object System.Security.Principal.NTAccount($domain.NetBIOSName, &quot;gp-modify&quot;)
+$modifier = $modifier.Translate([System.Security.Principal.SecurityIdentifier]).value
+
+# Get existing security descriptor for group policy container from schema partition in Active Directory.
+$descriptor = ($container = Get-ADObject &quot;CN=Group-Policy-Container,CN=Schema,CN=Configuration,$($domain.DistinguishedName)&quot; -Properties defaultSecurityDescriptor). defaultSecurityDescriptor
+
+# Set the access control entry for the *gp-read* group.
+$read = &quot;(A;CI;LCRPLORC;;;$reader)&quot;
+
+# Set the access control entry for the *gp-modify* group.
+$modify = &quot;(A;CI;RPWPCCDCLCLORCWOWDSDDTSW;;;$modifier)&quot;
+
+# Concatenate the access control entries with the existing security descriptor.
+$container | Set-ADObject -Replace @{defaultSecurityDescriptor = &quot;$descriptor$read$modify&quot;;} -Server $domain.PDCEmulator</code></pre>
+      <p>Let's break down the permissions <em>(LCRPLORC)</em> assigned to the <em>gp-read</em> group:</p>
+      <ul>
+        <li>LC: List children</li>
+        <li>RP: Read property</li>
+        <li>LO: List object</li>
+        <li>RC: Read control</li>
+      </ul>
+      <p>And the permissions <em>(RPWPCCDCLCLORCWOWDSDDTSW)</em> assigned to the <em>gp-modify</em> group:</p>
+      <ul>
+        <li>RP: Read property</li>
+        <li>WP: Write property</li>
+        <li>CC: Create child</li>
+        <li>DC: Delete child</li>
+        <li>LC: List children</li>
+        <li>LO: List object</li>
+        <li>RC: Read control</li>
+        <li>WO: Write owner</li>
+        <li>WD: Write DAC</li>
+        <li>SD: Standard delete</li>
+        <li>DT: Delete tree</li>
+        <li>SF: Self write</li>
+      </ul>
+      <p>Refer to <a href="https://docs.microsoft.com/en-us/windows/win32/secauthz/ace-strings">this article</a> for more information on the format of an access control entry within a security descriptor.</p>
+      <footer>
+        <p><span>Published: 2015-10-10</span> <span>Last Updated: 2015-10-13</span></p>
+      </footer>
+    </main>
+  </body>
+</html>

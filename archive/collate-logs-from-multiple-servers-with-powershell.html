@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The personal web site of Pete Hinchley." />
+    <title>Pete Hinchley: Collect Logs from Multiple Servers with PowerShell</title>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="home" href="https://hinchley.net" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="../index.html">Pete Hinchley</a>: Collect Logs from Multiple Servers with PowerShell</h1>
+    </header>
+    <main class="archive">
+      <p class="notice">This is an old post. There are much more efficient methods for performing this task in modern versions of PowerShell.</p>
+      <p>The code in this post is rather simplistic, and very specific to a particular task, but some of the concepts may prove useful to others.</p>
+      <p>The requirement was to copy a specific log file from a large number of servers to a central management server, search the copied logs for a specific error code, and write matched entries - using a prefix to denote the server of origin - to a consolidated &quot;results&quot; file.</p>
+      <p>A few points of interest:</p>
+      <ul>
+        <li>A file name is extracted from a fully qualified file path by splitting the path by backslash, and selecting the last element: <code>$sourcePath.split('\')[-1]</code></li>
+        <li>The <code>Test-Connection</code> cmdlet is used to confirm (by ping) that a server is online.</li>
+        <li>The <code>Tail</code> parameter of the <code>Get-Content</code> cmdlet is used to limit the search to the last "x" lines of each log.</li>
+        <li>A case-insensitive search of each log is performed using the <code>Search-String</code> cmdlet. The <code>AllMatches</code> parameter, as the name suggests, is used to ensure all lines matching the search pattern are retrieved.</li>
+      </ul>
+      <p>Here is the code:</p>
+      <pre><code># An array of servers to be queried.
+$servers = @(&quot;abc.local.net&quot;, &quot;xyz.local.net&quot;)
+
+# The local path (on each remote server) of the log file to be collected.
+$sourcePath = &quot;c:\logs\log.txt&quot;
+
+# The target folder (on the local management server) into which the log files will be collected.
+$targetPath = &quot;c:\archive&quot;
+
+# The path (on the local management server) to the file that will hold the matched log entries.
+$searchResultPath = &quot;C:\logs\results.txt&quot;
+
+# The search term.
+$searchTerm = &quot;critical error&quot;
+
+# The number of lines searched at the end of each log.
+$tail = 100
+
+# Do not change the code below this point.
+
+# Substitute the &quot;admin&quot; share for the local path.
+$sourceSharePath = $sourcePath.Replace(':', '$')
+
+# Get the target file name.
+$targetName = $sourcePath.split('\')[-1]
+
+# Iterate through the list of servers.
+$servers | %{
+  $server = $_
+
+  # Get the UNC path to the source log.
+  $sourceUncPath = &quot;\\$server\$sourceSharePath&quot;
+
+  # Add the server name to the target path.
+  # e.g. log.txt =&gt; log.server.txt
+  $uniqueTargetName = $targetName.Replace(&quot;.&quot;, &quot;-$server.&quot;)
+  $uniqueTargetPath = &quot;$targetPath\$uniqueTargetName&quot;
+
+  # Check if the server is online.
+  if (Test-Connection $server -Count 1 -Quiet) {
+    Write-Host &quot;$server is online.&quot;
+
+    # Check if the source is accessible.
+    if (Test-Path $sourceUncPath) {
+      Write-Host &quot;`tConnected to $server.&quot;
+
+      # Copy the source log to the target folder.
+      Write-Host &quot;`tCopying $sourceUncPath to $uniqueTargetPath.&quot;
+      Copy-Item $sourceUncPath $uniqueTargetPath -Force
+
+      # Seach the tail of the copied log for the pattern.
+      Get-Content $uniqueTargetPath -Tail $tail | Select-String $searchTerm -AllMatches | %{
+        # Prefix the matched content with the name of the source server and add to the results.
+        &quot;$($server): $_&quot; | Out-File -Append $searchResultPath
+      }
+    } else {
+      Write-Host &quot;`tCould not connect to $server.&quot; -foregroundcolor magenta
+    }
+  } else {
+    Write-Host &quot;$server is offline&quot; -foregroundcolor magenta
+  }
+}
+</code></pre>
+      <footer>
+        <p><span>Published: 2013-11-05</span></p>
+      </footer>
+    </main>
+  </body>
+</html>
