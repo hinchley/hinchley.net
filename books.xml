@@ -3,8 +3,18 @@
   <id>tag:hinchley.net,2026:books</id>
   <link rel="alternate" type="text/html" href="https://hinchley.net/books.html" />
   <link rel="self" type="application/atom+xml" href="https://hinchley.net/books.xml" />
-  <updated>2026-08-19T00:00:00Z</updated>
+  <updated>2026-08-29T00:00:00Z</updated>
   <author><name>Pete Hinchley</name></author>
+  <entry>
+    <title>Endurance: Shackleton&#39;s Incredible Voyage - Alfred Lansing</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/books.html#book-2026-08-29-1" />
+    <id>tag:hinchley.net,2026:book-2026-08-29-1</id>
+    <published>2026-08-29T00:00:00Z</published>
+    <updated>2026-08-29T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://en.wikipedia.org/wiki/Endurance:_Shackleton%27s_Incredible_Voyage">Endurance: Shackleton's Incredible Voyage</a> - Alfred Lansing.]]>
+    </content>
+  </entry>
   <entry>
     <title>A Single Man - Christopher Isherwood</title>
     <link rel="alternate" type="text/html" href="https://hinchley.net/books.html#book-2026-08-19-1" />
