@@ -1,5 +1,19 @@
 [
   {
+    "name": "Augustus",
+    "author": "John Williams",
+    "url": "https://en.wikipedia.org/wiki/Augustus_(Williams_novel)",
+    "date": "2026-09-08",
+    "id": "book-2026-09-08-1"
+  },
+  {
+    "name": "In the Heart of the Sea",
+    "author": "Nathaniel Philbrick",
+    "url": "https://en.wikipedia.org/wiki/In_the_Heart_of_the_Sea",
+    "date": "2026-09-05",
+    "id": "book-2026-09-05-1"
+  },
+  {
     "name": "Endurance: Shackleton's Incredible Voyage",
     "author": "Alfred Lansing",
     "url": "https://en.wikipedia.org/wiki/Endurance:_Shackleton%27s_Incredible_Voyage",
