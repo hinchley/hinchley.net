@@ -513,6 +513,11 @@ https://www.keybr.com
 Tools
 2026-01-01
 
+QR Generator
+https://qr.ente.com
+Tools
+2026-09-11
+
 Send to Kindle
 https://www.amazon.com.au/sendtokindle
 Tools
