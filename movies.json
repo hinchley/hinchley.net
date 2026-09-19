@@ -1,5 +1,19 @@
 [
   {
+    "name": "Bronson",
+    "released": "2008",
+    "url": "https://en.wikipedia.org/wiki/Bronson_(film)",
+    "date": "2026-09-19",
+    "id": "movie-2026-09-19-1"
+  },
+  {
+    "name": "Iron Winter",
+    "released": "2025",
+    "url": "https://en.wikipedia.org/wiki/Iron_Winter_(film)",
+    "date": "2026-09-17",
+    "id": "movie-2026-09-17-1"
+  },
+  {
     "name": "The Talented Mr. Ripley",
     "released": "1999",
     "url": "https://en.wikipedia.org/wiki/The_Talented_Mr._Ripley_(film)",

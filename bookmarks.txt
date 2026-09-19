@@ -358,6 +358,11 @@ https://www.mankier.com
 Reference
 2026-01-01
 
+Linus Syscall Table
+https://filippo.io/linux-syscall-table
+Reference
+2026-09-19
+
 Wikipedia
 https://www.wikipedia.org
 Reference
@@ -517,6 +522,11 @@ QR Generator
 https://qr.ente.com
 Tools
 2026-09-11
+
+Readplace
+https://readplace.com
+Tools
+2026-09-19
 
 Send to Kindle
 https://www.amazon.com.au/sendtokindle
