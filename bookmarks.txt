@@ -538,10 +538,10 @@ https://squoosh.app
 Tools
 2026-01-01
 
-Time.fyi
-https://time.fyi
+Time.ms
+https://time.ms
 Tools
-2026-01-01
+2026-09-20
 
 Typing
 https://typ.ing
