@@ -3,18 +3,8 @@
   <id>tag:hinchley.net,2026:bookmarks</id>
   <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html" />
   <link rel="self" type="application/atom+xml" href="https://hinchley.net/bookmarks.xml" />
-  <updated>2026-10-03T00:00:00Z</updated>
+  <updated>2026-09-20T00:00:00Z</updated>
   <author><name>Pete Hinchley</name></author>
-  <entry>
-    <title>Spotify Stats - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-10-03-1" />
-    <id>tag:hinchley.net,2026:bookmark-2026-10-03-1</id>
-    <published>2026-10-03T00:00:00Z</published>
-    <updated>2026-10-03T00:00:00Z</updated>
-    <content type="html">
-      <![CDATA[<a href="https://rigtch.fm">Spotify Stats</a> - Media.]]>
-    </content>
-  </entry>
   <entry>
     <title>Time.ms - Tools</title>
     <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-09-20-1" />
@@ -406,19 +396,9 @@
     </content>
   </entry>
   <entry>
-    <title>X (Cancel) - Forums</title>
+    <title>Ars Technica - IT News</title>
     <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-34" />
     <id>tag:hinchley.net,2026:bookmark-2026-01-01-34</id>
-    <published>2026-01-01T00:00:00Z</published>
-    <updated>2026-01-01T00:00:00Z</updated>
-    <content type="html">
-      <![CDATA[<a href="https://xcancel.com">X (Cancel)</a> - Forums.]]>
-    </content>
-  </entry>
-  <entry>
-    <title>Ars Technica - IT News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-35" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-35</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -427,8 +407,8 @@
   </entry>
   <entry>
     <title>IT News - IT News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-36" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-36</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-35" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-35</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -437,8 +417,8 @@
   </entry>
   <entry>
     <title>The Verge - IT News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-37" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-37</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-36" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-36</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -447,8 +427,8 @@
   </entry>
   <entry>
     <title>Wired - IT News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-38" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-38</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-37" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-37</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -457,8 +437,8 @@
   </entry>
   <entry>
     <title>Coder Musings - Learning</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-39" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-39</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-38" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-38</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -467,8 +447,8 @@
   </entry>
   <entry>
     <title>Making Software - Learning</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-40" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-40</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-39" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-39</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -477,8 +457,8 @@
   </entry>
   <entry>
     <title>Software Construction (MIT) - Learning</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-41" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-41</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-40" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-40</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -487,8 +467,8 @@
   </entry>
   <entry>
     <title>Ambiphone - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-42" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-42</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-41" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-41</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -497,8 +477,8 @@
   </entry>
   <entry>
     <title>Five Books - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-43" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-43</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-42" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-42</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -507,8 +487,8 @@
   </entry>
   <entry>
     <title>Metacritic: New Albums - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-44" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-44</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-43" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-43</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -517,8 +497,8 @@
   </entry>
   <entry>
     <title>My Noise - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-45" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-45</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-44" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-44</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -527,8 +507,8 @@
   </entry>
   <entry>
     <title>Pitchfork - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-46" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-46</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-45" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-45</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -537,8 +517,8 @@
   </entry>
   <entry>
     <title>Spotify - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-47" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-47</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-46" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-46</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -547,8 +527,8 @@
   </entry>
   <entry>
     <title>TV Guide - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-48" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-48</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-47" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-47</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -557,8 +537,8 @@
   </entry>
   <entry>
     <title>Wallhaven - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-49" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-49</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-48" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-48</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -567,8 +547,8 @@
   </entry>
   <entry>
     <title>YouTube - Media</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-50" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-50</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-49" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-49</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -577,8 +557,8 @@
   </entry>
   <entry>
     <title>BGP Tools - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-51" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-51</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-50" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-50</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -587,8 +567,8 @@
   </entry>
   <entry>
     <title>DNS Leak Test - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-52" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-52</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-51" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-51</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -597,8 +577,8 @@
   </entry>
   <entry>
     <title>DNS Lookup - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-53" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-53</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-52" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-52</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -607,8 +587,8 @@
   </entry>
   <entry>
     <title>ifconfig - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-54" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-54</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-53" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-53</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -617,8 +597,8 @@
   </entry>
   <entry>
     <title>MX Toolbox - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-55" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-55</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-54" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-54</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -627,8 +607,8 @@
   </entry>
   <entry>
     <title>Never SSL - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-56" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-56</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-55" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-55</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -637,8 +617,8 @@
   </entry>
   <entry>
     <title>Port Tester - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-57" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-57</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-56" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-56</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -647,8 +627,8 @@
   </entry>
   <entry>
     <title>Web Check - Network Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-58" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-58</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-57" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-57</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -657,8 +637,8 @@
   </entry>
   <entry>
     <title>ABC - News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-59" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-59</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-58" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-58</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -667,8 +647,8 @@
   </entry>
   <entry>
     <title>News as Facts - News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-60" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-60</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-59" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-59</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -677,8 +657,8 @@
   </entry>
   <entry>
     <title>New York Times - News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-61" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-61</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-60" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-60</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -687,8 +667,8 @@
   </entry>
   <entry>
     <title>ProPublica - News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-62" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-62</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-61" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-61</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -697,8 +677,8 @@
   </entry>
   <entry>
     <title>Rest of World - News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-63" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-63</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-62" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-62</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -707,8 +687,8 @@
   </entry>
   <entry>
     <title>Vox - News</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-64" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-64</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-63" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-63</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -717,8 +697,8 @@
   </entry>
   <entry>
     <title>Fastmail - Productivity</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-65" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-65</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-64" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-64</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -727,8 +707,8 @@
   </entry>
   <entry>
     <title>Keeper - Productivity</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-66" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-66</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-65" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-65</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -737,8 +717,8 @@
   </entry>
   <entry>
     <title>Standard Notes - Productivity</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-67" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-67</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-66" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-66</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -746,19 +726,9 @@
     </content>
   </entry>
   <entry>
-    <title>Tweek - Productivity</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-68" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-68</id>
-    <published>2026-01-01T00:00:00Z</published>
-    <updated>2026-01-01T00:00:00Z</updated>
-    <content type="html">
-      <![CDATA[<a href="https://tweek.so">Tweek</a> - Productivity.]]>
-    </content>
-  </entry>
-  <entry>
     <title>C Documentation - Reference</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-69" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-69</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-67" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-67</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -767,8 +737,8 @@
   </entry>
   <entry>
     <title>Google Maps - Reference</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-70" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-70</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-68" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-68</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -777,8 +747,8 @@
   </entry>
   <entry>
     <title>Linux man Pages - Reference</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-71" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-71</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-69" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-69</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -787,8 +757,8 @@
   </entry>
   <entry>
     <title>Wikipedia - Reference</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-72" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-72</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-70" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-70</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -797,8 +767,8 @@
   </entry>
   <entry>
     <title>Brave - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-73" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-73</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-71" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-71</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -807,8 +777,8 @@
   </entry>
   <entry>
     <title>Duck Duck Go - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-74" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-74</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-72" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-72</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -817,8 +787,8 @@
   </entry>
   <entry>
     <title>Google - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-75" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-75</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-73" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-73</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -827,8 +797,8 @@
   </entry>
   <entry>
     <title>Google Search (UDM14) - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-76" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-76</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-74" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-74</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -837,8 +807,8 @@
   </entry>
   <entry>
     <title>Marginalia - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-77" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-77</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-75" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-75</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -847,8 +817,8 @@
   </entry>
   <entry>
     <title>Mwmbl - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-78" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-78</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-76" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-76</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -857,8 +827,8 @@
   </entry>
   <entry>
     <title>Yandex - Search</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-79" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-79</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-77" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-77</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -867,8 +837,8 @@
   </entry>
   <entry>
     <title>ChatGPT - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-80" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-80</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-78" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-78</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -877,8 +847,8 @@
   </entry>
   <entry>
     <title>Claude - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-81" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-81</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-79" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-79</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -887,8 +857,8 @@
   </entry>
   <entry>
     <title>Copilot - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-82" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-82</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-80" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-80</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -897,8 +867,8 @@
   </entry>
   <entry>
     <title>Gemini - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-83" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-83</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-81" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-81</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -907,8 +877,8 @@
   </entry>
   <entry>
     <title>Grok - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-84" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-84</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-82" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-82</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -917,8 +887,8 @@
   </entry>
   <entry>
     <title>Kimi - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-85" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-85</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-83" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-83</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -927,8 +897,8 @@
   </entry>
   <entry>
     <title>Meta.ai - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-86" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-86</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-84" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-84</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -937,8 +907,8 @@
   </entry>
   <entry>
     <title>Mistral - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-87" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-87</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-85" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-85</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -947,8 +917,8 @@
   </entry>
   <entry>
     <title>Perplexity - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-88" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-88</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-86" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-86</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -957,8 +927,8 @@
   </entry>
   <entry>
     <title>Qwen - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-89" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-89</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-87" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-87</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -967,8 +937,8 @@
   </entry>
   <entry>
     <title>Sigma - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-90" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-90</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-88" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-88</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -977,8 +947,8 @@
   </entry>
   <entry>
     <title>Tropes - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-91" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-91</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-89" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-89</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -987,8 +957,8 @@
   </entry>
   <entry>
     <title>Z.ai - Slop</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-92" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-92</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-90" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-90</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -997,8 +967,8 @@
   </entry>
   <entry>
     <title>ANSI 101 - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-93" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-93</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-91" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-91</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1007,8 +977,8 @@
   </entry>
   <entry>
     <title>ASCII Flow - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-94" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-94</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-92" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-92</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1017,8 +987,8 @@
   </entry>
   <entry>
     <title>Base64 - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-95" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-95</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-93" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-93</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1027,8 +997,8 @@
   </entry>
   <entry>
     <title>Compiler Explorer - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-96" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-96</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-94" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-94</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1037,8 +1007,8 @@
   </entry>
   <entry>
     <title>Copy Char - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-97" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-97</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-95" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-95</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1047,8 +1017,8 @@
   </entry>
   <entry>
     <title>C Repl - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-98" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-98</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-96" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-96</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1057,8 +1027,8 @@
   </entry>
   <entry>
     <title>Epoch Converter - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-99" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-99</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-97" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-97</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1067,8 +1037,8 @@
   </entry>
   <entry>
     <title>EPUB to AZW - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-100" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-100</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-98" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-98</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1077,8 +1047,8 @@
   </entry>
   <entry>
     <title>Hemingway - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-101" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-101</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-99" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-99</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1087,8 +1057,8 @@
   </entry>
   <entry>
     <title>Keybr - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-102" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-102</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-100" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-100</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1097,8 +1067,8 @@
   </entry>
   <entry>
     <title>Send to Kindle - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-103" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-103</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-101" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-101</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1107,8 +1077,8 @@
   </entry>
   <entry>
     <title>Squoosh - Tools</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-104" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-104</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-102" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-102</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1117,8 +1087,8 @@
   </entry>
   <entry>
     <title>Bolly - Weather</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-105" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-105</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-103" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-103</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1127,8 +1097,8 @@
   </entry>
   <entry>
     <title>Forecast: BOM - Weather</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-106" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-106</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-104" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-104</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1137,8 +1107,8 @@
   </entry>
   <entry>
     <title>Forecast: YR - Weather</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-107" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-107</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-105" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-105</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1147,8 +1117,8 @@
   </entry>
   <entry>
     <title>Rain Radar - Weather</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-108" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-108</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-106" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-106</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1157,8 +1127,8 @@
   </entry>
   <entry>
     <title>Wind Map - Weather</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-109" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-109</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-107" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-107</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1167,8 +1137,8 @@
   </entry>
   <entry>
     <title>Fireship - YouTube</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-110" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-110</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-108" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-108</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1177,8 +1147,8 @@
   </entry>
   <entry>
     <title>Never to Small - YouTube</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-111" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-111</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-109" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-109</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1187,8 +1157,8 @@
   </entry>
   <entry>
     <title>Nir Lichtman - YouTube</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-112" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-112</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-110" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-110</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1197,8 +1167,8 @@
   </entry>
   <entry>
     <title>Tsoding - YouTube</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-113" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-113</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-111" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-111</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">
@@ -1207,8 +1177,8 @@
   </entry>
   <entry>
     <title>Tsoding Daily - YouTube</title>
-    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-114" />
-    <id>tag:hinchley.net,2026:bookmark-2026-01-01-114</id>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/bookmarks.html#bookmark-2026-01-01-112" />
+    <id>tag:hinchley.net,2026:bookmark-2026-01-01-112</id>
     <published>2026-01-01T00:00:00Z</published>
     <updated>2026-01-01T00:00:00Z</updated>
     <content type="html">

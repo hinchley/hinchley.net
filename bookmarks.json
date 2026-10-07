@@ -1,12 +1,5 @@
 [
   {
-    "name": "Spotify Stats",
-    "url": "https://rigtch.fm",
-    "category": "Media",
-    "date": "2026-10-03",
-    "id": "bookmark-2026-10-03-1"
-  },
-  {
     "name": "Time.ms",
     "url": "https://time.ms",
     "category": "Tools",
@@ -280,570 +273,556 @@
     "id": "bookmark-2026-01-01-33"
   },
   {
-    "name": "X (Cancel)",
-    "url": "https://xcancel.com",
-    "category": "Forums",
-    "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-34"
-  },
-  {
     "name": "Ars Technica",
     "url": "https://arstechnica.com",
     "category": "IT News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-35"
+    "id": "bookmark-2026-01-01-34"
   },
   {
     "name": "IT News",
     "url": "https://www.itnews.com.au",
     "category": "IT News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-36"
+    "id": "bookmark-2026-01-01-35"
   },
   {
     "name": "The Verge",
     "url": "https://www.theverge.com",
     "category": "IT News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-37"
+    "id": "bookmark-2026-01-01-36"
   },
   {
     "name": "Wired",
     "url": "https://www.wired.com",
     "category": "IT News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-38"
+    "id": "bookmark-2026-01-01-37"
   },
   {
     "name": "Coder Musings",
     "url": "https://www.codermusings.com",
     "category": "Learning",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-39"
+    "id": "bookmark-2026-01-01-38"
   },
   {
     "name": "Making Software",
     "url": "https://www.makingsoftware.com",
     "category": "Learning",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-40"
+    "id": "bookmark-2026-01-01-39"
   },
   {
     "name": "Software Construction (MIT)",
     "url": "https://web.mit.edu/6.031",
     "category": "Learning",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-41"
+    "id": "bookmark-2026-01-01-40"
   },
   {
     "name": "Ambiphone",
     "url": "https://ambiph.one",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-42"
+    "id": "bookmark-2026-01-01-41"
   },
   {
     "name": "Five Books",
     "url": "https://fivebooks.com",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-43"
+    "id": "bookmark-2026-01-01-42"
   },
   {
     "name": "Metacritic: New Albums",
     "url": "https://www.metacritic.com/browse/albums/release-date/new-releases/date",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-44"
+    "id": "bookmark-2026-01-01-43"
   },
   {
     "name": "My Noise",
     "url": "https://mynoise.net/noiseMachines.php",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-45"
+    "id": "bookmark-2026-01-01-44"
   },
   {
     "name": "Pitchfork",
     "url": "https://pitchfork.com",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-46"
+    "id": "bookmark-2026-01-01-45"
   },
   {
     "name": "Spotify",
     "url": "https://open.spotify.com",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-47"
+    "id": "bookmark-2026-01-01-46"
   },
   {
     "name": "TV Guide",
     "url": "https://www.yourtv.com.au/guide/canberra/",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-48"
+    "id": "bookmark-2026-01-01-47"
   },
   {
     "name": "Wallhaven",
     "url": "https://wallhaven.cc",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-49"
+    "id": "bookmark-2026-01-01-48"
   },
   {
     "name": "YouTube",
     "url": "https://www.youtube.com",
     "category": "Media",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-50"
+    "id": "bookmark-2026-01-01-49"
   },
   {
     "name": "BGP Tools",
     "url": "https://bgp.tools",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-51"
+    "id": "bookmark-2026-01-01-50"
   },
   {
     "name": "DNS Leak Test",
     "url": "https://dnsleaktest.com",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-52"
+    "id": "bookmark-2026-01-01-51"
   },
   {
     "name": "DNS Lookup",
     "url": "https://dnslookup.online",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-53"
+    "id": "bookmark-2026-01-01-52"
   },
   {
     "name": "ifconfig",
     "url": "https://ifconfig.co",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-54"
+    "id": "bookmark-2026-01-01-53"
   },
   {
     "name": "MX Toolbox",
     "url": "https://mxtoolbox.com/SuperTool.aspx",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-55"
+    "id": "bookmark-2026-01-01-54"
   },
   {
     "name": "Never SSL",
     "url": "http://neverssl.com",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-56"
+    "id": "bookmark-2026-01-01-55"
   },
   {
     "name": "Port Tester",
     "url": "http://portquiz.net",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-57"
+    "id": "bookmark-2026-01-01-56"
   },
   {
     "name": "Web Check",
     "url": "https://web-check.xyz",
     "category": "Network Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-58"
+    "id": "bookmark-2026-01-01-57"
   },
   {
     "name": "ABC",
     "url": "https://www.abc.net.au",
     "category": "News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-59"
+    "id": "bookmark-2026-01-01-58"
   },
   {
     "name": "News as Facts",
     "url": "https://newsasfacts.com",
     "category": "News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-60"
+    "id": "bookmark-2026-01-01-59"
   },
   {
     "name": "New York Times",
     "url": "https://www.nytimes.com",
     "category": "News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-61"
+    "id": "bookmark-2026-01-01-60"
   },
   {
     "name": "ProPublica",
     "url": "https://www.propublica.org",
     "category": "News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-62"
+    "id": "bookmark-2026-01-01-61"
   },
   {
     "name": "Rest of World",
     "url": "https://restofworld.org",
     "category": "News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-63"
+    "id": "bookmark-2026-01-01-62"
   },
   {
     "name": "Vox",
     "url": "https://www.vox.com",
     "category": "News",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-64"
+    "id": "bookmark-2026-01-01-63"
   },
   {
     "name": "Fastmail",
     "url": "https://app.fastmail.com",
     "category": "Productivity",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-65"
+    "id": "bookmark-2026-01-01-64"
   },
   {
     "name": "Keeper",
     "url": "https://www.keepersecurity.com/?data_region=au",
     "category": "Productivity",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-66"
+    "id": "bookmark-2026-01-01-65"
   },
   {
     "name": "Standard Notes",
     "url": "https://app.standardnotes.com",
     "category": "Productivity",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-67"
-  },
-  {
-    "name": "Tweek",
-    "url": "https://tweek.so",
-    "category": "Productivity",
-    "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-68"
+    "id": "bookmark-2026-01-01-66"
   },
   {
     "name": "C Documentation",
     "url": "https://devdocs.io/c/",
     "category": "Reference",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-69"
+    "id": "bookmark-2026-01-01-67"
   },
   {
     "name": "Google Maps",
     "url": "https://www.google.com/maps",
     "category": "Reference",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-70"
+    "id": "bookmark-2026-01-01-68"
   },
   {
     "name": "Linux man Pages",
     "url": "https://www.mankier.com",
     "category": "Reference",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-71"
+    "id": "bookmark-2026-01-01-69"
   },
   {
     "name": "Wikipedia",
     "url": "https://www.wikipedia.org",
     "category": "Reference",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-72"
+    "id": "bookmark-2026-01-01-70"
   },
   {
     "name": "Brave",
     "url": "https://search.brave.com",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-73"
+    "id": "bookmark-2026-01-01-71"
   },
   {
     "name": "Duck Duck Go",
     "url": "https://duckduckgo.com",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-74"
+    "id": "bookmark-2026-01-01-72"
   },
   {
     "name": "Google",
     "url": "https://www.google.com",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-75"
+    "id": "bookmark-2026-01-01-73"
   },
   {
     "name": "Google Search (UDM14)",
     "url": "https://udm14.com",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-76"
+    "id": "bookmark-2026-01-01-74"
   },
   {
     "name": "Marginalia",
     "url": "https://marginalia-search.com",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-77"
+    "id": "bookmark-2026-01-01-75"
   },
   {
     "name": "Mwmbl",
     "url": "https://mwmbl.org",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-78"
+    "id": "bookmark-2026-01-01-76"
   },
   {
     "name": "Yandex",
     "url": "https://yandex.com",
     "category": "Search",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-79"
+    "id": "bookmark-2026-01-01-77"
   },
   {
     "name": "ChatGPT",
     "url": "https://chatgpt.com",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-80"
+    "id": "bookmark-2026-01-01-78"
   },
   {
     "name": "Claude",
     "url": "https://claude.ai",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-81"
+    "id": "bookmark-2026-01-01-79"
   },
   {
     "name": "Copilot",
     "url": "https://copilot.microsoft.com",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-82"
+    "id": "bookmark-2026-01-01-80"
   },
   {
     "name": "Gemini",
     "url": "https://gemini.google.com/app",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-83"
+    "id": "bookmark-2026-01-01-81"
   },
   {
     "name": "Grok",
     "url": "http://grok.com",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-84"
+    "id": "bookmark-2026-01-01-82"
   },
   {
     "name": "Kimi",
     "url": "https://www.kimi.com",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-85"
+    "id": "bookmark-2026-01-01-83"
   },
   {
     "name": "Meta.ai",
     "url": "https://meta.ai",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-86"
+    "id": "bookmark-2026-01-01-84"
   },
   {
     "name": "Mistral",
     "url": "https://chat.mistral.ai/chat",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-87"
+    "id": "bookmark-2026-01-01-85"
   },
   {
     "name": "Perplexity",
     "url": "https://www.perplexity.ai",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-88"
+    "id": "bookmark-2026-01-01-86"
   },
   {
     "name": "Qwen",
     "url": "https://chat.qwen.ai",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-89"
+    "id": "bookmark-2026-01-01-87"
   },
   {
     "name": "Sigma",
     "url": "https://app.sigmabrowser.com/chat",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-90"
+    "id": "bookmark-2026-01-01-88"
   },
   {
     "name": "Tropes",
     "url": "https://tropes.fyi",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-91"
+    "id": "bookmark-2026-01-01-89"
   },
   {
     "name": "Z.ai",
     "url": "https://chat.z.ai",
     "category": "Slop",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-92"
+    "id": "bookmark-2026-01-01-90"
   },
   {
     "name": "ANSI 101",
     "url": "https://www.ansi101.com",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-93"
+    "id": "bookmark-2026-01-01-91"
   },
   {
     "name": "ASCII Flow",
     "url": "https://asciiflow.com",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-94"
+    "id": "bookmark-2026-01-01-92"
   },
   {
     "name": "Base64",
     "url": "https://www.base64.sh",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-95"
+    "id": "bookmark-2026-01-01-93"
   },
   {
     "name": "Compiler Explorer",
     "url": "https://godbolt.org",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-96"
+    "id": "bookmark-2026-01-01-94"
   },
   {
     "name": "Copy Char",
     "url": "https://copychar.cc",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-97"
+    "id": "bookmark-2026-01-01-95"
   },
   {
     "name": "C Repl",
     "url": "https://www.online-cpp.com/online_c_compiler",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-98"
+    "id": "bookmark-2026-01-01-96"
   },
   {
     "name": "Epoch Converter",
     "url": "https://epoch.vercel.app",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-99"
+    "id": "bookmark-2026-01-01-97"
   },
   {
     "name": "EPUB to AZW",
     "url": "https://convertio.co/epub-azw3/",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-100"
+    "id": "bookmark-2026-01-01-98"
   },
   {
     "name": "Hemingway",
     "url": "https://hemingwayapp.com",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-101"
+    "id": "bookmark-2026-01-01-99"
   },
   {
     "name": "Keybr",
     "url": "https://www.keybr.com",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-102"
+    "id": "bookmark-2026-01-01-100"
   },
   {
     "name": "Send to Kindle",
     "url": "https://www.amazon.com.au/sendtokindle",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-103"
+    "id": "bookmark-2026-01-01-101"
   },
   {
     "name": "Squoosh",
     "url": "https://squoosh.app",
     "category": "Tools",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-104"
+    "id": "bookmark-2026-01-01-102"
   },
   {
     "name": "Bolly",
     "url": "https://brolly.sh/forecast/rug3AbnB",
     "category": "Weather",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-105"
+    "id": "bookmark-2026-01-01-103"
   },
   {
     "name": "Forecast: BOM",
     "url": "http://www.bom.gov.au/act/forecasts/canberra.shtml",
     "category": "Weather",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-106"
+    "id": "bookmark-2026-01-01-104"
   },
   {
     "name": "Forecast: YR",
     "url": "https://www.yr.no/en/forecast/daily-table/2-2172517/Australia/Australian%20Capital%20Territory/Canberra",
     "category": "Weather",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-107"
+    "id": "bookmark-2026-01-01-105"
   },
   {
     "name": "Rain Radar",
     "url": "https://theweatherchaser.com/radar/IDR403-canberra",
     "category": "Weather",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-108"
+    "id": "bookmark-2026-01-01-106"
   },
   {
     "name": "Wind Map",
     "url": "https://earth.nullschool.net",
     "category": "Weather",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-109"
+    "id": "bookmark-2026-01-01-107"
   },
   {
     "name": "Fireship",
     "url": "https://www.youtube.com/@Fireship",
     "category": "YouTube",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-110"
+    "id": "bookmark-2026-01-01-108"
   },
   {
     "name": "Never to Small",
     "url": "https://www.youtube.com/@nevertoosmall",
     "category": "YouTube",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-111"
+    "id": "bookmark-2026-01-01-109"
   },
   {
     "name": "Nir Lichtman",
     "url": "https://www.youtube.com/@nirlichtman",
     "category": "YouTube",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-112"
+    "id": "bookmark-2026-01-01-110"
   },
   {
     "name": "Tsoding",
     "url": "https://www.youtube.com/@Tsoding",
     "category": "YouTube",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-113"
+    "id": "bookmark-2026-01-01-111"
   },
   {
     "name": "Tsoding Daily",
     "url": "https://www.youtube.com/@TsodingDaily",
     "category": "YouTube",
     "date": "2026-01-01",
-    "id": "bookmark-2026-01-01-114"
+    "id": "bookmark-2026-01-01-112"
   }
 ]

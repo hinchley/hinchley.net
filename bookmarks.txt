@@ -163,11 +163,6 @@ https://forums.whirlpool.net.au
 Forums
 2026-01-01
 
-X (Cancel)
-https://xcancel.com
-Forums
-2026-01-01
-
 Ars Technica
 https://arstechnica.com
 IT News
@@ -237,11 +232,6 @@ Spotify
 https://open.spotify.com
 Media
 2026-01-01
-
-Spotify Stats
-https://rigtch.fm
-Media
-2026-10-03
 
 TV Guide
 https://www.yourtv.com.au/guide/canberra/
@@ -340,11 +330,6 @@ Productivity
 
 Standard Notes
 https://app.standardnotes.com
-Productivity
-2026-01-01
-
-Tweek
-https://tweek.so
 Productivity
 2026-01-01
 
