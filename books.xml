@@ -3,8 +3,38 @@
   <id>tag:hinchley.net,2026:books</id>
   <link rel="alternate" type="text/html" href="https://hinchley.net/books.html" />
   <link rel="self" type="application/atom+xml" href="https://hinchley.net/books.xml" />
-  <updated>2026-09-23T00:00:00Z</updated>
+  <updated>2026-11-07T00:00:00Z</updated>
   <author><name>Pete Hinchley</name></author>
+  <entry>
+    <title>The Things We Never Say - Elizabeth Strout</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/books.html#book-2026-11-07-1" />
+    <id>tag:hinchley.net,2026:book-2026-11-07-1</id>
+    <published>2026-11-07T00:00:00Z</published>
+    <updated>2026-11-07T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://en.wikipedia.org/wiki/The_Things_We_Never_Say">The Things We Never Say</a> - Elizabeth Strout.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Yesteryear - Caro Claire Burke</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/books.html#book-2026-11-05-1" />
+    <id>tag:hinchley.net,2026:book-2026-11-05-1</id>
+    <published>2026-11-05T00:00:00Z</published>
+    <updated>2026-11-05T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://en.wikipedia.org/wiki/Yesteryear_(novel)">Yesteryear</a> - Caro Claire Burke.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Lonesome Dove - Larry McMurtry</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/books.html#book-2026-10-30-1" />
+    <id>tag:hinchley.net,2026:book-2026-10-30-1</id>
+    <published>2026-10-30T00:00:00Z</published>
+    <updated>2026-10-30T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://en.wikipedia.org/wiki/Lonesome_Dove">Lonesome Dove</a> - Larry McMurtry.]]>
+    </content>
+  </entry>
   <entry>
     <title>The Wager: A Tale of Shipwreck, Mutiny and Murder - David Grann</title>
     <link rel="alternate" type="text/html" href="https://hinchley.net/books.html#book-2026-09-23-1" />
