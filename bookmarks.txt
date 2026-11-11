@@ -3,6 +3,11 @@ https://bruceediger.com
 Blogs
 2026-01-01
 
+Chris Wellons
+https://nullprogram.com
+Blogs
+2026-11-11
+
 Cyrus Lopez
 https://unix.foo
 Blogs
@@ -217,6 +222,11 @@ Five Books
 https://fivebooks.com
 Media
 2026-01-01
+
+Hacker Books
+https://hackerbooks.org
+Media
+2026-11-11
 
 Metacritic: New Albums
 https://www.metacritic.com/browse/albums/release-date/new-releases/date

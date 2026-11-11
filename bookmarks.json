@@ -1,5 +1,19 @@
 [
   {
+    "name": "Chris Wellons",
+    "url": "https://nullprogram.com",
+    "category": "Blogs",
+    "date": "2026-11-11",
+    "id": "bookmark-2026-11-11-1"
+  },
+  {
+    "name": "Hacker Books",
+    "url": "https://hackerbooks.org",
+    "category": "Media",
+    "date": "2026-11-11",
+    "id": "bookmark-2026-11-11-2"
+  },
+  {
     "name": "Elias Ebner",
     "url": "https://eliasebner.com",
     "category": "Blogs",
