@@ -3,8 +3,28 @@
   <id>tag:hinchley.net,2026:music</id>
   <link rel="alternate" type="text/html" href="https://hinchley.net/music.html" />
   <link rel="self" type="application/atom+xml" href="https://hinchley.net/music.xml" />
-  <updated>2026-10-23T00:00:00Z</updated>
+  <updated>2026-11-20T00:00:00Z</updated>
   <author><name>Pete Hinchley</name></author>
+  <entry>
+    <title>Leave It Alone - Water-Mall</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/music.html#music-2026-11-20-1" />
+    <id>tag:hinchley.net,2026:music-2026-11-20-1</id>
+    <published>2026-11-20T00:00:00Z</published>
+    <updated>2026-11-20T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://youtu.be/aybiWxQKNjY">Leave It Alone</a> - Water-Mall.]]>
+    </content>
+  </entry>
+  <entry>
+    <title>Seabird - Deary</title>
+    <link rel="alternate" type="text/html" href="https://hinchley.net/music.html#music-2026-11-19-1" />
+    <id>tag:hinchley.net,2026:music-2026-11-19-1</id>
+    <published>2026-11-19T00:00:00Z</published>
+    <updated>2026-11-19T00:00:00Z</updated>
+    <content type="html">
+      <![CDATA[<a href="https://youtu.be/CjvMfS4aFxQ">Seabird</a> - Deary.]]>
+    </content>
+  </entry>
   <entry>
     <title>The Way I Was Made - Eels</title>
     <link rel="alternate" type="text/html" href="https://hinchley.net/music.html#music-2026-10-23-1" />
